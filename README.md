@@ -68,3 +68,33 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+---
+
+## Hướng dẫn nhanh: Đăng nhập (Auth)
+
+Ứng dụng front-end đã được bổ sung một giao diện đăng nhập đơn giản để gọi API xác thực hiện có.
+
+- Endpoint: POST http://localhost:8080/auth-service/auth/token
+- Payload JSON: { "username": "email", "password": "password" }
+- Kết quả mong đợi: { code: 1000, result: { token: "..." } }
+
+Hướng dẫn chạy:
+
+1. Cài đặt phụ thuộc:
+
+```powershell
+npm install
+```
+
+2. Chạy dev server:
+
+```powershell
+npm start
+```
+
+3. Mở http://localhost:3000 và đăng nhập bằng tài khoản demo hoặc tài khoản thật nếu backend đang chạy.
+
+Lưu ý: token được lưu trong localStorage với key `token`.
+
+Tiếp theo bạn có thể: thêm context cho auth, route bảo vệ, refresh token, và màn hình quản lý người dùng.
