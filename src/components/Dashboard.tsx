@@ -1,6 +1,11 @@
 import React from "react";
 
-export default function Dashboard({ token, onLogout }) {
+type Props = {
+  token: string | null;
+  onLogout: () => void;
+};
+
+export default function Dashboard({ token, onLogout }: Props) {
   return (
     <div style={{ padding: 20 }}>
       <h1>Dashboard</h1>

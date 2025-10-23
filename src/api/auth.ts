@@ -1,6 +1,9 @@
 const API_BASE = "http://localhost:8080";
 
-export async function login(username, password) {
+export async function login(
+  username: string,
+  password: string
+): Promise<string> {
   const url = `${API_BASE}/auth-service/auth/token`;
   const body = { username, password };
 
@@ -19,10 +22,6 @@ export async function login(username, password) {
   }
 
   const data = await resp.json();
-  // Expecting shape { code: 1000, result: { token: '...' } }
-  if (data && data.result && data.result.token) {
-    return data.result.token;
-  }
-
+  if (data && data.result && data.result.token) return data.result.token;
   throw new Error("Không nhận được token từ server");
 }

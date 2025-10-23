@@ -97,4 +97,38 @@ npm start
 
 Lưu ý: token được lưu trong localStorage với key `token`.
 
-Tiếp theo bạn có thể: thêm context cho auth, route bảo vệ, refresh token, và màn hình quản lý người dùng.
+---
+
+## Cấu trúc thư mục (TypeScript)
+
+Dự án đã được refactor sang **TypeScript** với cấu trúc thư mục chuẩn:
+
+```
+src/
+├── api/              # API services (auth.ts)
+├── components/       # React components (Login.tsx, Dashboard.tsx)
+├── css/              # Stylesheets (login.css)
+├── assets/           # Static assets (images, fonts, etc.) - tạo khi cần
+├── contexts/         # React contexts - tạo khi cần
+├── hooks/            # Custom hooks - tạo khi cần
+├── router/           # Routing configuration - tạo khi cần
+├── types/            # TypeScript type definitions - tạo khi cần
+├── utils/            # Utility functions - tạo khi cần
+├── App.tsx           # Main App component
+├── index.tsx         # Entry point
+└── reportWebVitals.ts
+```
+
+### Các file chính:
+- `src/api/auth.ts` - Authentication service (login API call)
+- `src/components/Login.tsx` - Login form component
+- `src/components/Dashboard.tsx` - Dashboard placeholder
+- `src/App.tsx` - Main app with auth state management
+- `tsconfig.json` - TypeScript configuration
+
+### Tiếp theo:
+- Thêm React Router để quản lý routes
+- Tạo AuthContext để quản lý auth state toàn app
+- Thêm protected routes và redirect logic
+- Implement refresh token mechanism
+- Tạo các màn hình quản lý người dùng và slide

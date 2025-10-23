@@ -1,14 +1,18 @@
 import React, { useState } from "react";
-import { login as loginApi } from "../services/auth";
-import "./login.css";
+import { login as loginApi } from "../api/auth";
+import "../css/login.css";
 
-export default function Login({ onLogin }) {
+type Props = {
+  onLogin: (token: string) => void;
+};
+
+export default function Login({ onLogin }: Props) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
-  async function handleSubmit(e) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     if (!email || !password) {
@@ -18,13 +22,10 @@ export default function Login({ onLogin }) {
     setLoading(true);
     try {
       const token = await loginApi(email, password);
-      if (token) {
-        onLogin(token);
-      } else {
-        setError("Đăng nhập thất bại");
-      }
-    } catch (err) {
-      setError(err.message || "Lỗi khi gọi API");
+      if (token) onLogin(token);
+      else setError("Đăng nhập thất bại");
+    } catch (err: any) {
+      setError(err?.message || "Lỗi khi gọi API");
     } finally {
       setLoading(false);
     }
