@@ -33,36 +33,66 @@ export default function Login({ onLogin }: Props) {
 
   return (
     <div className="login-container">
-      <form className="login-card" onSubmit={handleSubmit}>
-        <h2>Đăng nhập - Hệ thống Slide Giáo dục</h2>
-        {error && <div className="login-error">{error}</div>}
-        <label>
-          Email
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="example@domain.com"
-            required
-          />
-        </label>
-        <label>
-          Mật khẩu
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Mật khẩu"
-            required
-          />
-        </label>
-        <button type="submit" disabled={loading} className="login-btn">
-          {loading ? "Đang đăng nhập..." : "Đăng nhập"}
-        </button>
-        <div className="login-help">
-          Bạn có thể dùng email demo: nhducminhqt@gmail.com
+      <div className="login-card">
+        <div className="login-header">
+          <div className="login-logo">S</div>
+          <h2>Đăng nhập</h2>
+          <p className="login-subtitle">Hệ thống Slide Giáo dục AI</p>
         </div>
-      </form>
+
+        <form className="login-form" onSubmit={handleSubmit}>
+          {error && (
+            <div className="login-error">
+              <span>⚠️</span>
+              <span>{error}</span>
+            </div>
+          )}
+
+          <label>
+            Email
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="example@domain.com"
+              required
+              autoComplete="email"
+            />
+          </label>
+
+          <label>
+            Mật khẩu
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              required
+              autoComplete="current-password"
+            />
+          </label>
+
+          <button type="submit" disabled={loading} className="login-btn">
+            {loading ? (
+              <>
+                <span className="spinner spinner-sm"></span>
+                <span>Đang đăng nhập...</span>
+              </>
+            ) : (
+              "Đăng nhập"
+            )}
+          </button>
+        </form>
+
+        <div className="login-help">
+          💡 <strong>Demo:</strong> nhducminhqt@gmail.com /
+          nhducminhqt@gmail.com
+        </div>
+
+        <div className="login-footer">
+          Chưa có tài khoản? <a href="/register">Đăng ký ngay</a>
+        </div>
+      </div>
     </div>
   );
 }

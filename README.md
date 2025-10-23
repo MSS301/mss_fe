@@ -120,15 +120,104 @@ src/
 ```
 
 ### Các file chính:
+
 - `src/api/auth.ts` - Authentication service (login API call)
 - `src/components/Login.tsx` - Login form component
 - `src/components/Dashboard.tsx` - Dashboard placeholder
 - `src/App.tsx` - Main app with auth state management
 - `tsconfig.json` - TypeScript configuration
 
-### Tiếp theo:
-- Thêm React Router để quản lý routes
-- Tạo AuthContext để quản lý auth state toàn app
-- Thêm protected routes và redirect logic
-- Implement refresh token mechanism
-- Tạo các màn hình quản lý người dùng và slide
+---
+
+## 🎨 Giao diện UI/UX
+
+Hệ thống đã được thiết kế hoàn toàn mới với:
+
+### Design System
+
+- **CSS Variables** cho theming và customization dễ dàng
+- **Responsive Design** hoạt động tốt trên mobile, tablet, desktop
+- **Modern Components** với animations và transitions mượt mà
+- **Dark Mode Ready** (có thể bật bằng data-theme="dark")
+
+### Các trang đã implement:
+
+1. **Login Page**
+
+   - Gradient background với animation
+   - Form validation real-time
+   - Loading states và error handling
+   - Demo credentials sẵn có
+
+2. **Dashboard**
+
+   - Statistics cards với số liệu tổng quan
+   - Quick actions cho các tác vụ phổ biến
+   - Recent slides và activity feed
+   - Wallet balance display
+
+3. **Layout với Sidebar**
+
+   - Sidebar navigation cố định với nhóm menu rõ ràng
+   - Header với search, notifications, user menu
+   - Breadcrumb navigation
+   - Mobile-responsive với hamburger menu
+
+4. **Curriculum Browser**
+   - 3-step wizard: Chọn môn → Chọn lớp → Chọn chủ đề
+   - Visual cards với icons và colors
+   - Smooth transitions giữa các bước
+
+### Components có sẵn:
+
+- Buttons (primary, secondary, outline, ghost)
+- Cards với header/body/footer
+- Inputs với focus states
+- Badges cho status
+- Modal overlays
+- Toast notifications
+- Loading spinners
+- Avatars
+
+### Color Palette:
+
+- Primary: #4F46E5 (Indigo)
+- Secondary: #10B981 (Green)
+- Success: #10B981
+- Warning: #F59E0B
+- Error: #EF4444
+- Info: #3B82F6
+
+---
+
+## 📁 Cấu trúc mới
+
+```
+src/
+├── styles/           # Design system
+│   ├── variables.css # CSS variables
+│   ├── global.css    # Global styles & utilities
+│   └── components.css # Reusable component styles
+├── components/       # React components
+│   ├── Layout.tsx/css # Main layout với sidebar
+│   ├── Login.tsx     # Login component
+│   └── Dashboard.tsx # Dashboard component
+├── pages/            # Page-level components
+│   ├── Dashboard.css # Dashboard styles
+│   ├── Curriculum.tsx/css # Curriculum browser
+│   └── ...
+└── ...
+```
+
+### Tiếp theo cần làm:
+
+- ✅ Design System & Layout
+- ✅ Login & Dashboard UI
+- ✅ Curriculum Browser
+- ⏳ Slide Creation Wizard (multi-step form)
+- ⏳ My Slides Page (grid/list view, filters)
+- ⏳ Wallet & Payment UI
+- ⏳ Notifications Center
+- ⏳ User Profile & Settings
+- ⏳ React Router integration
+- ⏳ AuthContext & Protected Routes
