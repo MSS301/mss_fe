@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Layout from "../components/Layout";
-import "./Curriculum.css";
+import "../css/Curriculum.css";
 
 type Subject = {
   id: number;

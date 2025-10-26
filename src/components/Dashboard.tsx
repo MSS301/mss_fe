@@ -1,6 +1,6 @@
 import React from "react";
 import Layout from "./Layout";
-import "../pages/Dashboard.css";
+import "../css/Dashboard.css";
 
 type Props = {
   token: string | null;

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./Layout.css";
+import "../css/Layout.css";
 
 type LayoutProps = {
   children: React.ReactNode;

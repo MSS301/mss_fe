@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import "./styles/variables.css";
-import "./styles/global.css";
-import "./styles/components.css";
-import "./App.css";
+import "./css/variables.css";
+import "./css/global.css";
+import "./css/components.css";
+import "./css/App.css";
 import Login from "./components/Login";
 import Dashboard from "./components/Dashboard";
 

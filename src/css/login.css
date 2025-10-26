@@ -153,6 +153,18 @@
   animation: shake 0.3s;
 }
 
+.login-success {
+  background: var(--color-success);
+  color: white;
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  animation: slideUp 0.3s;
+}
+
 @keyframes shake {
   0%,
   100% {
@@ -196,6 +208,22 @@
 }
 
 .login-footer a:hover {
+  text-decoration: underline;
+}
+
+.login-toggle-link {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  padding: 0;
+  font-size: inherit;
+  font-family: inherit;
+  text-decoration: none;
+}
+
+.login-toggle-link:hover {
   text-decoration: underline;
 }
 
