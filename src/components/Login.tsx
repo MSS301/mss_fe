@@ -193,13 +193,6 @@ export default function Login({ onLogin, onBack }: Props) {
           Đăng nhập với Google
         </button>
 
-        {!isRegisterMode && (
-          <div className="login-help">
-            💡 <strong>Demo:</strong> nhducminhqt@gmail.com /
-            nhducminhqt@gmail.com
-          </div>
-        )}
-
         <div className="login-footer">
           {isRegisterMode ? "Đã có tài khoản? " : "Chưa có tài khoản? "}
           <button
