@@ -26,7 +26,7 @@ export interface LoginResponse {
   code: number;
   result: {
     token: string;
-    authenticated: boolean;
+    expiryTime: string;
   };
 }
 
@@ -56,12 +56,9 @@ export async function register(
   return data;
 }
 
-export async function login(
-  username: string,
-  password: string
-): Promise<string> {
+export async function login(email: string, password: string): Promise<string> {
   const url = `${API_BASE}/auth-service/auth/token`;
-  const body = { username, password };
+  const body = { email, password };
 
   const resp = await fetch(url, {
     method: "POST",

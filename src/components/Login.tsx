@@ -8,9 +8,10 @@ import "../css/login.css";
 
 type Props = {
   onLogin: (token: string) => void;
+  onBack?: () => void;
 };
 
-export default function Login({ onLogin }: Props) {
+export default function Login({ onLogin, onBack }: Props) {
   const [isRegisterMode, setIsRegisterMode] = useState(false);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -77,6 +78,11 @@ export default function Login({ onLogin }: Props) {
 
   return (
     <div className="login-container">
+      {onBack && (
+        <button onClick={onBack} className="back-button">
+          ← Trang chủ
+        </button>
+      )}
       <div className="login-card">
         <div className="login-header">
           <div className="login-logo">S</div>
