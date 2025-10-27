@@ -83,3 +83,21 @@ export function loginWithGoogle(): void {
   // Redirect to Google OAuth endpoint
   window.location.href = `${API_BASE}/auth-service/auth/google`;
 }
+
+export async function logout(token: string): Promise<void> {
+  const url = `${API_BASE}/auth-service/auth/logout`;
+
+  const resp = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!resp.ok) {
+    const text = await resp.text();
+    throw new Error(`HTTP ${resp.status}: ${text}`);
+  }
+}

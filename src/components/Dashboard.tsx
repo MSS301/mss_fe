@@ -4,14 +4,16 @@ import "../css/Dashboard.css";
 
 type Props = {
   token: string | null;
-  onLogout: () => void;
+  onLogout: () => void | Promise<void>;
 };
 
 export default function Dashboard({ token, onLogout }: Props) {
+  console.log("Dashboard rendered with onLogout:", onLogout);
   return (
     <Layout
       title="Dashboard"
       breadcrumb={[{ label: "Trang chủ" }, { label: "Dashboard" }]}
+      onLogout={onLogout}
     >
       <div className="dashboard">
         {/* Statistics Cards */}
@@ -224,26 +226,6 @@ export default function Dashboard({ token, onLogout }: Props) {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Debug info (temporary) */}
-        <div className="card" style={{ marginTop: "var(--spacing-xl)" }}>
-          <div className="card-header">
-            <h3 className="card-title">Token Info (Dev)</h3>
-          </div>
-          <div className="card-body">
-            <pre style={{ fontSize: "12px", overflow: "auto" }}>
-              {token?.slice(0, 120)}
-              {token && token.length > 120 ? "..." : ""}
-            </pre>
-            <button
-              onClick={onLogout}
-              className="btn btn-outline btn-sm"
-              style={{ marginTop: "12px" }}
-            >
-              Đăng xuất
-            </button>
           </div>
         </div>
       </div>

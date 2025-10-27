@@ -1,14 +1,41 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "../css/Layout.css";
 
 type LayoutProps = {
   children: React.ReactNode;
   title?: string;
   breadcrumb?: Array<{ label: string; href?: string }>;
+  onLogout?: () => void | Promise<void>;
 };
 
-export default function Layout({ children, title, breadcrumb }: LayoutProps) {
+export default function Layout({
+  children,
+  title,
+  breadcrumb,
+  onLogout,
+}: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        userMenuRef.current &&
+        !userMenuRef.current.contains(event.target as Node)
+      ) {
+        setUserMenuOpen(false);
+      }
+    }
+
+    if (userMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }
+  }, [userMenuOpen]);
 
   return (
     <div className="layout">
@@ -150,13 +177,69 @@ export default function Layout({ children, title, breadcrumb }: LayoutProps) {
                 🔔
               </button>
               <button className="header-action-btn">💬</button>
-              <button className="header-action-btn">
-                <img
-                  src="https://i.pravatar.cc/150?img=12"
-                  alt="User"
-                  className="avatar avatar-sm"
-                />
-              </button>
+
+              {/* User Menu Dropdown */}
+              <div className="user-menu-container" ref={userMenuRef}>
+                <button
+                  className="header-action-btn user-menu-trigger"
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                >
+                  <img
+                    src="https://i.pravatar.cc/150?img=12"
+                    alt="User"
+                    className="avatar avatar-sm"
+                  />
+                </button>
+
+                {userMenuOpen && (
+                  <div className="user-menu-dropdown">
+                    <div className="user-menu-header">
+                      <img
+                        src="https://i.pravatar.cc/150?img=12"
+                        alt="User"
+                        className="avatar avatar-md"
+                      />
+                      <div className="user-menu-info">
+                        <div className="user-menu-name">Nguyễn Văn A</div>
+                        <div className="user-menu-email">
+                          nguyenvana@gmail.com
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="user-menu-divider"></div>
+
+                    <a href="/profile" className="user-menu-item">
+                      <span className="user-menu-item-icon">👤</span>
+                      <span>Xem hồ sơ</span>
+                    </a>
+
+                    <a href="/settings" className="user-menu-item">
+                      <span className="user-menu-item-icon">⚙️</span>
+                      <span>Cài đặt</span>
+                    </a>
+
+                    {onLogout && (
+                      <>
+                        <div className="user-menu-divider"></div>
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            console.log("Logout button clicked!");
+                            console.log("onLogout function:", onLogout);
+                            setUserMenuOpen(false);
+                            onLogout();
+                          }}
+                          className="user-menu-item user-menu-item-danger"
+                        >
+                          <span className="user-menu-item-icon">🚪</span>
+                          <span>Đăng xuất</span>
+                        </button>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </header>

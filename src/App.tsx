@@ -6,6 +6,7 @@ import "./css/App.css";
 import Homepage from "./pages/Homepage";
 import Login from "./components/Login";
 import Dashboard from "./components/Dashboard";
+import { logout as logoutApi } from "./api/auth";
 
 type Page = "homepage" | "login" | "dashboard";
 
@@ -32,7 +33,19 @@ function App(): JSX.Element {
     setToken(newToken);
   }
 
-  function handleLogout() {
+  async function handleLogout() {
+    console.log("handleLogout called");
+    if (token) {
+      try {
+        console.log("Calling logout API with token");
+        await logoutApi(token);
+        console.log("Logout API success");
+      } catch (error) {
+        console.error("Logout error:", error);
+        // Continue with logout even if API call fails
+      }
+    }
+    console.log("Clearing token and navigating to homepage");
     setToken(null);
     setCurrentPage("homepage");
   }
