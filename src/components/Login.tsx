@@ -66,23 +66,37 @@ export default function Login({ onLogin, onBack }: Props) {
 
   useEffect(() => {
     // Initialize Google Sign-In
-    if (window.google) {
-      window.google.accounts.id.initialize({
-        client_id: "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com", // Thay bằng Client ID thật
-        callback: handleGoogleCallback,
-        auto_select: false,
-        cancel_on_tap_outside: true,
-      });
+    const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID || "";
 
-      // Render button vào container nếu có
-      const buttonDiv = document.getElementById("google-signin-button");
-      if (buttonDiv) {
-        window.google.accounts.id.renderButton(buttonDiv, {
-          theme: "outline",
-          size: "large",
-          width: 350,
-          text: isRegisterMode ? "signup_with" : "signin_with",
+    if (!GOOGLE_CLIENT_ID) {
+      console.warn(
+        "Google Client ID chưa được cấu hình. Vui lòng thêm REACT_APP_GOOGLE_CLIENT_ID vào .env"
+      );
+      return;
+    }
+
+    if (window.google) {
+      try {
+        window.google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: handleGoogleCallback,
+          auto_select: false,
+          cancel_on_tap_outside: true,
         });
+
+        // Render button vào container nếu có
+        const buttonDiv = document.getElementById("google-signin-button");
+        if (buttonDiv) {
+          window.google.accounts.id.renderButton(buttonDiv, {
+            theme: "outline",
+            size: "large",
+            width: 350,
+            text: isRegisterMode ? "signup_with" : "signin_with",
+          });
+        }
+      } catch (error) {
+        console.error("Error initializing Google Sign-In:", error);
+        setError("Không thể khởi tạo Google Sign-In");
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
