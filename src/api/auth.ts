@@ -30,6 +30,13 @@ export interface LoginResponse {
   };
 }
 
+export interface GoogleAuthRequest {
+  googleId: string;
+  email: string;
+  name: string;
+  picture: string;
+}
+
 export async function register(
   username: string,
   email: string,
@@ -82,6 +89,34 @@ export async function login(email: string, password: string): Promise<string> {
 export function loginWithGoogle(): void {
   // Redirect to Google OAuth endpoint
   window.location.href = `${API_BASE}/auth-service/auth/google`;
+}
+
+export async function googleAuth(
+  googleId: string,
+  email: string,
+  name: string,
+  picture: string
+): Promise<string> {
+  const url = `${API_BASE}/auth-service/auth/google`;
+  const body: GoogleAuthRequest = { googleId, email, name, picture };
+
+  const resp = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!resp.ok) {
+    const text = await resp.text();
+    throw new Error(`HTTP ${resp.status}: ${text}`);
+  }
+
+  const data: LoginResponse = await resp.json();
+  if (data && data.result && data.result.token) return data.result.token;
+  throw new Error("Không nhận được token từ server");
 }
 
 export async function logout(token: string): Promise<void> {
