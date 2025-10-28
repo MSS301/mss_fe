@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { Link, useLocation } from "react-router-dom";
 import "../css/Layout.css";
 
 type LayoutProps = {
@@ -17,6 +18,10 @@ export default function Layout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
+
+  // Helper to check if link is active
+  const isActive = (path: string) => location.pathname === path;
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -52,67 +57,118 @@ export default function Layout({
           {/* Main */}
           <div className="sidebar-section">
             <div className="sidebar-section-title">Tổng quan</div>
-            <a href="/dashboard" className="sidebar-link active">
+            <Link
+              to="/dashboard"
+              className={`sidebar-link ${
+                isActive("/dashboard") ? "active" : ""
+              }`}
+            >
               <span className="sidebar-link-icon">📊</span>
               <span>Dashboard</span>
-            </a>
-            <a href="/profile" className="sidebar-link">
+            </Link>
+            <Link
+              to="/profile"
+              className={`sidebar-link ${isActive("/profile") ? "active" : ""}`}
+            >
               <span className="sidebar-link-icon">👤</span>
               <span>Hồ sơ</span>
-            </a>
+            </Link>
           </div>
 
           {/* Curriculum */}
           <div className="sidebar-section">
             <div className="sidebar-section-title">Chương trình học</div>
-            <a href="/curriculum" className="sidebar-link">
+            <Link
+              to="/curriculum"
+              className={`sidebar-link ${
+                isActive("/curriculum") ? "active" : ""
+              }`}
+            >
               <span className="sidebar-link-icon">📚</span>
               <span>Khám phá</span>
-            </a>
+            </Link>
           </div>
 
           {/* Slides */}
           <div className="sidebar-section">
             <div className="sidebar-section-title">Slide</div>
-            <a href="/slides/create" className="sidebar-link">
+            <Link
+              to="/slides/create"
+              className={`sidebar-link ${
+                isActive("/slides/create") ? "active" : ""
+              }`}
+            >
               <span className="sidebar-link-icon">➕</span>
               <span>Tạo mới</span>
-            </a>
-            <a href="/slides" className="sidebar-link">
+            </Link>
+            <Link
+              to="/slides"
+              className={`sidebar-link ${isActive("/slides") ? "active" : ""}`}
+            >
               <span className="sidebar-link-icon">📄</span>
               <span>Slide của tôi</span>
-            </a>
-            <a href="/slides/templates" className="sidebar-link">
+            </Link>
+            <Link
+              to="/slides/templates"
+              className={`sidebar-link ${
+                isActive("/slides/templates") ? "active" : ""
+              }`}
+            >
               <span className="sidebar-link-icon">🎨</span>
               <span>Templates</span>
-            </a>
+            </Link>
           </div>
 
           {/* Financial */}
           <div className="sidebar-section">
             <div className="sidebar-section-title">Tài chính</div>
-            <a href="/wallet" className="sidebar-link">
+            <Link
+              to="/wallet"
+              className={`sidebar-link ${isActive("/wallet") ? "active" : ""}`}
+            >
               <span className="sidebar-link-icon">💰</span>
               <span>Ví của tôi</span>
-            </a>
-            <a href="/payment" className="sidebar-link">
+            </Link>
+            <Link
+              to="/payment"
+              className={`sidebar-link ${isActive("/payment") ? "active" : ""}`}
+            >
               <span className="sidebar-link-icon">💳</span>
               <span>Nạp tiền</span>
-            </a>
+            </Link>
           </div>
 
           {/* System */}
           <div className="sidebar-section">
             <div className="sidebar-section-title">Hệ thống</div>
-            <a href="/notifications" className="sidebar-link">
+            <Link
+              to="/notifications"
+              className={`sidebar-link ${
+                isActive("/notifications") ? "active" : ""
+              }`}
+            >
               <span className="sidebar-link-icon">🔔</span>
               <span>Thông báo</span>
               <span className="sidebar-link-badge">3</span>
-            </a>
-            <a href="/settings" className="sidebar-link">
+            </Link>
+            <Link
+              to="/statistics"
+              className={`sidebar-link ${
+                isActive("/statistics") ? "active" : ""
+              }`}
+            >
+              <span className="sidebar-link-icon">📊</span>
+              <span>Thống kê</span>
+            </Link>
+            <Link
+              to="/settings"
+              className={`sidebar-link ${
+                isActive("/settings") ? "active" : ""
+              }`}
+            >
               <span className="sidebar-link-icon">⚙️</span>
               <span>Cài đặt</span>
-            </a>
+            </Link>
           </div>
         </nav>
 
