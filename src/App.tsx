@@ -9,6 +9,13 @@ import Login from "./components/Login";
 import Dashboard from "./components/Dashboard";
 import AdminDashboard from "./components/AdminDashboard";
 import Curriculum from "./pages/Curriculum";
+import SubjectManagement from "./pages/admin/SubjectManagement";
+import ChapterManagement from "./pages/admin/ChapterManagement";
+import LessonCommentManagement from "./pages/admin/LessonCommentManagement";
+import LessonRatingManagement from "./pages/admin/LessonRatingManagement";
+import LessonFileManagement from "./pages/admin/LessonFileManagement";
+import TeacherLessonManagement from "./pages/admin/TeacherLessonManagement";
+import CurriculumLessonManagement from "./pages/admin/CurriculumLessonManagement";
 import MySlides from "./pages/user/MySlides";
 import Wallet from "./pages/user/Wallet";
 import Statistics from "./pages/user/Statistics";
@@ -78,7 +85,7 @@ function AppContent(): JSX.Element {
           <Route
             path="/dashboard"
             element={
-              <Layout title="Dashboard">
+              <Layout title="Dashboard" onLogout={handleLogout}>
                 <Dashboard token={token!} onLogout={handleLogout} />
               </Layout>
             }
@@ -86,7 +93,7 @@ function AppContent(): JSX.Element {
           <Route
             path="/curriculum"
             element={
-              <Layout title="Chương trình học">
+              <Layout title="Chương trình học" onLogout={handleLogout}>
                 <Curriculum />
               </Layout>
             }
@@ -94,7 +101,7 @@ function AppContent(): JSX.Element {
           <Route
             path="/slides"
             element={
-              <Layout title="Slides của tôi">
+              <Layout title="Slides của tôi" onLogout={handleLogout}>
                 <MySlides />
               </Layout>
             }
@@ -102,7 +109,7 @@ function AppContent(): JSX.Element {
           <Route
             path="/wallet"
             element={
-              <Layout title="Ví tiền">
+              <Layout title="Ví tiền" onLogout={handleLogout}>
                 <Wallet />
               </Layout>
             }
@@ -110,7 +117,7 @@ function AppContent(): JSX.Element {
           <Route
             path="/statistics"
             element={
-              <Layout title="Thống kê">
+              <Layout title="Thống kê" onLogout={handleLogout}>
                 <Statistics />
               </Layout>
             }
@@ -118,7 +125,7 @@ function AppContent(): JSX.Element {
           <Route
             path="/settings"
             element={
-              <Layout title="Cài đặt">
+              <Layout title="Cài đặt" onLogout={handleLogout}>
                 <Settings />
               </Layout>
             }
@@ -170,6 +177,62 @@ function AppContent(): JSX.Element {
             element={
               <AdminLayout title="Cài đặt hệ thống">
                 <SystemSettings />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/admin/subject"
+            element={
+              <AdminLayout title="Quản lý môn học">
+                <SubjectManagement />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/admin/chapter"
+            element={
+              <AdminLayout title="Quản lý chương">
+                <ChapterManagement />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/admin/lesson-comment"
+            element={
+              <AdminLayout title="Quản lý bình luận bài học">
+                <LessonCommentManagement />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/admin/lesson-rating"
+            element={
+              <AdminLayout title="Quản lý đánh giá bài học">
+                <LessonRatingManagement />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/admin/lesson-file"
+            element={
+              <AdminLayout title="Quản lý file bài học">
+                <LessonFileManagement />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/admin/teacher-lesson"
+            element={
+              <AdminLayout title="Quản lý bài học của giáo viên">
+                <TeacherLessonManagement />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/admin/curriculum-lesson"
+            element={
+              <AdminLayout title="Quản lý bài học của chương trình">
+                <CurriculumLessonManagement />
               </AdminLayout>
             }
           />

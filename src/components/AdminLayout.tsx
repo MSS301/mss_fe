@@ -114,6 +114,69 @@ export default function AdminLayout({
               <span>Quản lý Slide</span>
             </Link>
             <Link
+              to="/admin/subject"
+              className={`admin-sidebar-link ${
+                isActive("/admin/subject") ? "active" : ""
+              }`}
+            >
+              <span className="admin-sidebar-link-icon">📘</span>
+              <span>Quản lý môn học</span>
+            </Link>
+            <Link
+              to="/admin/chapter"
+              className={`admin-sidebar-link ${
+                isActive("/admin/chapter") ? "active" : ""
+              }`}
+            >
+              <span className="admin-sidebar-link-icon">📑</span>
+              <span>Quản lý chương</span>
+            </Link>
+            <Link
+              to="/admin/lesson-comment"
+              className={`admin-sidebar-link ${
+                isActive("/admin/lesson-comment") ? "active" : ""
+              }`}
+            >
+              <span className="admin-sidebar-link-icon">�</span>
+              <span>Quản lý bình luận bài học</span>
+            </Link>
+            <Link
+              to="/admin/lesson-rating"
+              className={`admin-sidebar-link ${
+                isActive("/admin/lesson-rating") ? "active" : ""
+              }`}
+            >
+              <span className="admin-sidebar-link-icon">⭐</span>
+              <span>Quản lý đánh giá bài học</span>
+            </Link>
+            <Link
+              to="/admin/lesson-file"
+              className={`admin-sidebar-link ${
+                isActive("/admin/lesson-file") ? "active" : ""
+              }`}
+            >
+              <span className="admin-sidebar-link-icon">📎</span>
+              <span>Quản lý file bài học</span>
+            </Link>
+            <Link
+              to="/admin/teacher-lesson"
+              className={`admin-sidebar-link ${
+                isActive("/admin/teacher-lesson") ? "active" : ""
+              }`}
+            >
+              <span className="admin-sidebar-link-icon">👨‍🏫</span>
+              <span>Quản lý bài học của giáo viên</span>
+            </Link>
+            <Link
+              to="/admin/curriculum-lesson"
+              className={`admin-sidebar-link ${
+                isActive("/admin/curriculum-lesson") ? "active" : ""
+              }`}
+            >
+              <span className="admin-sidebar-link-icon">📚</span>
+              <span>Quản lý bài học của chương trình</span>
+            </Link>
+            <Link
               to="/admin/curriculum"
               className={`admin-sidebar-link ${
                 isActive("/admin/curriculum") ? "active" : ""
@@ -264,13 +327,68 @@ export default function AdminLayout({
                 🔔
               </button>
               <button className="header-action-btn">💬</button>
-              <button className="header-action-btn">
-                <img
-                  src="https://i.pravatar.cc/150?img=68"
-                  alt="Admin"
-                  className="avatar avatar-sm"
-                />
-              </button>
+              {/* User Menu Dropdown */}
+              <div
+                className="user-menu-container"
+                style={{ position: "relative" }}
+              >
+                <button
+                  className="header-action-btn user-menu-trigger"
+                  onClick={() => setSidebarOpen(!sidebarOpen)}
+                >
+                  <img
+                    src="https://i.pravatar.cc/150?img=68"
+                    alt="Admin"
+                    className="avatar avatar-sm"
+                  />
+                </button>
+                {sidebarOpen && (
+                  <div
+                    className="user-menu-dropdown"
+                    style={{
+                      right: 0,
+                      top: "40px",
+                      position: "absolute",
+                      minWidth: 180,
+                    }}
+                  >
+                    <div className="user-menu-header">
+                      <img
+                        src="https://i.pravatar.cc/150?img=68"
+                        alt="Admin"
+                        className="avatar avatar-md"
+                      />
+                      <div className="user-menu-info">
+                        <div className="user-menu-name">
+                          {user?.email || "Admin"}
+                        </div>
+                        <div className="user-menu-email">Quản trị viên</div>
+                      </div>
+                    </div>
+                    <div className="user-menu-divider"></div>
+                    <Link to="/admin/profile" className="user-menu-item">
+                      <span className="user-menu-item-icon">👤</span>
+                      <span>Xem hồ sơ</span>
+                    </Link>
+                    <Link to="/admin/settings" className="user-menu-item">
+                      <span className="user-menu-item-icon">⚙️</span>
+                      <span>Cài đặt</span>
+                    </Link>
+                    <div className="user-menu-divider"></div>
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setSidebarOpen(false);
+                        logout();
+                      }}
+                      className="user-menu-item user-menu-item-danger"
+                    >
+                      <span className="user-menu-item-icon">🚪</span>
+                      <span>Đăng xuất</span>
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </header>
