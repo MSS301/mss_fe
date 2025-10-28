@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import "./css/variables.css";
 import "./css/global.css";
 import "./css/components.css";
@@ -6,31 +6,21 @@ import "./css/App.css";
 import Homepage from "./pages/Homepage";
 import Login from "./components/Login";
 import Dashboard from "./components/Dashboard";
+import AdminDashboard from "./components/AdminDashboard";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { logout as logoutApi } from "./api/auth";
 
 type Page = "homepage" | "login" | "dashboard";
 
-function App(): JSX.Element {
-  const [currentPage, setCurrentPage] = useState<Page>("homepage");
-  const [token, setToken] = useState<string | null>(() => {
-    try {
-      return localStorage.getItem("token");
-    } catch (e) {
-      return null;
-    }
+function AppContent(): JSX.Element {
+  const { token, isAuthenticated, isAdmin, logout: authLogout } = useAuth();
+  const [currentPage, setCurrentPage] = useState<Page>(() => {
+    return isAuthenticated ? "dashboard" : "homepage";
   });
 
-  useEffect(() => {
-    if (token) {
-      localStorage.setItem("token", token);
-      setCurrentPage("dashboard");
-    } else {
-      localStorage.removeItem("token");
-    }
-  }, [token]);
-
   function handleLogin(newToken: string) {
-    setToken(newToken);
+    // Login xử lý bởi AuthContext
+    setCurrentPage("dashboard");
   }
 
   async function handleLogout() {
@@ -46,7 +36,7 @@ function App(): JSX.Element {
       }
     }
     console.log("Clearing token and navigating to homepage");
-    setToken(null);
+    authLogout();
     setCurrentPage("homepage");
   }
 
@@ -58,20 +48,35 @@ function App(): JSX.Element {
     setCurrentPage("homepage");
   }
 
-  // Render based on current page
-  if (currentPage === "homepage" && !token) {
+  // Render based on authentication and role
+  if (currentPage === "homepage" && !isAuthenticated) {
     return <Homepage onNavigateToLogin={navigateToLogin} />;
   }
 
-  if (currentPage === "login" && !token) {
+  if (currentPage === "login" && !isAuthenticated) {
     return <Login onLogin={handleLogin} onBack={navigateToHomepage} />;
   }
 
-  if (token) {
-    return <Dashboard token={token} onLogout={handleLogout} />;
+  // Role-based routing: ROLE_ADMIN -> AdminDashboard, ROLE_USER -> Dashboard
+  if (isAuthenticated) {
+    if (isAdmin) {
+      console.log("User is ADMIN, showing AdminDashboard");
+      return <AdminDashboard />;
+    } else {
+      console.log("User is USER, showing Dashboard");
+      return <Dashboard token={token!} onLogout={handleLogout} />;
+    }
   }
 
   return <Homepage onNavigateToLogin={navigateToLogin} />;
+}
+
+function App(): JSX.Element {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
+  );
 }
 
 export default App;

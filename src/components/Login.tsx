@@ -4,6 +4,7 @@ import {
   register as registerApi,
   googleAuth,
 } from "../api/auth";
+import { useAuth } from "../contexts/AuthContext";
 import "../css/login.css";
 
 type Props = {
@@ -18,6 +19,7 @@ declare global {
 }
 
 export default function Login({ onLogin, onBack }: Props) {
+  const { login } = useAuth();
   const [isRegisterMode, setIsRegisterMode] = useState(false);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -44,7 +46,8 @@ export default function Login({ onLogin, onBack }: Props) {
       );
 
       if (token) {
-        onLogin(token);
+        login(token); // Update AuthContext
+        onLogin(token); // Trigger navigation
       } else {
         setError(
           isRegisterMode
@@ -137,8 +140,12 @@ export default function Login({ onLogin, onBack }: Props) {
       setLoading(true);
       try {
         const token = await loginApi(email, password);
-        if (token) onLogin(token);
-        else setError("Đăng nhập thất bại");
+        if (token) {
+          login(token); // Update AuthContext
+          onLogin(token); // Trigger navigation
+        } else {
+          setError("Đăng nhập thất bại");
+        }
       } catch (err: any) {
         setError(err?.message || "Lỗi khi gọi API");
       } finally {
