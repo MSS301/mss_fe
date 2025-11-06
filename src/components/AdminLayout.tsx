@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import "./AdminLayout.css";
+import NotificationBell from "./NotificationBell";
 
 type AdminLayoutProps = {
   children: React.ReactNode;
@@ -322,11 +323,8 @@ export default function AdminLayout({
 
           <div className="header-right">
             <div className="header-actions">
-              <button className="header-action-btn">
-                <span className="header-action-btn-badge"></span>
-                🔔
-              </button>
-              <button className="header-action-btn">💬</button>
+              <NotificationBell variant="admin" />
+              {/* <button className="header-action-btn">💬</button> */}
               {/* User Menu Dropdown */}
               <div
                 className="user-menu-container"
@@ -397,13 +395,13 @@ export default function AdminLayout({
       </div>
 
       {/* Mobile Overlay */}
-      {sidebarOpen && (
+      {/* {sidebarOpen && (
         <div
           className="modal-overlay"
           onClick={() => setSidebarOpen(false)}
           style={{ background: "rgba(0,0,0,0.5)" }}
         />
-      )}
+      )} */}
     </div>
   );
 }
