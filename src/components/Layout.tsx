@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import "../css/Layout.css";
+import NotificationBell from "./NotificationBell";
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -228,10 +229,7 @@ export default function Layout({
             </div>
 
             <div className="header-actions">
-              <button className="header-action-btn">
-                <span className="header-action-btn-badge"></span>
-                🔔
-              </button>
+              <NotificationBell variant="user" />
               <button className="header-action-btn">💬</button>
 
               {/* User Menu Dropdown */}
