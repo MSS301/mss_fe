@@ -25,9 +25,12 @@ import SlideManagement from "./pages/admin/SlideManagement";
 import PaymentManagement from "./pages/admin/PaymentManagement";
 import SystemSettings from "./pages/admin/SystemSettings";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { NotificationProvider } from "./contexts/NotificationContext";
 import { logout as logoutApi } from "./api/auth";
 import Layout from "./components/Layout";
 import AdminLayout from "./components/AdminLayout";
+import UserNotifications from "./pages/user/Notifications";
+import AdminNotificationCenter from "./pages/admin/NotificationCenter";
 
 type Page = "homepage" | "login" | "dashboard";
 
@@ -127,6 +130,14 @@ function AppContent(): JSX.Element {
             element={
               <Layout title="Cài đặt" onLogout={handleLogout}>
                 <Settings />
+              </Layout>
+            }
+          />
+          <Route
+            path="/notifications"
+            element={
+              <Layout title="Thông báo" onLogout={handleLogout}>
+                <UserNotifications />
               </Layout>
             }
           />
@@ -236,6 +247,14 @@ function AppContent(): JSX.Element {
               </AdminLayout>
             }
           />
+          <Route
+            path="/admin/notifications"
+            element={
+              <AdminLayout title="Trung tâm thông báo">
+                <AdminNotificationCenter />
+              </AdminLayout>
+            }
+          />
         </>
       )}
 
@@ -253,9 +272,11 @@ function AppContent(): JSX.Element {
 function App(): JSX.Element {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <AppContent />
-      </BrowserRouter>
+      <NotificationProvider>
+        <BrowserRouter>
+          <AppContent />
+        </BrowserRouter>
+      </NotificationProvider>
     </AuthProvider>
   );
 }
