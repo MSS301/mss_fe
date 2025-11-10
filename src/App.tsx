@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import React from "react";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import "./css/variables.css";
 import "./css/global.css";
 import "./css/components.css";
@@ -24,6 +24,7 @@ import UserManagement from "./pages/admin/UserManagement";
 import SlideManagement from "./pages/admin/SlideManagement";
 import PaymentManagement from "./pages/admin/PaymentManagement";
 import SystemSettings from "./pages/admin/SystemSettings";
+import OAuth2Callback from "./pages/OAuth2Callback";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
 import { logout as logoutApi } from "./api/auth";
@@ -32,17 +33,13 @@ import AdminLayout from "./components/AdminLayout";
 import UserNotifications from "./pages/user/Notifications";
 import AdminNotificationCenter from "./pages/admin/NotificationCenter";
 
-type Page = "homepage" | "login" | "dashboard";
-
 function AppContent(): JSX.Element {
   const { token, isAuthenticated, isAdmin, logout: authLogout } = useAuth();
-  const [currentPage, setCurrentPage] = useState<Page>(() => {
-    return isAuthenticated ? "dashboard" : "homepage";
-  });
+  const navigate = useNavigate();
 
   function handleLogin(newToken: string) {
-    // Login xử lý bởi AuthContext
-    setCurrentPage("dashboard");
+    // Login handled by AuthContext, just navigate to dashboard
+    navigate("/dashboard");
   }
 
   async function handleLogout() {
@@ -59,30 +56,40 @@ function AppContent(): JSX.Element {
     }
     console.log("Clearing token and navigating to homepage");
     authLogout();
-    setCurrentPage("homepage");
+    navigate("/");
   }
 
   function navigateToLogin() {
-    setCurrentPage("login");
+    navigate("/login");
   }
 
   function navigateToHomepage() {
-    setCurrentPage("homepage");
+    navigate("/");
   }
 
-  // Show homepage or login when not authenticated
-  if (!isAuthenticated) {
-    if (currentPage === "login") {
-      return <Login onLogin={handleLogin} onBack={navigateToHomepage} />;
-    }
-    return <Homepage onNavigateToLogin={navigateToLogin} />;
-  }
-
-  // Authenticated routes with React Router
+  // Using React Router for all routes
   return (
     <Routes>
-      {/* User Routes */}
-      {!isAdmin && (
+      {/* Public OAuth2 Callback Route */}
+      <Route path="/oauth2/callback" element={<OAuth2Callback />} />
+
+      {/* Unauthenticated routes */}
+      {!isAuthenticated && (
+        <>
+          <Route
+            path="/"
+            element={<Homepage onNavigateToLogin={navigateToLogin} />}
+          />
+          <Route
+            path="/login"
+            element={<Login onLogin={handleLogin} onBack={navigateToHomepage} />}
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </>
+      )}
+
+      {/* Authenticated User Routes */}
+      {isAuthenticated && !isAdmin && (
         <>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route
@@ -258,13 +265,15 @@ function AppContent(): JSX.Element {
         </>
       )}
 
-      {/* Catch all */}
-      <Route
-        path="*"
-        element={
-          <Navigate to={isAdmin ? "/admin/dashboard" : "/dashboard"} replace />
-        }
-      />
+      {/* Catch all - redirect based on auth state */}
+      {isAuthenticated && (
+        <Route
+          path="*"
+          element={
+            <Navigate to={isAdmin ? "/admin/dashboard" : "/dashboard"} replace />
+          }
+        />
+      )}
     </Routes>
   );
 }
