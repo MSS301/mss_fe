@@ -349,7 +349,7 @@ export default function Homepage({ onNavigateToLogin }: Props) {
       <footer className="footer">
         <div className="footer-container">
           <div className="footer-content">
-            <div className="footer-column">
+            <div className="footer-column footer-about">
               <div className="footer-logo">
                 <div className="logo-icon">
                   <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
@@ -373,8 +373,31 @@ export default function Homepage({ onNavigateToLogin }: Props) {
                 <span className="logo-text">SlideAI</span>
               </div>
               <p className="footer-description">
-                Hệ thống tạo slide giáo dục thông minh với AI
+                Hệ thống tạo slide giáo dục thông minh với AI. Giúp giáo viên tạo slide chuyên nghiệp trong vài giây.
               </p>
+              <div className="footer-contact-info">
+                <div className="contact-item">
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                    <path d="M15.75 3H2.25C1.42157 3 0.75 3.67157 0.75 4.5V13.5C0.75 14.3284 1.42157 15 2.25 15H15.75C16.5784 15 17.25 14.3284 17.25 13.5V4.5C17.25 3.67157 16.5784 3 15.75 3Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M0.75 4.5L9 9.75L17.25 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span>support@slideai.vn</span>
+                </div>
+                <div className="contact-item">
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                    <path d="M15.75 12.75C15.75 13.5784 15.0784 14.25 14.25 14.25H3.75C2.92157 14.25 2.25 13.5784 2.25 12.75V5.25C2.25 4.42157 2.92157 3.75 3.75 3.75H14.25C15.0784 3.75 15.75 4.42157 15.75 5.25V12.75Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M6.75 8.25H11.25M6.75 10.5H9.75" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  </svg>
+                  <span>+84 1900 1234</span>
+                </div>
+                <div className="contact-item">
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                    <path d="M9 9.75C10.2426 9.75 11.25 8.74264 11.25 7.5C11.25 6.25736 10.2426 5.25 9 5.25C7.75736 5.25 6.75 6.25736 6.75 7.5C6.75 8.74264 7.75736 9.75 9 9.75Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M9 1.5C6.51472 1.5 4.5 3.51472 4.5 6C4.5 8.25 9 15.75 9 15.75C9 15.75 13.5 8.25 13.5 6C13.5 3.51472 11.4853 1.5 9 1.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span>123 Đường ABC, Quận XYZ, TP. Hồ Chí Minh</span>
+                </div>
+              </div>
             </div>
 
             <div className="footer-column">
@@ -423,28 +446,63 @@ export default function Homepage({ onNavigateToLogin }: Props) {
                   <a href="#docs">Tài liệu</a>
                 </li>
                 <li>
-                  <a href="#privacy">Chính sách</a>
+                  <a href="#faq">Câu hỏi thường gặp</a>
                 </li>
                 <li>
-                  <a href="#terms">Điều khoản</a>
+                  <a href="#contact">Liên hệ hỗ trợ</a>
+                </li>
+              </ul>
+            </div>
+
+            <div className="footer-column">
+              <h4 className="footer-title">Pháp lý</h4>
+              <ul className="footer-links">
+                <li>
+                  <a href="#privacy">Chính sách bảo mật</a>
+                </li>
+                <li>
+                  <a href="#terms">Điều khoản sử dụng</a>
+                </li>
+                <li>
+                  <a href="#cookie">Chính sách Cookie</a>
+                </li>
+                <li>
+                  <a href="#license">Giấy phép</a>
                 </li>
               </ul>
             </div>
           </div>
 
           <div className="footer-bottom">
-            <p className="footer-copyright">
-              © 2025 SlideAI. All rights reserved.
-            </p>
+            <div className="footer-bottom-left">
+              <p className="footer-copyright">
+                © 2025 <strong>SlideAI</strong>. Bản quyền thuộc về Công ty TNHH SlideAI Việt Nam.
+              </p>
+              <p className="footer-license">
+                Giấy phép ĐKKD số: 0123456789 do Sở KH&ĐT TP. Hồ Chí Minh cấp ngày 01/01/2024
+              </p>
+            </div>
             <div className="footer-social">
-              <a href="#facebook" className="social-link">
-                Facebook
+              <a href="#facebook" className="social-link" aria-label="Facebook">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <path d="M18.3333 10C18.3333 5.4 14.6 1.66667 10 1.66667C5.4 1.66667 1.66667 5.4 1.66667 10C1.66667 14.0333 4.68333 17.4083 8.61667 18.15V12.5H6.66667V10H8.61667V8.125C8.61667 6.00833 9.925 4.79167 11.9167 4.79167C12.8833 4.79167 13.8917 5 13.8917 5V7.08333H12.75C11.7083 7.08333 11.3833 7.66667 11.3833 8.26667V10H13.8083L13.3917 12.5H11.3833V18.15C15.3167 17.4083 18.3333 14.0333 18.3333 10Z" fill="currentColor"/>
+                </svg>
               </a>
-              <a href="#twitter" className="social-link">
-                Twitter
+              <a href="#twitter" className="social-link" aria-label="Twitter">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <path d="M18.3333 4.99167C17.7083 5.275 17.0333 5.46667 16.325 5.56667C17.05 5.15 17.6083 4.46667 17.875 3.625C17.1917 4.00833 16.4333 4.29167 15.625 4.45833C14.975 3.75 14.0083 3.33333 12.9167 3.33333C10.7917 3.33333 9.08333 5.04167 9.08333 7.16667C9.08333 7.45 9.11667 7.725 9.175 7.99167C6.25833 7.85 3.73333 6.41667 2.03333 4.19167C1.725 4.65 1.55 5.15 1.55 5.69167C1.55 6.70833 2.09167 7.59167 2.91667 8.10833C2.33333 8.09167 1.79167 7.93333 1.30833 7.69167V7.73333C1.30833 9.55 2.53333 11.0833 4.19167 11.4333C3.89167 11.5083 3.575 11.5417 3.25 11.5417C3.01667 11.5417 2.79167 11.525 2.56667 11.4917C3.03333 12.95 4.35 14.0333 5.93333 14.0583C4.71667 15.05 3.19167 15.625 1.525 15.625C1.24167 15.625 0.958333 15.6083 0.683333 15.575C2.28333 16.625 4.18333 17.25 6.23333 17.25C12.9083 17.25 16.6833 11.6 16.6833 6.70833C16.6833 6.55 16.6833 6.39167 16.675 6.23333C17.375 5.70833 17.9833 5.075 18.3333 4.99167Z" fill="currentColor"/>
+                </svg>
               </a>
-              <a href="#linkedin" className="social-link">
-                LinkedIn
+              <a href="#linkedin" className="social-link" aria-label="LinkedIn">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <path d="M16.6667 2.5H3.33333C2.875 2.5 2.5 2.875 2.5 3.33333V16.6667C2.5 17.125 2.875 17.5 3.33333 17.5H16.6667C17.125 17.5 17.5 17.125 17.5 16.6667V3.33333C17.5 2.875 17.125 2.5 16.6667 2.5ZM7.5 15H5V8.33333H7.5V15ZM6.25 7.08333C5.39167 7.08333 4.70833 6.4 4.70833 5.54167C4.70833 4.68333 5.39167 4 6.25 4C7.10833 4 7.79167 4.68333 7.79167 5.54167C7.79167 6.4 7.10833 7.08333 6.25 7.08333ZM15 15H12.5V11.25C12.5 10.3333 12.5 9.16667 11.25 9.16667C10 9.16667 9.79167 10.1667 9.79167 11.1917V15H7.29167V8.33333H9.66667V9.41667C10.0417 8.75 10.8333 8.33333 11.875 8.33333C14.0417 8.33333 15 9.79167 15 12.0833V15Z" fill="currentColor"/>
+                </svg>
+              </a>
+              <a href="#youtube" className="social-link" aria-label="YouTube">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <path d="M18.3333 5.83333C18.125 5.08333 17.5167 4.475 16.7667 4.26667C15.4167 3.83333 10 3.83333 10 3.83333C10 3.83333 4.58333 3.83333 3.23333 4.26667C2.48333 4.475 1.875 5.08333 1.66667 5.83333C1.25 7.18333 1.25 10 1.25 10C1.25 10 1.25 12.8167 1.66667 14.1667C1.875 14.9167 2.48333 15.525 3.23333 15.7333C4.58333 16.1667 10 16.1667 10 16.1667C10 16.1667 15.4167 16.1667 16.7667 15.7333C17.5167 15.525 18.125 14.9167 18.3333 14.1667C18.75 12.8167 18.75 10 18.75 10C18.75 10 18.75 7.18333 18.3333 5.83333Z" fill="currentColor"/>
+                  <path d="M8.33333 12.5L13.3333 10L8.33333 7.5V12.5Z" fill="white"/>
+                </svg>
               </a>
             </div>
           </div>
