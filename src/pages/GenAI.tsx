@@ -14,10 +14,13 @@ import {
 } from "../api/aiService";
 import "../css/GenAI.css";
 
+type Step = "selection" | "template";
+
 export default function GenAI() {
   const { token } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [currentStep, setCurrentStep] = useState<Step>("selection");
 
   // Data states
   const [subjects, setSubjects] = useState<Subject[]>([]);
@@ -262,22 +265,33 @@ export default function GenAI() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedSubjectId || !selectedGradeId || !selectedBookId) {
-      alert("Vui lòng chọn đầy đủ: Môn học, Khối, và Sách giáo khoa");
+    if (!selectedSubjectId || !selectedGradeId || !selectedBookId || !selectedChapterId || !selectedLessonId) {
+      setError("Vui lòng chọn đầy đủ: Môn học, Khối, Sách giáo khoa, Chương và Bài học");
       return;
     }
 
+    // Move to template selection step
+    setCurrentStep("template");
+  };
+
+  const handleTemplateChoice = (templateType: "preset" | "custom") => {
     const selection = {
       subjectId: selectedSubjectId,
       gradeId: selectedGradeId,
       bookId: selectedBookId,
-      chapterId: selectedChapterId || undefined,
-      lessonId: selectedLessonId || undefined,
+      chapterId: selectedChapterId,
+      lessonId: selectedLessonId,
+      templateType,
     };
 
-    console.log("Selected:", selection);
-    // TODO: Navigate to slide generation or RAG query page
-    alert(`Đã chọn:\n${JSON.stringify(selection, null, 2)}`);
+    console.log("Selected with template:", selection);
+    // TODO: Navigate to slide generation page with template type
+    alert(`Đã chọn template: ${templateType === "preset" ? "Có sẵn" : "Tùy chọn"}\n${JSON.stringify(selection, null, 2)}`);
+  };
+
+  const handleBackToSelection = () => {
+    setCurrentStep("selection");
+    setError(null);
   };
 
   if (!token) {
@@ -305,7 +319,8 @@ export default function GenAI() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="genai-form">
+      {currentStep === "selection" && (
+        <form onSubmit={handleSubmit} className="genai-form">
         {/* Step 1: Subject */}
         <div className="genai-form-group">
           <label htmlFor="subject" className="genai-label required">
@@ -388,19 +403,20 @@ export default function GenAI() {
         {/* Step 4: Chapter */}
         {selectedBookId && (
           <div className="genai-form-group">
-            <label htmlFor="chapter" className="genai-label">
+            <label htmlFor="chapter" className="genai-label required">
               <span className="step-number">4</span>
-              Chương (tùy chọn)
+              Chương
             </label>
             <select
               id="chapter"
               value={selectedChapterId}
               onChange={handleChapterChange}
               className="genai-select"
+              required
               disabled={loadingChapters}
             >
               <option value="">
-                {loadingChapters ? "Đang tải..." : "-- Chọn chương (nếu có) --"}
+                {loadingChapters ? "Đang tải..." : "-- Chọn chương --"}
               </option>
               {chapters.map((chapter) => (
                 <option key={chapter.chapter_id} value={chapter.chapter_id}>
@@ -414,19 +430,20 @@ export default function GenAI() {
         {/* Step 5: Lesson */}
         {selectedChapterId && (
           <div className="genai-form-group">
-            <label htmlFor="lesson" className="genai-label">
+            <label htmlFor="lesson" className="genai-label required">
               <span className="step-number">5</span>
-              Bài học (tùy chọn)
+              Bài học
             </label>
             <select
               id="lesson"
               value={selectedLessonId}
               onChange={handleLessonChange}
               className="genai-select"
+              required
               disabled={loadingLessons}
             >
               <option value="">
-                {loadingLessons ? "Đang tải..." : "-- Chọn bài học (nếu có) --"}
+                {loadingLessons ? "Đang tải..." : "-- Chọn bài học --"}
               </option>
               {lessons.map((lesson) => (
                 <option key={lesson.lesson_id} value={lesson.lesson_id}>
@@ -439,7 +456,7 @@ export default function GenAI() {
         )}
 
         {/* Submit Button */}
-        {selectedSubjectId && selectedGradeId && selectedBookId && (
+        {selectedSubjectId && selectedGradeId && selectedBookId && selectedChapterId && selectedLessonId && (
           <div className="genai-form-actions">
             <button
               type="submit"
@@ -451,7 +468,48 @@ export default function GenAI() {
           </div>
         )}
       </form>
+      )}
 
+      {/* Template Selection Step */}
+      {currentStep === "template" && (
+        <div className="genai-template-selection">
+          <div className="genai-template-header">
+            <h2>Chọn loại template</h2>
+            <p>Bạn muốn tạo slide với template nào?</p>
+          </div>
+
+          <div className="genai-template-options">
+            <div
+              className="genai-template-card"
+              onClick={() => handleTemplateChoice("preset")}
+            >
+              <div className="genai-template-icon">📋</div>
+              <h3>Template có sẵn</h3>
+              <p>Sử dụng các template đã được thiết kế sẵn, nhanh chóng và chuyên nghiệp</p>
+              <button className="genai-template-btn">Chọn</button>
+            </div>
+
+            <div
+              className="genai-template-card"
+              onClick={() => handleTemplateChoice("custom")}
+            >
+              <div className="genai-template-icon">🎨</div>
+              <h3>Template tùy chọn</h3>
+              <p>Tự thiết kế và tùy chỉnh template theo ý muốn của bạn</p>
+              <button className="genai-template-btn">Chọn</button>
+            </div>
+          </div>
+
+          <div className="genai-template-actions">
+            <button
+              onClick={handleBackToSelection}
+              className="genai-back-btn"
+            >
+              ← Quay lại
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
