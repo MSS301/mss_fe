@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import Layout from "../components/Layout";
 import "../css/Curriculum.css";
 
 type Subject = {
@@ -47,100 +46,90 @@ export default function Curriculum() {
   ];
 
   return (
-    <Layout
-      title="Chương trình học"
-      breadcrumb={[
-        { label: "Trang chủ", href: "/dashboard" },
-        { label: "Khám phá chương trình" },
-      ]}
-    >
-      <div className="curriculum-container">
-        {/* Step 1: Chọn môn học */}
+    <div className="curriculum-container">
+      {/* Step 1: Chọn môn học */}
+      <div className="curriculum-section">
+        <div className="section-header">
+          <h2 className="section-title">
+            <span className="step-badge">1</span>
+            Chọn môn học
+          </h2>
+          <p className="section-desc">Chọn môn học bạn muốn tạo slide</p>
+        </div>
+        <div className="subject-grid">
+          {subjects.map((subject) => (
+            <div
+              key={subject.id}
+              className={`subject-card ${
+                selectedSubject === subject.id ? "active" : ""
+              }`}
+              onClick={() => setSelectedSubject(subject.id)}
+              style={
+                { "--subject-color": subject.color } as React.CSSProperties
+              }
+            >
+              <div className="subject-icon">{subject.icon}</div>
+              <div className="subject-name">{subject.name}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Step 2: Chọn khối lớp */}
+      {selectedSubject && (
         <div className="curriculum-section">
           <div className="section-header">
             <h2 className="section-title">
-              <span className="step-badge">1</span>
-              Chọn môn học
+              <span className="step-badge">2</span>
+              Chọn khối lớp
             </h2>
-            <p className="section-desc">Chọn môn học bạn muốn tạo slide</p>
+            <p className="section-desc">Chọn cấp độ phù hợp với học sinh</p>
           </div>
-          <div className="subject-grid">
-            {subjects.map((subject) => (
+          <div className="grade-grid">
+            {grades.map((grade) => (
               <div
-                key={subject.id}
-                className={`subject-card ${
-                  selectedSubject === subject.id ? "active" : ""
+                key={grade.id}
+                className={`grade-card ${
+                  selectedGrade === grade.id ? "active" : ""
                 }`}
-                onClick={() => setSelectedSubject(subject.id)}
-                style={
-                  { "--subject-color": subject.color } as React.CSSProperties
-                }
+                onClick={() => setSelectedGrade(grade.id)}
               >
-                <div className="subject-icon">{subject.icon}</div>
-                <div className="subject-name">{subject.name}</div>
+                <div className="grade-level">{grade.level}</div>
+                <div className="grade-name">{grade.name}</div>
               </div>
             ))}
           </div>
         </div>
+      )}
 
-        {/* Step 2: Chọn khối lớp */}
-        {selectedSubject && (
-          <div className="curriculum-section">
-            <div className="section-header">
-              <h2 className="section-title">
-                <span className="step-badge">2</span>
-                Chọn khối lớp
-              </h2>
-              <p className="section-desc">Chọn cấp độ phù hợp với học sinh</p>
-            </div>
-            <div className="grade-grid">
-              {grades.map((grade) => (
-                <div
-                  key={grade.id}
-                  className={`grade-card ${
-                    selectedGrade === grade.id ? "active" : ""
-                  }`}
-                  onClick={() => setSelectedGrade(grade.id)}
-                >
-                  <div className="grade-level">{grade.level}</div>
-                  <div className="grade-name">{grade.name}</div>
-                </div>
-              ))}
-            </div>
+      {/* Step 3: Chọn chủ đề */}
+      {selectedSubject && selectedGrade && (
+        <div className="curriculum-section">
+          <div className="section-header">
+            <h2 className="section-title">
+              <span className="step-badge">3</span>
+              Chọn chủ đề
+            </h2>
+            <p className="section-desc">
+              Chọn chủ đề cụ thể trong chương trình
+            </p>
           </div>
-        )}
-
-        {/* Step 3: Chọn chủ đề */}
-        {selectedSubject && selectedGrade && (
-          <div className="curriculum-section">
-            <div className="section-header">
-              <h2 className="section-title">
-                <span className="step-badge">3</span>
-                Chọn chủ đề
-              </h2>
-              <p className="section-desc">
-                Chọn chủ đề cụ thể trong chương trình
-              </p>
-            </div>
-            <div className="topic-list">
-              {topics.map((topic) => (
-                <div key={topic.id} className="topic-card">
-                  <div className="topic-info">
-                    <div className="topic-icon">📖</div>
-                    <div>
-                      <div className="topic-name">{topic.name}</div>
-                      <div className="topic-meta">{topic.lessons} bài học</div>
-                    </div>
+          <div className="topic-list">
+            {topics.map((topic) => (
+              <div key={topic.id} className="topic-card">
+                <div className="topic-info">
+                  <div className="topic-icon">📖</div>
+                  <div>
+                    <div className="topic-name">{topic.name}</div>
+                    <div className="topic-meta">{topic.lessons} bài học</div>
                   </div>
-                  <button className="btn btn-primary btn-sm">
-                    Tạo slide →
-                  </button>
                 </div>
-              ))}
-            </div>
+                <button className="btn btn-primary btn-sm">Tạo slide →</button>
+              </div>
+            ))}
           </div>
-        )}
-      </div>
-    </Layout>
+        </div>
+      )}
+    </div>
   );
 }
