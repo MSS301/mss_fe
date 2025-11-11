@@ -199,6 +199,11 @@
   transform: translateY(-2px);
 }
 
+.btn-login:active {
+  transform: translateY(0) scale(0.97);
+  background: rgba(255, 255, 255, 0.1);
+}
+
 .navbar-scrolled .btn-login {
   color: var(--color-text-primary);
   border-color: var(--color-border);
@@ -208,6 +213,12 @@
   background: var(--color-background);
   border-color: var(--color-primary);
   color: var(--color-primary);
+}
+
+.navbar-scrolled .btn-login:active {
+  transform: translateY(0) scale(0.97);
+  background: var(--color-background);
+  border-color: var(--color-primary);
 }
 
 .btn-signup {
@@ -226,6 +237,12 @@
 .btn-signup:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.btn-signup:active {
+  transform: translateY(0) scale(0.97);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  background: #f3f4f6;
 }
 
 /* Hero Content */
@@ -365,12 +382,22 @@
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
 }
 
+.btn-primary-large:active {
+  transform: translateY(-1px) scale(0.98);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+}
+
 .btn-icon {
   transition: transform var(--transition-fast);
 }
 
 .btn-primary-large:hover .btn-icon {
   transform: translateX(4px);
+}
+
+.btn-primary-large:active .btn-icon {
+  transform: translateX(2px);
 }
 
 .btn-secondary-large {
@@ -395,12 +422,22 @@
   transform: translateY(-4px);
 }
 
+.btn-secondary-large:active {
+  transform: translateY(-1px) scale(0.98);
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
 .play-icon {
   transition: transform var(--transition-fast);
 }
 
 .btn-secondary-large:hover .play-icon {
   transform: scale(1.1);
+}
+
+.btn-secondary-large:active .play-icon {
+  transform: scale(1.05);
 }
 
 /* Hero Stats */
@@ -1062,6 +1099,12 @@
   transform: translateY(-2px);
 }
 
+.btn-pricing:active {
+  transform: translateY(0) scale(0.98);
+  background: var(--color-background);
+  border-color: var(--color-primary);
+}
+
 .btn-pricing.primary {
   background: linear-gradient(
     135deg,
@@ -1076,6 +1119,12 @@
 .btn-pricing.primary:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+}
+
+.btn-pricing.primary:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  background: linear-gradient(135deg, #5a67d8, #059669);
 }
 
 /* CTA Section */
@@ -1307,8 +1356,19 @@
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
 }
 
+.btn-cta:active {
+  transform: translateY(-1px) scale(0.98);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  background: #f3f4f6;
+  color: #5a67d8;
+}
+
 .btn-cta:hover svg {
   transform: translateX(4px);
+}
+
+.btn-cta:active svg {
+  transform: translateX(2px);
 }
 
 /* Footer */
