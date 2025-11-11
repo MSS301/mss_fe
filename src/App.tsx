@@ -53,7 +53,14 @@ import ClassroomDetail from "./pages/teacher/ClassroomDetail";
 import LessonDetail from "./pages/LessonDetail";
 
 function AppContent(): JSX.Element {
-  const { token, isAuthenticated, isAdmin, isTeacher, isStudent, logout: authLogout } = useAuth();
+  const {
+    token,
+    isAuthenticated,
+    isAdmin,
+    isTeacher,
+    isStudent,
+    logout: authLogout,
+  } = useAuth();
   const navigate = useNavigate();
   const currentUserId =
     token && token.split(".")[1]
@@ -106,7 +113,9 @@ function AppContent(): JSX.Element {
           />
           <Route
             path="/login"
-            element={<Login onLogin={handleLogin} onBack={navigateToHomepage} />}
+            element={
+              <Login onLogin={handleLogin} onBack={navigateToHomepage} />
+            }
           />
           <Route path="*" element={<Navigate to="/" replace />} />
         </>
@@ -135,7 +144,14 @@ function AppContent(): JSX.Element {
           <Route
             path="/curriculum"
             element={
-              <Layout title="Chương trình học" onLogout={handleLogout}>
+              <Layout
+                title="Chương trình học"
+                breadcrumb={[
+                  { label: "Trang chủ", href: "/dashboard" },
+                  { label: "Khám phá chương trình" },
+                ]}
+                onLogout={handleLogout}
+              >
                 <Curriculum />
               </Layout>
             }
@@ -184,10 +200,7 @@ function AppContent(): JSX.Element {
             path="/wallet"
             element={
               <Layout title="Ví tiền" onLogout={handleLogout}>
-                <Wallet
-                  token={token!}
-                  userId={currentUserId}
-                />
+                <Wallet token={token!} userId={currentUserId} />
               </Layout>
             }
           />
