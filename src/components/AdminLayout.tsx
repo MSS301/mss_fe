@@ -115,18 +115,16 @@ export default function AdminLayout({
             <div className="admin-sidebar-section-title">Tổng quan</div>
             <Link
               to="/admin/dashboard"
-              className={`admin-sidebar-link ${
-                isActive("/admin/dashboard") ? "active" : ""
-              }`}
+              className={`admin-sidebar-link ${isActive("/admin/dashboard") ? "active" : ""
+                }`}
             >
               <span className="admin-sidebar-link-icon">📊</span>
               <span>Dashboard</span>
             </Link>
             <Link
               to="/admin/analytics"
-              className={`admin-sidebar-link ${
-                isActive("/admin/analytics") ? "active" : ""
-              }`}
+              className={`admin-sidebar-link ${isActive("/admin/analytics") ? "active" : ""
+                }`}
             >
               <span className="admin-sidebar-link-icon">📈</span>
               <span>Analytics</span>
@@ -140,36 +138,32 @@ export default function AdminLayout({
             </div>
             <Link
               to="/admin/users"
-              className={`admin-sidebar-link ${
-                isActive("/admin/users") ? "active" : ""
-              }`}
+              className={`admin-sidebar-link ${isActive("/admin/users") ? "active" : ""
+                }`}
             >
               <span className="admin-sidebar-link-icon">👥</span>
               <span>Tất cả người dùng</span>
             </Link>
             <Link
               to="/admin/teachers"
-              className={`admin-sidebar-link ${
-                isActive("/admin/teachers") ? "active" : ""
-              }`}
+              className={`admin-sidebar-link ${isActive("/admin/teachers") ? "active" : ""
+                }`}
             >
               <span className="admin-sidebar-link-icon">👨‍🏫</span>
               <span>Giáo viên</span>
             </Link>
             <Link
               to="/admin/students"
-              className={`admin-sidebar-link ${
-                isActive("/admin/students") ? "active" : ""
-              }`}
+              className={`admin-sidebar-link ${isActive("/admin/students") ? "active" : ""
+                }`}
             >
               <span className="admin-sidebar-link-icon">👨‍🎓</span>
               <span>Học sinh</span>
             </Link>
             <Link
               to="/admin/roles"
-              className={`admin-sidebar-link ${
-                isActive("/admin/roles") ? "active" : ""
-              }`}
+              className={`admin-sidebar-link ${isActive("/admin/roles") ? "active" : ""
+                }`}
             >
               <span className="admin-sidebar-link-icon">🔐</span>
               <span>Vai trò & Quyền</span>
@@ -190,90 +184,88 @@ export default function AdminLayout({
             <div className="admin-sidebar-section-title">Quản lý nội dung</div>
             <Link
               to="/admin/slides"
-              className={`admin-sidebar-link ${
-                isActive("/admin/slides") ? "active" : ""
-              }`}
+              className={`admin-sidebar-link ${isActive("/admin/slides") ? "active" : ""
+                }`}
             >
               <span className="admin-sidebar-link-icon">📄</span>
               <span>Quản lý Slide</span>
             </Link>
             <Link
               to="/admin/subject"
-              className={`admin-sidebar-link ${
-                isActive("/admin/subject") ? "active" : ""
-              }`}
+              className={`admin-sidebar-link ${isActive("/admin/subject") ? "active" : ""
+                }`}
             >
               <span className="admin-sidebar-link-icon">📘</span>
               <span>Quản lý môn học</span>
             </Link>
             <Link
               to="/admin/chapter"
-              className={`admin-sidebar-link ${
-                isActive("/admin/chapter") ? "active" : ""
-              }`}
+              className={`admin-sidebar-link ${isActive("/admin/chapter") ? "active" : ""
+                }`}
             >
               <span className="admin-sidebar-link-icon">📑</span>
               <span>Quản lý chương</span>
             </Link>
             <Link
               to="/admin/lesson-comment"
-              className={`admin-sidebar-link ${
-                isActive("/admin/lesson-comment") ? "active" : ""
-              }`}
+              className={`admin-sidebar-link ${isActive("/admin/lesson-comment") ? "active" : ""
+                }`}
             >
               <span className="admin-sidebar-link-icon">�</span>
               <span>Quản lý bình luận bài học</span>
             </Link>
             <Link
               to="/admin/lesson-rating"
-              className={`admin-sidebar-link ${
-                isActive("/admin/lesson-rating") ? "active" : ""
-              }`}
+              className={`admin-sidebar-link ${isActive("/admin/lesson-rating") ? "active" : ""
+                }`}
             >
               <span className="admin-sidebar-link-icon">⭐</span>
               <span>Quản lý đánh giá bài học</span>
             </Link>
             <Link
               to="/admin/lesson-file"
-              className={`admin-sidebar-link ${
-                isActive("/admin/lesson-file") ? "active" : ""
-              }`}
+              className={`admin-sidebar-link ${isActive("/admin/lesson-file") ? "active" : ""
+                }`}
             >
               <span className="admin-sidebar-link-icon">📎</span>
               <span>Quản lý file bài học</span>
             </Link>
             <Link
               to="/admin/teacher-lesson"
-              className={`admin-sidebar-link ${
-                isActive("/admin/teacher-lesson") ? "active" : ""
-              }`}
+              className={`admin-sidebar-link ${isActive("/admin/teacher-lesson") ? "active" : ""
+                }`}
             >
               <span className="admin-sidebar-link-icon">👨‍🏫</span>
               <span>Quản lý bài học của giáo viên</span>
             </Link>
             <Link
+              to="/admin/teacher-mindmap"
+              className={`admin-sidebar-link ${isActive("/admin/teacher-mindmap") ? "active" : ""
+                }`}
+            >
+              <span className="admin-sidebar-link-icon">👨‍🏫</span>
+              <span>Quản lý mindmap của giáo viên</span>
+            </Link>
+            <Link
               to="/admin/curriculum-lesson"
-              className={`admin-sidebar-link ${
-                isActive("/admin/curriculum-lesson") ? "active" : ""
-              }`}
+              className={`admin-sidebar-link ${isActive("/admin/curriculum-lesson") ? "active" : ""
+                }`}
             >
               <span className="admin-sidebar-link-icon">📚</span>
               <span>Quản lý bài học của chương trình</span>
             </Link>
             <Link
               to="/admin/curriculum"
-              className={`admin-sidebar-link ${
-                isActive("/admin/curriculum") ? "active" : ""
-              }`}
+              className={`admin-sidebar-link ${isActive("/admin/curriculum") ? "active" : ""
+                }`}
             >
               <span className="admin-sidebar-link-icon">📚</span>
               <span>Chương trình học</span>
             </Link>
             <Link
               to="/admin/templates"
-              className={`admin-sidebar-link ${
-                isActive("/admin/templates") ? "active" : ""
-              }`}
+              className={`admin-sidebar-link ${isActive("/admin/templates") ? "active" : ""
+                }`}
             >
               <span className="admin-sidebar-link-icon">🎨</span>
               <span>Templates</span>
@@ -285,27 +277,24 @@ export default function AdminLayout({
             <div className="admin-sidebar-section-title">Tài chính</div>
             <Link
               to="/admin/payments"
-              className={`admin-sidebar-link ${
-                isActive("/admin/payments") ? "active" : ""
-              }`}
+              className={`admin-sidebar-link ${isActive("/admin/payments") ? "active" : ""
+                }`}
             >
               <span className="admin-sidebar-link-icon">💳</span>
               <span>Thanh toán</span>
             </Link>
             <Link
               to="/admin/wallets"
-              className={`admin-sidebar-link ${
-                isActive("/admin/wallets") ? "active" : ""
-              }`}
+              className={`admin-sidebar-link ${isActive("/admin/wallets") ? "active" : ""
+                }`}
             >
               <span className="admin-sidebar-link-icon">💰</span>
               <span>Quản lý Ví</span>
             </Link>
             <Link
               to="/admin/transactions"
-              className={`admin-sidebar-link ${
-                isActive("/admin/transactions") ? "active" : ""
-              }`}
+              className={`admin-sidebar-link ${isActive("/admin/transactions") ? "active" : ""
+                }`}
             >
               <span className="admin-sidebar-link-icon">📝</span>
               <span>Giao dịch</span>
@@ -317,36 +306,32 @@ export default function AdminLayout({
             <div className="admin-sidebar-section-title">Hệ thống</div>
             <Link
               to="/admin/notifications"
-              className={`admin-sidebar-link ${
-                isActive("/admin/notifications") ? "active" : ""
-              }`}
+              className={`admin-sidebar-link ${isActive("/admin/notifications") ? "active" : ""
+                }`}
             >
               <span className="admin-sidebar-link-icon">🔔</span>
               <span>Thông báo</span>
             </Link>
             <Link
               to="/admin/reports"
-              className={`admin-sidebar-link ${
-                isActive("/admin/reports") ? "active" : ""
-              }`}
+              className={`admin-sidebar-link ${isActive("/admin/reports") ? "active" : ""
+                }`}
             >
               <span className="admin-sidebar-link-icon">📊</span>
               <span>Báo cáo</span>
             </Link>
             <Link
               to="/admin/settings"
-              className={`admin-sidebar-link ${
-                isActive("/admin/settings") ? "active" : ""
-              }`}
+              className={`admin-sidebar-link ${isActive("/admin/settings") ? "active" : ""
+                }`}
             >
               <span className="admin-sidebar-link-icon">⚙️</span>
               <span>Cài đặt</span>
             </Link>
             <Link
               to="/admin/logs"
-              className={`admin-sidebar-link ${
-                isActive("/admin/logs") ? "active" : ""
-              }`}
+              className={`admin-sidebar-link ${isActive("/admin/logs") ? "active" : ""
+                }`}
             >
               <span className="admin-sidebar-link-icon">📋</span>
               <span>System Logs</span>

@@ -1,0 +1,346 @@
+.mindmap-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.mindmap-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.mindmap-card {
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.mindmap-list-header,
+.mindmap-detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.mindmap-list-header h2,
+.mindmap-detail-header h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.mindmap-meta-info {
+  font-size: 0.9rem;
+  color: #475569;
+}
+
+.mindmap-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.mindmap-item {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.mindmap-item:hover {
+  border-color: rgba(59, 130, 246, 0.5);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+}
+
+.mindmap-item.active {
+  border-color: #2563eb;
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.2);
+}
+
+.mindmap-item-title {
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 0.2rem;
+}
+
+.mindmap-item-prompt {
+  font-size: 0.85rem;
+  color: #475569;
+  margin-bottom: 0.4rem;
+}
+
+.mindmap-item-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.mindmap-status-badge {
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.mindmap-status-ready {
+  background: rgba(34, 197, 94, 0.15);
+  color: #16a34a;
+}
+
+.mindmap-status-processing {
+  background: rgba(249, 115, 22, 0.15);
+  color: #f97316;
+}
+
+.mindmap-status-failed {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.mindmap-empty {
+  text-align: center;
+  color: #94a3b8;
+  font-size: 0.9rem;
+  padding: 1.5rem 0;
+}
+
+.mindmap-create-form form,
+.mindmap-edit-form form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.mindmap-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.mindmap-field label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.mindmap-field input,
+.mindmap-field textarea {
+  border-radius: 10px;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  padding: 0.65rem 0.8rem;
+  font-size: 0.9rem;
+  resize: vertical;
+}
+
+.mindmap-field textarea {
+  min-height: 90px;
+}
+
+.mindmap-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.mindmap-btn {
+  border: none;
+  border-radius: 10px;
+  padding: 0.55rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.1s ease, opacity 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.mindmap-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.mindmap-btn.primary {
+  background: linear-gradient(135deg, #4f46e5, #2563eb);
+  color: #fff;
+}
+
+.mindmap-btn.secondary {
+  background: rgba(15, 23, 42, 0.05);
+  color: #0f172a;
+}
+
+.mindmap-btn.danger {
+  background: rgba(239, 68, 68, 0.15);
+  color: #b91c1c;
+}
+
+.mindmap-detail-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.mindmap-metadata-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.8rem;
+}
+
+.mindmap-metadata-item {
+  background: rgba(15, 23, 42, 0.02);
+  border-radius: 10px;
+  padding: 0.7rem 0.9rem;
+}
+
+.mindmap-metadata-item span {
+  display: block;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin-bottom: 0.15rem;
+}
+
+.mindmap-metadata-item strong {
+  color: #0f172a;
+}
+
+.mindmap-json {
+  background: #0f172a;
+  color: #e2e8f0;
+  border-radius: 12px;
+  padding: 1rem;
+  font-family: "JetBrains Mono", "Fira Code", Consolas, monospace;
+  font-size: 0.85rem;
+  max-height: 320px;
+  overflow: auto;
+}
+
+.mindmap-alert {
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  font-size: 0.9rem;
+}
+
+.mindmap-alert.info {
+  background: rgba(59, 130, 246, 0.12);
+  color: #1d4ed8;
+}
+
+.mindmap-alert.error {
+  background: rgba(248, 113, 113, 0.16);
+  color: #b91c1c;
+}
+
+.mindmap-empty-detail {
+  border: 1px dashed rgba(15, 23, 42, 0.2);
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+  color: #94a3b8;
+}
+
+.mindmap-tree {
+  border-radius: 24px;
+  padding: 1.6rem;
+  background: linear-gradient(140deg, rgba(99, 102, 241, 0.09), rgba(14, 165, 233, 0.08));
+  border: 1px solid rgba(99, 102, 241, 0.08);
+  box-shadow: 0 30px 60px rgba(15, 23, 42, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.mindmap-tree-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.mindmap-tree-description {
+  color: #475569;
+  margin: 0.25rem 0 0;
+}
+
+.mindmap-tree-controls {
+  display: inline-flex;
+  gap: 0.4rem;
+}
+
+.mindmap-tree-controls .mindmap-btn {
+  padding: 0.35rem 0.75rem;
+  min-width: 2.2rem;
+  justify-content: center;
+}
+
+.mindmap-tree-canvas {
+  width: 100%;
+  min-height: 520px;
+  height: 60vh;
+  background: #ffffff;
+  border-radius: 18px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: inset 0 0 35px rgba(15, 23, 42, 0.06);
+  overflow: hidden;
+  position: relative;
+}
+
+.mindmap-tree-canvas .rd3t-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.mindmap-tree-link {
+  stroke: rgba(15, 23, 42, 0.22);
+  stroke-width: 3px;
+  stroke-linecap: round;
+  fill: none;
+}
+
+.mindmap-node-rect {
+  fill: #ffffff;
+  stroke: rgba(15, 23, 42, 0.08);
+  stroke-width: 1.2px;
+  filter: drop-shadow(0 12px 24px rgba(15, 23, 42, 0.15));
+}
+
+.mindmap-node.depth-0 .mindmap-node-rect {
+  stroke: rgba(99, 102, 241, 0.5);
+  filter: drop-shadow(0 16px 35px rgba(99, 102, 241, 0.25));
+}
+
+.mindmap-node.depth-1 .mindmap-node-rect {
+  stroke: rgba(20, 184, 166, 0.35);
+}
+
+.mindmap-node.depth-2 .mindmap-node-rect {
+  stroke: rgba(245, 158, 11, 0.35);
+}
+
+.mindmap-node.depth-3 .mindmap-node-rect,
+.mindmap-node.depth-4 .mindmap-node-rect {
+  stroke: rgba(236, 72, 153, 0.3);
+}
+
+.mindmap-node-title {
+  font-weight: 600;
+  fill: #0f172a;
+  font-size: 0.95rem;
+}
+
+.mindmap-node-notes {
+  fill: #475569;
+  font-size: 0.75rem;
+}

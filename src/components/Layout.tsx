@@ -213,6 +213,20 @@ export default function Layout({
             </Link>
           </div>
 
+          {/* Mindmaps */}
+          <div className="sidebar-section">
+            <div className="sidebar-section-title">Mindmap AI</div>
+            <Link
+              to="/mindmaps"
+              className={`sidebar-link ${
+                isActive("/mindmaps") ? "active" : ""
+              }`}
+            >
+              <span className="sidebar-link-icon">🧠</span>
+              <span>Quản lý mindmap</span>
+            </Link>
+          </div>
+
           {/* Financial */}
           <div className="sidebar-section">
             <div className="sidebar-section-title">Tài chính</div>
