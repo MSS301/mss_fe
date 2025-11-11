@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "../css/Homepage.css";
 
 type Props = {
@@ -6,23 +6,52 @@ type Props = {
 };
 
 export default function Homepage({ onNavigateToLogin }: Props) {
+  const [navbarScrolled, setNavbarScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const featuresSection = document.getElementById('features');
+      const pricingSection = document.getElementById('pricing');
+      const howItWorksSection = document.querySelector('.how-it-works-section');
+      
+      // Kiểm tra nếu scroll xuống phần features, pricing hoặc how-it-works (có nền trắng)
+      if (featuresSection || pricingSection || howItWorksSection) {
+        const featuresTop = featuresSection?.getBoundingClientRect().top || Infinity;
+        const pricingTop = pricingSection?.getBoundingClientRect().top || Infinity;
+        const howItWorksTop = howItWorksSection?.getBoundingClientRect().top || Infinity;
+        
+        // Nếu scroll xuống phần có nền trắng (features, pricing hoặc how-it-works)
+        if (featuresTop < 100 || pricingTop < 100 || howItWorksTop < 100) {
+          setNavbarScrolled(true);
+        } else {
+          setNavbarScrolled(false);
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
     <div className="homepage">
       {/* Header */}
       <header className="hero-header">
-        <nav className="navbar">
+        <nav className={`navbar ${navbarScrolled ? 'navbar-scrolled' : ''}`}>
           <div className="navbar-container">
             <div className="navbar-logo">
               <div className="logo-icon">
-                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" className="logo-svg">
                   <rect width="32" height="32" rx="8" fill="url(#logoGradient)"/>
                   <path
                     d="M16 8L22 14H18V20H14V14H10L16 8Z"
                     fill="white"
+                    className="logo-path"
                   />
                   <path
                     d="M10 24H22V22H10V24Z"
                     fill="white"
+                    className="logo-path"
                   />
                   <defs>
                     <linearGradient id="logoGradient" x1="0" y1="0" x2="32" y2="32">
@@ -36,24 +65,89 @@ export default function Homepage({ onNavigateToLogin }: Props) {
             </div>
             <ul className="navbar-menu">
               <li>
-                <a href="#features">Tính năng</a>
+                <a 
+                  href="#ai-create" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const element = document.getElementById('ai-create');
+                    if (element) {
+                      const offset = 80;
+                      const elementPosition = element.getBoundingClientRect().top;
+                      const offsetPosition = elementPosition + window.pageYOffset - offset;
+                      window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                      });
+                    }
+                  }}
+                >
+                  AI tạo Slide
+                </a>
               </li>
               <li>
-                <a href="#pricing">Bảng giá</a>
+                <a 
+                  href="#features" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const element = document.getElementById('features');
+                    if (element) {
+                      const offset = 80;
+                      const elementPosition = element.getBoundingClientRect().top;
+                      const offsetPosition = elementPosition + window.pageYOffset - offset;
+                      window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                      });
+                    }
+                  }}
+                >
+                  Tính năng
+                </a>
               </li>
               <li>
-                <a href="#about">Về chúng tôi</a>
+                <a 
+                  href="#pricing" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const element = document.getElementById('pricing');
+                    if (element) {
+                      const offset = 80;
+                      const elementPosition = element.getBoundingClientRect().top;
+                      const offsetPosition = elementPosition + window.pageYOffset - offset;
+                      window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                      });
+                    }
+                  }}
+                >
+                  Bảng giá
+                </a>
               </li>
               <li>
-                <a href="#contact">Liên hệ</a>
+                <a 
+                  href="#about" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const element = document.getElementById('about');
+                    if (element) {
+                      const offset = 80;
+                      const elementPosition = element.getBoundingClientRect().top;
+                      const offsetPosition = elementPosition + window.pageYOffset - offset;
+                      window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                      });
+                    }
+                  }}
+                >
+                  Về chúng tôi
+                </a>
               </li>
             </ul>
             <div className="navbar-actions">
               <button onClick={onNavigateToLogin} className="btn-login">
                 Đăng nhập
-              </button>
-              <button onClick={onNavigateToLogin} className="btn-signup">
-                Bắt đầu miễn phí
               </button>
             </div>
           </div>
@@ -93,16 +187,33 @@ export default function Homepage({ onNavigateToLogin }: Props) {
           </div>
           <div className="hero-stats">
             <div className="stat-item">
+              <div className="stat-icon-wrapper">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" className="stat-icon">
+                  <path d="M16 16C19.3137 16 22 13.3137 22 10C22 6.68629 19.3137 4 16 4C12.6863 4 10 6.68629 10 10C10 13.3137 12.6863 16 16 16Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M4 28C4 23.0294 8.02944 19 13 19H19C23.9706 19 28 23.0294 28 28" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
               <div className="stat-number">10K+</div>
               <div className="stat-label">Giáo viên</div>
             </div>
             <div className="stat-divider"></div>
             <div className="stat-item">
+              <div className="stat-icon-wrapper">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" className="stat-icon">
+                  <path d="M6 8C6 6.89543 6.89543 6 8 6H24C25.1046 6 26 6.89543 26 8V24C26 25.1046 25.1046 26 24 26H8C6.89543 26 6 25.1046 6 24V8Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M6 12H26M12 6V26M20 6V26" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
               <div className="stat-number">50K+</div>
               <div className="stat-label">Slide đã tạo</div>
             </div>
             <div className="stat-divider"></div>
             <div className="stat-item">
+              <div className="stat-icon-wrapper">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" className="stat-icon">
+                  <path d="M16 2L19.09 11.26L29 12.27L21.5 18.74L23.18 28.02L16 23.77L8.82 28.02L10.5 18.74L3 12.27L12.91 11.26L16 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="currentColor"/>
+                </svg>
+              </div>
               <div className="stat-number">4.9/5</div>
               <div className="stat-label">Đánh giá</div>
             </div>
@@ -333,20 +444,67 @@ export default function Homepage({ onNavigateToLogin }: Props) {
       </section>
 
       {/* CTA Section */}
-      <section className="cta-section">
+      <section id="ai-create" className="cta-section">
         <div className="cta-container">
-          <h2 className="cta-title">Sẵn sàng tạo slide tuyệt vời?</h2>
+          <div className="cta-icon-wrapper">
+            <svg width="80" height="80" viewBox="0 0 80 80" fill="none" className="cta-ai-icon">
+              <circle cx="40" cy="40" r="38" fill="url(#ctaGradient)" opacity="0.2"/>
+              <path d="M40 20L50 35H45V50H35V35H30L40 20Z" fill="white"/>
+              <path d="M25 60H55V55H25V60Z" fill="white"/>
+              <path d="M20 25C20 22.7909 21.7909 21 24 21H26C28.2091 21 30 22.7909 30 25V27C30 29.2091 28.2091 31 26 31H24C21.7909 31 20 29.2091 20 27V25Z" fill="white" opacity="0.8"/>
+              <path d="M50 25C50 22.7909 51.7909 21 54 21H56C58.2091 21 60 22.7909 60 25V27C60 29.2091 58.2091 31 56 31H54C51.7909 31 50 29.2091 50 27V25Z" fill="white" opacity="0.8"/>
+              <defs>
+                <linearGradient id="ctaGradient" x1="0" y1="0" x2="80" y2="80">
+                  <stop offset="0%" stopColor="#667eea"/>
+                  <stop offset="100%" stopColor="#764ba2"/>
+                </linearGradient>
+              </defs>
+            </svg>
+            <div className="cta-sparkle sparkle-1">✨</div>
+            <div className="cta-sparkle sparkle-2">✨</div>
+            <div className="cta-sparkle sparkle-3">✨</div>
+          </div>
+          <h2 className="cta-title">
+            Tạo Slide Chuyên Nghiệp
+            <br />
+            <span className="cta-title-highlight">Với Sức Mạnh AI</span>
+          </h2>
           <p className="cta-description">
-            Hàng ngàn giáo viên đã tin dùng. Đến lượt bạn!
+            Chỉ cần vài cú click, AI sẽ tạo slide hoàn chỉnh cho bạn trong 60 giây.
+            <br />
+            <strong>Hàng ngàn giáo viên</strong> đã tin dùng và tiết kiệm hàng giờ mỗi tuần.
           </p>
+          <div className="cta-features">
+            <div className="cta-feature-item">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="currentColor"/>
+              </svg>
+              <span>AI thông minh</span>
+            </div>
+            <div className="cta-feature-item">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" fill="currentColor"/>
+              </svg>
+              <span>Tạo trong 60 giây</span>
+            </div>
+            <div className="cta-feature-item">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <span>Chất lượng cao</span>
+            </div>
+          </div>
           <button onClick={onNavigateToLogin} className="btn-cta">
-            Bắt đầu miễn phí ngay
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M5 10H15M15 10L11 6M15 10L11 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            <span>Bắt đầu miễn phí ngay</span>
           </button>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="footer">
+      <footer id="about" className="footer">
         <div className="footer-container">
           <div className="footer-content">
             <div className="footer-column footer-about">
