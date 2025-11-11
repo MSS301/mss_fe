@@ -86,7 +86,12 @@ const Packages: React.FC = () => {
       <div className="packages-page">
         <div className="packages-container">
           <div className="loading-state">
-            <div className="spinner"></div>
+            <div className="loading-spinner">
+              <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
+                <circle cx="30" cy="30" r="24" stroke="currentColor" strokeWidth="4" strokeOpacity="0.2"/>
+                <path d="M30 6C16.7452 6 6 16.7452 6 30" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/>
+              </svg>
+            </div>
             <p>Đang tải danh sách gói...</p>
           </div>
         </div>
@@ -98,34 +103,57 @@ const Packages: React.FC = () => {
     <div className="packages-page">
       <div className="packages-container">
         <div className="packages-header">
+          <div className="packages-header-icon">
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+              <path d="M40 12H32V8C32 6.89543 31.1046 6 30 6H10C8.89543 6 8 6.89543 8 8V40C8 41.1046 8.89543 42 10 42H30C31.1046 42 32 41.1046 32 40V36H40C41.1046 36 42 35.1046 42 34V14C42 12.8954 41.1046 12 40 12Z" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M32 24H42" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
           <h1>Chọn gói nạp Credits</h1>
-          <p>Chọn gói phù hợp với nhu cầu của bạn</p>
+          <p>Chọn gói phù hợp với nhu cầu của bạn và bắt đầu tạo slide tuyệt vời</p>
         </div>
 
         {error && (
           <div className="error-message">
-            <span className="error-icon">⚠️</span>
-            <span>{error}</span>
+            <div className="error-icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M12 8V12M12 16H12.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+            <span className="error-text">{error}</span>
             <button onClick={loadPackages} className="btn-retry">
-              Thử lại
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <path d="M9 1.5C13.1421 1.5 16.5 4.85786 16.5 9C16.5 13.1421 13.1421 16.5 9 16.5C4.85786 16.5 1.5 13.1421 1.5 9C1.5 4.85786 4.85786 1.5 9 1.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M9 4.5V9L12 11.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <span>Thử lại</span>
             </button>
           </div>
         )}
 
         <div className="packages-grid">
-          {packages.map((pkg) => (
+          {packages.map((pkg, index) => (
             <PackageCard
               key={pkg.id}
               package={pkg}
               onSelect={handleSelectPackage}
               isLoading={processingPackageId === pkg.id}
+              index={index}
             />
           ))}
         </div>
 
         {packages.length === 0 && !error && (
           <div className="empty-state">
+            <div className="empty-state-icon">
+              <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+                <path d="M20 20H60C62.7614 20 65 22.2386 65 25V55C65 57.7614 62.7614 60 60 60H20C17.2386 60 15 57.7614 15 55V25C15 22.2386 17.2386 20 20 20Z" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M25 30H55M25 40H55M25 50H45" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
             <p>Không có gói nào khả dụng</p>
+            <p className="empty-state-subtitle">Vui lòng thử lại sau</p>
           </div>
         )}
       </div>
