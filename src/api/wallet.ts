@@ -10,6 +10,7 @@ export interface Wallet {
   total_earned: number;
   total_refunded: number;
   locked_balance: number;
+  token: number;
   created_at: string;
   updated_at: string;
 }

@@ -1,5 +1,11 @@
 import React from "react";
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useNavigate,
+} from "react-router-dom";
 import "./css/variables.css";
 import "./css/global.css";
 import "./css/components.css";
@@ -18,6 +24,8 @@ import TeacherLessonManagement from "./pages/admin/TeacherLessonManagement";
 import CurriculumLessonManagement from "./pages/admin/CurriculumLessonManagement";
 import MySlides from "./pages/user/MySlides";
 import Wallet from "./pages/user/Wallet";
+import Packages from "./pages/user/Packages";
+import PaymentResult from "./pages/payment/PaymentResult";
 import Statistics from "./pages/user/Statistics";
 import Settings from "./pages/user/Settings";
 import UserManagement from "./pages/admin/UserManagement";
@@ -82,7 +90,9 @@ function AppContent(): JSX.Element {
           />
           <Route
             path="/login"
-            element={<Login onLogin={handleLogin} onBack={navigateToHomepage} />}
+            element={
+              <Login onLogin={handleLogin} onBack={navigateToHomepage} />
+            }
           />
           <Route path="*" element={<Navigate to="/" replace />} />
         </>
@@ -129,6 +139,15 @@ function AppContent(): JSX.Element {
               </Layout>
             }
           />
+          <Route
+            path="/packages"
+            element={
+              <Layout title="Nạp Credits" onLogout={handleLogout}>
+                <Packages />
+              </Layout>
+            }
+          />
+          <Route path="/payment/result" element={<PaymentResult />} />
           <Route
             path="/statistics"
             element={
@@ -275,7 +294,10 @@ function AppContent(): JSX.Element {
         <Route
           path="*"
           element={
-            <Navigate to={isAdmin ? "/admin/dashboard" : "/dashboard"} replace />
+            <Navigate
+              to={isAdmin ? "/admin/dashboard" : "/dashboard"}
+              replace
+            />
           }
         />
       )}
