@@ -120,7 +120,12 @@ function AppContent(): JSX.Element {
             path="/wallet"
             element={
               <Layout title="Ví tiền" onLogout={handleLogout}>
-                <Wallet />
+                <Wallet
+                  token={token!}
+                  userId={
+                    token ? JSON.parse(atob(token.split(".")[1])).sub : ""
+                  }
+                />
               </Layout>
             }
           />
