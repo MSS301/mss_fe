@@ -8,6 +8,7 @@ import {
   UserProfileResult,
   resolveAvatarUrl,
 } from "../api/auth";
+import "../css/Profile.css";
 
 export default function Profile(): JSX.Element {
   const { token } = useAuth();
@@ -126,54 +127,132 @@ export default function Profile(): JSX.Element {
     }
   }
 
-  if (loading) return <div>Đang tải thông tin hồ sơ...</div>;
+  if (loading) {
+    return (
+      <div className="profile-container">
+        <div className="profile-loading">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style={{ marginRight: '12px', animation: 'spin 0.8s linear infinite' }}>
+            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" strokeOpacity="0.3"/>
+            <path d="M12 2C13.3132 2 14.6136 2.25866 15.8268 2.7612C17.0401 3.26375 18.1425 4.00035 19.0711 4.92893C19.9997 5.85752 20.7362 6.95991 21.2388 8.17317C21.7413 9.38643 22 10.6868 22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+          </svg>
+          Đang tải thông tin hồ sơ...
+        </div>
+      </div>
+    );
+  }
 
   if (profile) {
     return (
-      <div className="container" style={{ maxWidth: 650, margin: '40px auto', padding: '24px', backgroundColor: '#f9f9f9', borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-        <h2 style={{ textAlign: 'center', marginBottom: 24, color: '#333' }}>Hồ sơ của bạn</h2>
-        <div style={{ display: "flex", gap: 20, alignItems: "center", marginBottom: 24, padding: 20, backgroundColor: 'white', borderRadius: 8 }}>
-          <img
-            src={resolveAvatarUrl(profile.avatarUrl) || "https://i.pravatar.cc/150"}
-            alt={profile.fullName || "Avatar"}
-            className="avatar avatar-lg"
-            style={{ width: 120, height: 120, borderRadius: '50%', objectFit: 'cover', border: '3px solid #2196F3' }}
-          />
-          <div style={{ flex: 1 }}>
-            <div style={{ marginBottom: 12, fontSize: 15 }}>
-              <strong style={{ color: '#555' }}>Họ và tên:</strong> <span style={{ color: '#333' }}>{profile.fullName}</span>
-            </div>
-            <div style={{ marginBottom: 12, fontSize: 15 }}>
-              <strong style={{ color: '#555' }}>Vai trò:</strong> <span style={{ color: '#333' }}>{profile.role === "TEACHER" ? "Giáo viên" : "Học sinh"}</span>
-            </div>
-            <div style={{ marginBottom: 12, fontSize: 15 }}>
-              <strong style={{ color: '#555' }}>Trường:</strong> <span style={{ color: '#333' }}>{profile.schoolName || profile.schoolId || "-"}</span>
-            </div>
-            <div style={{ fontSize: 15 }}>
-              <strong style={{ color: '#555' }}>Ngày sinh:</strong> <span style={{ color: '#333' }}>{profile.dateOfBirth || "-"}</span>
+      <div className="profile-container">
+        <div className="profile-card">
+          <div className="profile-header">
+            <h1 className="profile-title">Hồ sơ của bạn</h1>
+            <div className="profile-avatar-wrapper">
+              <img
+                src={resolveAvatarUrl(profile.avatarUrl) || "https://i.pravatar.cc/150"}
+                alt={profile.fullName || "Avatar"}
+                className="profile-avatar"
+              />
+              <div className="profile-avatar-badge">
+                {profile.role === "TEACHER" ? (
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M10 2L12.5 7.5L18.5 8.5L14 12.5L15 18.5L10 15.5L5 18.5L6 12.5L1.5 8.5L7.5 7.5L10 2Z" fill="#667eea"/>
+                  </svg>
+                ) : (
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M10 10C12.7614 10 15 7.76142 15 5C15 2.23858 12.7614 0 10 0C7.23858 0 5 2.23858 5 5C5 7.76142 7.23858 10 10 10Z" fill="#43e97b"/>
+                    <path d="M10 12C6.68629 12 4 14.6863 4 18H16C16 14.6863 13.3137 12 10 12Z" fill="#43e97b"/>
+                  </svg>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-        <div style={{ textAlign: 'center' }}>
-          <button 
-            onClick={() => navigate("/profile/edit")}
-            style={{
-              padding: '12px 32px',
-              fontSize: 16,
-              backgroundColor: '#2196F3',
-              color: 'white',
-              border: 'none',
-              borderRadius: 8,
-              cursor: 'pointer',
-              fontWeight: 600,
-              transition: 'all 0.3s ease',
-              boxShadow: '0 2px 6px rgba(33,150,243,0.3)'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1976D2'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#2196F3'}
-          >
-            ✏️ Chỉnh sửa hồ sơ
-          </button>
+
+          <div className="profile-info-section">
+            <div className="profile-info-grid">
+              <div className="profile-info-item">
+                <div className="profile-info-label">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M8 8C9.65685 8 11 6.65685 11 5C11 3.34315 9.65685 2 8 2C6.34315 2 5 3.34315 5 5C5 6.65685 6.34315 8 8 8Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M2 14C2 11.5147 4.51472 9 7 9H9C11.4853 9 14 11.5147 14 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  Họ và tên
+                </div>
+                <div className="profile-info-value">{profile.fullName || "-"}</div>
+              </div>
+
+              <div className="profile-info-item">
+                <div className="profile-info-label">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M8 2L10 6L14 7L11 10L11.5 14L8 12L4.5 14L5 10L2 7L6 6L8 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  Vai trò
+                </div>
+                <div className="profile-info-value">
+                  <span className={`profile-role-badge ${profile.role === "TEACHER" ? "teacher" : "student"}`}>
+                    {profile.role === "TEACHER" ? (
+                      <>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                          <path d="M8 1L9.5 5.5L14 6.5L10.5 9.5L11.5 14L8 11.5L4.5 14L5.5 9.5L2 6.5L6.5 5.5L8 1Z" fill="currentColor"/>
+                        </svg>
+                        Giáo viên
+                      </>
+                    ) : (
+                      <>
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                          <path d="M8 8C9.65685 8 11 6.65685 11 5C11 3.34315 9.65685 2 8 2C6.34315 2 5 3.34315 5 5C5 6.65685 6.34315 8 8 8Z" fill="currentColor"/>
+                          <path d="M2 14C2 11.5147 4.51472 9 7 9H9C11.4853 9 14 11.5147 14 14" fill="currentColor"/>
+                        </svg>
+                        Học sinh
+                      </>
+                    )}
+                  </span>
+                </div>
+              </div>
+
+              <div className="profile-info-item">
+                <div className="profile-info-label">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M8 8C10.2091 8 12 6.20914 12 4C12 1.79086 10.2091 0 8 0C5.79086 0 4 1.79086 4 4C4 6.20914 5.79086 8 8 8Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M1 16C1 12.6863 3.68629 10 7 10H9C12.3137 10 15 12.6863 15 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  Trường
+                </div>
+                <div className="profile-info-value">{profile.schoolName || profile.schoolId || "-"}</div>
+              </div>
+
+              <div className="profile-info-item">
+                <div className="profile-info-label">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5"/>
+                    <path d="M8 4V8L11 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  Ngày sinh
+                </div>
+                <div className="profile-info-value">
+                  {profile.dateOfBirth 
+                    ? new Date(profile.dateOfBirth).toLocaleDateString('vi-VN', { 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                      })
+                    : "-"}
+                </div>
+              </div>
+            </div>
+
+            <div className="profile-actions">
+              <button 
+                onClick={() => navigate("/profile/edit")}
+                className="btn-edit-profile"
+              >
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <path d="M11.25 3.75L14.25 6.75M2.5 17.5L6.13333 16.8667C6.38333 16.8167 6.60833 16.6917 6.78333 16.5167L15.25 8.05C15.5833 7.71667 15.5833 7.18333 15.25 6.85L13.15 4.75C12.8167 4.41667 12.2833 4.41667 11.95 4.75L3.48333 13.2167C3.30833 13.3917 3.18333 13.6167 3.13333 13.8667L2.5 17.5L11.25 3.75Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span>Chỉnh sửa hồ sơ</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -181,210 +260,224 @@ export default function Profile(): JSX.Element {
 
   // No profile -> show choice and form
   return (
-    <div className="container" style={{ maxWidth: 650, margin: '40px auto', padding: '24px', backgroundColor: '#f9f9f9', borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-      <h2 style={{ textAlign: 'center', marginBottom: 16, color: '#333' }}>Tạo hồ sơ</h2>
-      <p style={{ textAlign: 'center', marginBottom: 24, color: '#666' }}>Bạn chưa có hồ sơ. Vui lòng chọn vai trò và điền thông tin.</p>
-
-      {!choice && (
-        <div style={{ display: "flex", gap: 16, justifyContent: 'center', marginTop: 24 }}>
-          <button
-            onClick={() => onChoose("STUDENT")}
-            style={{
-              padding: '14px 40px',
-              fontSize: 16,
-              backgroundColor: '#4CAF50',
-              color: 'white',
-              border: 'none',
-              borderRadius: 8,
-              cursor: 'pointer',
-              fontWeight: 600,
-              transition: 'all 0.3s ease',
-              boxShadow: '0 2px 6px rgba(76,175,80,0.3)'
-            }}
-          >
-            Học sinh
-          </button>
-          <button
-            onClick={() => onChoose("TEACHER")}
-            style={{
-              padding: '14px 40px',
-              fontSize: 16,
-              backgroundColor: '#2196F3',
-              color: 'white',
-              border: 'none',
-              borderRadius: 8,
-              cursor: 'pointer',
-              fontWeight: 600,
-              transition: 'all 0.3s ease',
-              boxShadow: '0 2px 6px rgba(33,150,243,0.3)'
-            }}
-          >
-            Giáo viên
-          </button>
+    <div className="profile-container">
+      <div className="profile-create-card">
+        <div className="profile-create-header">
+          <h1 className="profile-create-title">Tạo hồ sơ</h1>
+          <p className="profile-create-subtitle">
+            Bạn chưa có hồ sơ. Vui lòng chọn vai trò và điền thông tin để bắt đầu.
+          </p>
         </div>
-      )}
 
-      {choice && (
-        <form onSubmit={handleSubmit} style={{ marginTop: 24 }}>
-          <div style={{ marginBottom: 20, padding: 12, backgroundColor: '#e8f5e9', borderRadius: 6, border: '1px solid #4CAF50' }}>
-            <div style={{ fontSize: 14, color: '#666', marginBottom: 4 }}>Vai trò:</div>
-            <strong style={{ fontSize: 16, color: '#333' }}>{choice === "TEACHER" ? "Giáo viên" : "Học sinh"}</strong>
-          </div>
-
-          <div style={{ marginBottom: 16 }}>
-            <label htmlFor="schoolSelect" style={{ display: 'block', marginBottom: 6, fontWeight: 600, color: '#333' }}>Trường</label>
-            <select
-              id="schoolSelect"
-              value={schoolId === "" ? "" : String(schoolId)}
-              onChange={(e) => setSchoolId(e.target.value === "" ? "" : Number(e.target.value))}
-              style={{
-                width: '100%',
-                padding: '10px 12px',
-                fontSize: 15,
-                border: '1px solid #ccc',
-                borderRadius: 6,
-                backgroundColor: 'white',
-                cursor: 'pointer'
-              }}
+        {!choice && (
+          <div className="profile-role-selection">
+            <button
+              onClick={() => onChoose("STUDENT")}
+              className="profile-role-button"
             >
-              <option value="">-- Chọn trường --</option>
-              {schools.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
+              <div className="profile-role-icon student">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                  <path d="M16 16C19.3137 16 22 13.3137 22 10C22 6.68629 19.3137 4 16 4C12.6863 4 10 6.68629 10 10C10 13.3137 12.6863 16 16 16Z" fill="white"/>
+                  <path d="M4 28C4 23.0294 8.02944 19 13 19H19C23.9706 19 28 23.0294 28 28" fill="white"/>
+                </svg>
+              </div>
+              <div className="profile-role-name">Học sinh</div>
+              <div className="profile-role-description">
+                Tạo hồ sơ để tham gia các lớp học và học tập
+              </div>
+            </button>
+            <button
+              onClick={() => onChoose("TEACHER")}
+              className="profile-role-button"
+            >
+              <div className="profile-role-icon teacher">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                  <path d="M16 2L19.09 11.26L29 12.27L21.5 18.74L23.18 28.02L16 23.77L8.82 28.02L10.5 18.74L3 12.27L12.91 11.26L16 2Z" fill="white"/>
+                </svg>
+              </div>
+              <div className="profile-role-name">Giáo viên</div>
+              <div className="profile-role-description">
+                Tạo hồ sơ để quản lý lớp học và tạo slide
+              </div>
+            </button>
           </div>
+        )}
 
-          <div style={{ marginBottom: 16 }}>
-            <label htmlFor="fullNameInput" style={{ display: 'block', marginBottom: 6, fontWeight: 600, color: '#333' }}>Họ và tên</label>
-            <input
-              id="fullNameInput"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '10px 12px',
-                fontSize: 15,
-                border: '1px solid #ccc',
-                borderRadius: 6,
-                boxSizing: 'border-box'
-              }}
-            />
-          </div>
+        {choice && (
+          <form onSubmit={handleSubmit} className="profile-form">
+          <div className="profile-form-section">
+            <div className="profile-selected-role">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                {choice === "TEACHER" ? (
+                  <path d="M9 1L11.5 6.5L17.5 7.5L13 11.5L14.5 17.5L9 14.5L3.5 17.5L5 11.5L0.5 7.5L6.5 6.5L9 1Z" fill="currentColor"/>
+                ) : (
+                  <>
+                    <path d="M9 9C11.0711 9 12.75 7.32107 12.75 5.25C12.75 3.17893 11.0711 1.5 9 1.5C6.92893 1.5 5.25 3.17893 5.25 5.25C5.25 7.32107 6.92893 9 9 9Z" fill="currentColor"/>
+                    <path d="M15.75 16.5C15.75 13.5147 12.7279 11.25 9 11.25C5.27208 11.25 2.25 13.5147 2.25 16.5" fill="currentColor"/>
+                  </>
+                )}
+              </svg>
+              <span>Vai trò: {choice === "TEACHER" ? "Giáo viên" : "Học sinh"}</span>
+            </div>
 
-          <div style={{ marginBottom: 16 }}>
-            <label htmlFor="dobInput" style={{ display: 'block', marginBottom: 6, fontWeight: 600, color: '#333' }}>Ngày sinh</label>
-            <input
-              id="dobInput"
-              type="date"
-              value={dateOfBirth}
-              onChange={(e) => setDateOfBirth(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '10px 12px',
-                fontSize: 15,
-                border: '1px solid #ccc',
-                borderRadius: 6,
-                boxSizing: 'border-box'
-              }}
-            />
-          </div>
+            <div className="profile-form-group">
+              <label htmlFor="schoolSelect" className="profile-form-label">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                  <path d="M9 9C11.0711 9 12.75 7.32107 12.75 5.25C12.75 3.17893 11.0711 1.5 9 1.5C6.92893 1.5 5.25 3.17893 5.25 5.25C5.25 7.32107 6.92893 9 9 9Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M15.75 16.5C15.75 13.5147 12.7279 11.25 9 11.25C5.27208 11.25 2.25 13.5147 2.25 16.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Trường
+              </label>
+              <select
+                id="schoolSelect"
+                value={schoolId === "" ? "" : String(schoolId)}
+                onChange={(e) => setSchoolId(e.target.value === "" ? "" : Number(e.target.value))}
+                className="profile-form-select"
+              >
+                <option value="">-- Chọn trường --</option>
+                {schools.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          <div style={{ marginBottom: 16 }}>
-            <label htmlFor="avatarFile" style={{ display: 'block', marginBottom: 6, fontWeight: 600, color: '#333' }}>Avatar (ảnh)</label>
-            <input
-              id="avatarFile"
-              type="file"
-              accept="image/*"
-              onChange={(e) => setAvatarFile(e.target.files ? e.target.files[0] : null)}
-              style={{
-                width: '100%',
-                padding: '8px',
-                fontSize: 14,
-                border: '1px solid #ccc',
-                borderRadius: 6,
-                backgroundColor: 'white'
-              }}
-            />
+            <div className="profile-form-group">
+              <label htmlFor="fullNameInput" className="profile-form-label">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                  <path d="M9 9C11.0711 9 12.75 7.32107 12.75 5.25C12.75 3.17893 11.0711 1.5 9 1.5C6.92893 1.5 5.25 3.17893 5.25 5.25C5.25 7.32107 6.92893 9 9 9Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M15.75 16.5C15.75 13.5147 12.7279 11.25 9 11.25C5.27208 11.25 2.25 13.5147 2.25 16.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Họ và tên
+                <span className="required">*</span>
+              </label>
+              <input
+                id="fullNameInput"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                className="profile-form-input"
+                placeholder="Nhập họ và tên của bạn"
+                required
+              />
+            </div>
+
+            <div className="profile-form-group">
+              <label htmlFor="dobInput" className="profile-form-label">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                  <circle cx="9" cy="9" r="7.5" stroke="currentColor" strokeWidth="1.5"/>
+                  <path d="M9 4.5V9L12 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Ngày sinh
+              </label>
+              <input
+                id="dobInput"
+                type="date"
+                value={dateOfBirth}
+                onChange={(e) => setDateOfBirth(e.target.value)}
+                className="profile-form-input"
+              />
+            </div>
+
+            <div className="profile-form-group">
+              <label htmlFor="avatarFile" className="profile-form-label">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                  <path d="M14.25 12.75L11.25 9.75L8.25 12.75M14.25 3.75H3.75C2.92157 3.75 2.25 4.42157 2.25 5.25V14.25C2.25 15.0784 2.92157 15.75 3.75 15.75H14.25C15.0784 15.75 15.75 15.0784 15.75 14.25V5.25C15.75 4.42157 15.0784 3.75 14.25 3.75Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <circle cx="6.75" cy="6.75" r="1.5" stroke="currentColor" strokeWidth="1.5"/>
+                </svg>
+                Avatar (ảnh đại diện)
+              </label>
+              <input
+                id="avatarFile"
+                type="file"
+                accept="image/*"
+                onChange={(e) => setAvatarFile(e.target.files ? e.target.files[0] : null)}
+                className="profile-form-file-input"
+              />
+            </div>
           </div>
 
           {choice === "TEACHER" && (
-            <div style={{ marginBottom: 16, padding: 12, backgroundColor: '#fff3e0', borderRadius: 6, border: '1px solid #FF9800' }}>
-              <label htmlFor="teacherProof" style={{ display: 'block', marginBottom: 6, fontWeight: 600, color: '#333' }}>
-                Giấy tờ chứng minh (ảnh, pdf) <span style={{ color: '#d32f2f' }}>*</span>
-              </label>
-              <input
-                id="teacherProof"
-                type="file"
-                accept="image/*,application/pdf"
-                onChange={(e) => setTeacherProofFile(e.target.files ? e.target.files[0] : null)}
-                style={{
-                  width: '100%',
-                  padding: '8px',
-                  fontSize: 14,
-                  border: '1px solid #FF9800',
-                  borderRadius: 6,
-                  backgroundColor: 'white'
-                }}
-              />
+            <div className="profile-form-section">
+              <div className="profile-teacher-proof-notice">
+                <div className="profile-teacher-proof-notice-title">
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                    <path d="M9 1.5L11.25 6.75L17.25 7.5L13.5 11.25L14.25 17.25L9 14.25L3.75 17.25L4.5 11.25L0.75 7.5L6.75 6.75L9 1.5Z" fill="currentColor"/>
+                  </svg>
+                  Yêu cầu đặc biệt cho giáo viên
+                </div>
+                <p className="profile-teacher-proof-notice-text">
+                  Vui lòng tải lên giấy tờ chứng minh bạn là giáo viên (bằng cấp, giấy phép giảng dạy, v.v.) để được xác minh.
+                </p>
+              </div>
+              <div className="profile-form-group">
+                <label htmlFor="teacherProof" className="profile-form-label">
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                    <path d="M14 2H4C3.17157 2 2.5 2.67157 2.5 3.5V14.5C2.5 15.3284 3.17157 16 4 16H14C14.8284 16 15.5 15.3284 15.5 14.5V3.5C15.5 2.67157 14.8284 2 14 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M5.5 5.5H12.5M5.5 9H12.5M5.5 12.5H9.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  </svg>
+                  Giấy tờ chứng minh (ảnh, PDF)
+                  <span className="required">*</span>
+                </label>
+                <input
+                  id="teacherProof"
+                  type="file"
+                  accept="image/*,application/pdf"
+                  onChange={(e) => setTeacherProofFile(e.target.files ? e.target.files[0] : null)}
+                  className="profile-form-file-input"
+                  required
+                />
+              </div>
             </div>
           )}
 
           {error && (
-            <div style={{
-              padding: 12,
-              marginBottom: 16,
-              backgroundColor: '#ffebee',
-              color: '#c62828',
-              border: '1px solid #ef5350',
-              borderRadius: 6,
-              fontSize: 14
-            }}>
-              {error}
+            <div className="profile-form-error">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="2"/>
+                <path d="M10 6V10M10 14H10.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+              <span>{error}</span>
             </div>
           )}
 
-          <div style={{ marginTop: 24, display: 'flex', gap: 12, justifyContent: 'center' }}>
+          <div className="profile-form-actions">
             <button
               type="submit"
               disabled={submitting}
-              style={{
-                padding: '12px 32px',
-                fontSize: 16,
-                backgroundColor: submitting ? '#ccc' : '#4CAF50',
-                color: 'white',
-                border: 'none',
-                borderRadius: 8,
-                cursor: submitting ? 'not-allowed' : 'pointer',
-                fontWeight: 600,
-                transition: 'all 0.3s ease',
-                boxShadow: submitting ? 'none' : '0 2px 6px rgba(76,175,80,0.3)'
-              }}
+              className="btn-submit-profile"
             >
-              {submitting ? "Đang gửi..." : "Gửi hồ sơ"}
+              {submitting ? (
+                <>
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" style={{ animation: 'spin 0.7s linear infinite' }}>
+                    <circle cx="9" cy="9" r="7.5" stroke="currentColor" strokeWidth="2" strokeOpacity="0.3"/>
+                    <path d="M9 1.5C11.4853 1.5 13.5 3.51472 13.5 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  </svg>
+                  <span>Đang gửi...</span>
+                </>
+              ) : (
+                <>
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M16.6667 5L7.5 14.1667L3.33333 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span>Gửi hồ sơ</span>
+                </>
+              )}
             </button>
             <button
               type="button"
               onClick={() => setChoice(null)}
-              style={{
-                padding: '12px 32px',
-                fontSize: 16,
-                backgroundColor: '#757575',
-                color: 'white',
-                border: 'none',
-                borderRadius: 8,
-                cursor: 'pointer',
-                fontWeight: 600,
-                transition: 'all 0.3s ease',
-                boxShadow: '0 2px 6px rgba(0,0,0,0.2)'
-              }}
+              className="btn-cancel-profile"
             >
-              Quay lại
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M5 5L15 15M15 5L5 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+              <span>Quay lại</span>
             </button>
           </div>
-        </form>
-      )}
+          </form>
+        )}
+      </div>
     </div>
   );
 }
