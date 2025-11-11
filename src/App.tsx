@@ -1,5 +1,11 @@
 import React from "react";
-import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useNavigate,
+} from "react-router-dom";
 import "./css/variables.css";
 import "./css/global.css";
 import "./css/components.css";
@@ -19,6 +25,8 @@ import TeacherLessonManagement from "./pages/admin/TeacherLessonManagement";
 import CurriculumLessonManagement from "./pages/admin/CurriculumLessonManagement";
 import MySlides from "./pages/user/MySlides";
 import Wallet from "./pages/user/Wallet";
+import Packages from "./pages/user/Packages";
+import PaymentResult from "./pages/payment/PaymentResult";
 import Statistics from "./pages/user/Statistics";
 import Settings from "./pages/user/Settings";
 import UserManagement from "./pages/admin/UserManagement";
@@ -99,14 +107,14 @@ function AppContent(): JSX.Element {
       {/* Authenticated User Routes */}
       {isAuthenticated && !isAdmin && (
         <>
-          <Route 
-            path="/" 
+          <Route
+            path="/"
             element={
-              <Navigate 
-                to={isTeacher ? "/teacher/dashboard" : "/dashboard"} 
-                replace 
+              <Navigate
+                to={isTeacher ? "/teacher/dashboard" : "/dashboard"}
+                replace
               />
-            } 
+            }
           />
           <Route
             path="/dashboard"
@@ -153,6 +161,15 @@ function AppContent(): JSX.Element {
               </Layout>
             }
           />
+          <Route
+            path="/packages"
+            element={
+              <Layout title="Nạp Credits" onLogout={handleLogout}>
+                <Packages />
+              </Layout>
+            }
+          />
+          <Route path="/payment/result" element={<PaymentResult />} />
           <Route
             path="/statistics"
             element={
@@ -353,15 +370,15 @@ function AppContent(): JSX.Element {
         <Route
           path="*"
           element={
-            <Navigate 
+            <Navigate
               to={
-                isAdmin 
-                  ? "/admin/dashboard" 
-                  : isTeacher 
-                  ? "/teacher/dashboard" 
+                isAdmin
+                  ? "/admin/dashboard"
+                  : isTeacher
+                  ? "/teacher/dashboard"
                   : "/dashboard"
-              } 
-              replace 
+              }
+              replace
             />
           }
         />

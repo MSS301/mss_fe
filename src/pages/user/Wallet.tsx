@@ -1,4 +1,5 @@
 ﻿import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   getMyWallet,
   getMyTransactions,
@@ -16,6 +17,7 @@ type Props = {
 };
 
 export default function Wallet({ token, userId }: Props) {
+  const navigate = useNavigate();
   const [wallet, setWallet] = useState<WalletType | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -77,16 +79,20 @@ export default function Wallet({ token, userId }: Props) {
       {/* Balance Card */}
       <div className="balance-card">
         <div className="balance-header">
-          <h2 className="balance-title">Số dư khả dụng</h2>
           {wallet?.status === "ACTIVE" && (
             <span className="status-badge">✓ Đang hoạt động</span>
           )}
         </div>
-        <div className="balance-amount">
-          {formatCurrency(wallet?.balance || 0)}
+        <div className="token-display">
+          <span className="token-icon">🪙</span>
+          <span className="token-count">{wallet?.token || 0}</span>
+          <span className="token-label">Tokens còn lại</span>
         </div>
         <div className="balance-actions">
-          <button className="action-btn deposit">
+          <button
+            className="action-btn deposit"
+            onClick={() => navigate("/packages")}
+          >
             <span className="btn-icon">+</span>
             Nạp tiền
           </button>
@@ -96,10 +102,8 @@ export default function Wallet({ token, userId }: Props) {
       {/* Quick Stats */}
       <div className="wallet-stats">
         <div className="stat-item">
-          <span className="stat-label">Thu nhập</span>
-          <span className="stat-value income">
-            {formatCurrency(wallet?.total_earned || 0)}
-          </span>
+          <span className="stat-label">Tokens</span>
+          <span className="stat-value income">{wallet?.token || 0}</span>
         </div>
         <div className="stat-item">
           <span className="stat-label">Chi tiêu</span>
