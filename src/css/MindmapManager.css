@@ -254,7 +254,11 @@
 .mindmap-tree {
   border-radius: 24px;
   padding: 1.6rem;
-  background: linear-gradient(140deg, rgba(99, 102, 241, 0.09), rgba(14, 165, 233, 0.08));
+  background: linear-gradient(
+    140deg,
+    rgba(99, 102, 241, 0.09),
+    rgba(14, 165, 233, 0.08)
+  );
   border: 1px solid rgba(99, 102, 241, 0.08);
   box-shadow: 0 30px 60px rgba(15, 23, 42, 0.08);
   display: flex;
@@ -295,6 +299,125 @@
   box-shadow: inset 0 0 35px rgba(15, 23, 42, 0.06);
   overflow: hidden;
   position: relative;
+}
+
+/* ReactFlow specific styles */
+.mindmap-tree--reactflow .mindmap-tree-canvas {
+  padding: 0;
+}
+
+.mindmap-tree--reactflow .react-flow__node {
+  cursor: grab;
+}
+
+.mindmap-tree--reactflow .react-flow__node:active {
+  cursor: grabbing;
+}
+
+.mindmap-tree--reactflow .react-flow__edge-path {
+  stroke-width: 2px;
+}
+
+.mindmap-tree--reactflow .react-flow__controls {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+}
+
+.mindmap-tree--reactflow .react-flow__controls-button {
+  border-bottom: 1px solid rgba(15, 23, 42, 0.1);
+  transition: all 0.2s;
+}
+
+.mindmap-tree--reactflow .react-flow__controls-button:hover {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.mindmap-panel-info {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 8px 12px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Edit Modal */
+.mindmap-edit-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.mindmap-edit-modal {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.mindmap-edit-modal-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mindmap-edit-modal-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #0f172a;
+}
+
+.mindmap-edit-modal-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.mindmap-edit-modal-footer {
+  padding: 1.5rem;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.mindmap-edit-modal-footer .mindmap-btn {
+  min-width: 100px;
 }
 
 .mindmap-tree-canvas .rd3t-svg {

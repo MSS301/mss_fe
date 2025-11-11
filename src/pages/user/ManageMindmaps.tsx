@@ -1,5 +1,24 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import "../../css/MindmapManager.css";
+import ReactFlow, {
+  Node,
+  Edge,
+  Controls,
+  Background,
+  BackgroundVariant,
+  useNodesState,
+  useEdgesState,
+  Panel,
+  getRectOfNodes,
+} from "reactflow";
+import "reactflow/dist/style.css";
+import { toPng, toSvg } from "html-to-image";
 import {
   createMindmap,
   deleteMindmap,
@@ -11,9 +30,6 @@ import {
   updateMindmap,
 } from "../../api/mindmap";
 import { useAuth } from "contexts/AuthContext";
-
-const NODE_WIDTH = 200;
-const NODE_HEIGHT = 80;
 
 type Props = {
   token: string;
@@ -55,70 +71,6 @@ type ParsedMindmap = {
   roots: MindmapTreeNode[];
 };
 
-type NodeVisualConfig = {
-  type: "circle" | "pill" | "hexagon";
-  fill: string;
-  stroke: string;
-  labelColor: string;
-  noteColor: string;
-  labelFontSize: number;
-  noteFontSize: number;
-  labelMaxChars: number;
-  labelMaxLines: number;
-  noteMaxChars: number;
-  noteMaxLines: number;
-  radius?: number;
-  width?: number;
-  height?: number;
-};
-
-const NODE_VISUALS: NodeVisualConfig[] = [
-  {
-    type: "circle",
-    fill: "#FDBA1D",
-    stroke: "#F97316",
-    labelColor: "#0F172A",
-    noteColor: "#78350F",
-    labelFontSize: 16,
-    noteFontSize: 12,
-    labelMaxChars: 24,
-    labelMaxLines: 3,
-    noteMaxChars: 32,
-    noteMaxLines: 3,
-    radius: 90,
-  },
-  {
-    type: "pill",
-    fill: "#3B82F6",
-    stroke: "#1D4ED8",
-    labelColor: "#FFFFFF",
-    noteColor: "#E0F2FE",
-    labelFontSize: 14,
-    noteFontSize: 11,
-    labelMaxChars: 26,
-    labelMaxLines: 2,
-    noteMaxChars: 32,
-    noteMaxLines: 2,
-    width: 210,
-    height: 70,
-  },
-  {
-    type: "hexagon",
-    fill: "#38BDF8",
-    stroke: "#0284C7",
-    labelColor: "#FFFFFF",
-    noteColor: "#E0F2FE",
-    labelFontSize: 13,
-    noteFontSize: 11,
-    labelMaxChars: 24,
-    labelMaxLines: 2,
-    noteMaxChars: 28,
-    noteMaxLines: 2,
-    width: 170,
-    height: 70,
-  },
-];
-
 const emptyForm: FormState = {
   name: "",
   prompt: "",
@@ -127,7 +79,7 @@ const emptyForm: FormState = {
 
 function describeError(err: any, fallback: string) {
   const status = err?.status ?? err?.response?.status;
-  console.log(fallback)
+  console.log(fallback);
   if (status === 401 || status === 403) {
     return "Phiên đăng nhập hết hạn, vui lòng đăng nhập lại.";
   }
@@ -149,9 +101,8 @@ export default function ManageMindmaps({ token, userId }: Props) {
   const [listError, setListError] = useState<string | null>(null);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [selectedMindmap, setSelectedMindmap] = useState<MindmapResponse | null>(
-    null
-  );
+  const [selectedMindmap, setSelectedMindmap] =
+    useState<MindmapResponse | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
 
@@ -163,7 +114,7 @@ export default function ManageMindmaps({ token, userId }: Props) {
 
   const [infoMessage, setInfoMessage] = useState<string | null>(null);
 
-  const {user} = useAuth()
+  const { user } = useAuth();
 
   useEffect(() => {
     void loadMindmaps();
@@ -180,11 +131,7 @@ export default function ManageMindmaps({ token, userId }: Props) {
     } else {
       setEditForm(emptyForm);
     }
-  }, [
-    selectedMindmap?.metadata?.id,
-    selectedMindmap?.metadata?.updatedAt,
-    selectedMindmap?.metadata?.prompt,
-  ]);
+  }, [selectedMindmap?.metadata]);
 
   useEffect(() => {
     if (!loadingList && mindmaps.length > 0 && !selectedId) {
@@ -202,14 +149,14 @@ export default function ManageMindmaps({ token, userId }: Props) {
     }
   }, [selectedMindmap]);
 
-const parsedMindmap = useMemo(
-  () =>
-    parseMindmap(
-      selectedMindmap?.mindmap,
-      selectedMindmap?.metadata?.name || selectedMindmap?.metadata?.prompt
-    ),
-  [selectedMindmap]
-);
+  const parsedMindmap = useMemo(
+    () =>
+      parseMindmap(
+        selectedMindmap?.mindmap,
+        selectedMindmap?.metadata?.name || selectedMindmap?.metadata?.prompt
+      ),
+    [selectedMindmap]
+  );
 
   const hasEditChanges = useMemo(() => {
     if (!selectedMindmap?.metadata) return false;
@@ -273,7 +220,9 @@ const parsedMindmap = useMemo(
         project: createForm.project.trim() || undefined,
       };
       const response = await createMindmap(token, payload);
-      setInfoMessage("Đã gửi yêu cầu tạo mindmap. Vui lòng chờ trong giây lát.");
+      setInfoMessage(
+        "Đã gửi yêu cầu tạo mindmap. Vui lòng chờ trong giây lát."
+      );
       setCreateForm(emptyForm);
       await loadMindmaps(false);
       setSelectedId(response.metadata.id);
@@ -341,6 +290,31 @@ const parsedMindmap = useMemo(
       setDetailError(describeError(error, "Không thể gửi thông báo"));
     } finally {
       setUpdating(false);
+    }
+  }
+
+  function handleDownloadJSON() {
+    if (!selectedMindmap) return;
+
+    try {
+      // Export JSON data
+      const jsonData = JSON.stringify(selectedMindmap.mindmap, null, 2);
+      const jsonBlob = new Blob([jsonData], { type: "application/json" });
+      const jsonUrl = URL.createObjectURL(jsonBlob);
+
+      const downloadLink = document.createElement("a");
+      downloadLink.href = jsonUrl;
+      downloadLink.download = `${
+        selectedMindmap.metadata.name || "mindmap"
+      }-${selectedId}.json`;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+      URL.revokeObjectURL(jsonUrl);
+
+      setInfoMessage("Đã tải mindmap JSON về máy thành công.");
+    } catch (error: any) {
+      setDetailError("Không thể tải mindmap JSON. Vui lòng thử lại.");
     }
   }
 
@@ -458,7 +432,10 @@ const parsedMindmap = useMemo(
                 value={createForm.project}
                 placeholder="(Không bắt buộc)"
                 onChange={(e) =>
-                  setCreateForm((prev) => ({ ...prev, project: e.target.value }))
+                  setCreateForm((prev) => ({
+                    ...prev,
+                    project: e.target.value,
+                  }))
                 }
               />
             </div>
@@ -526,11 +503,15 @@ const parsedMindmap = useMemo(
               </div>
               <div className="mindmap-metadata-item">
                 <span>File</span>
-                <strong>{selectedMindmap.metadata.filename || "Chưa tạo"}</strong>
+                <strong>
+                  {selectedMindmap.metadata.filename || "Chưa tạo"}
+                </strong>
               </div>
               <div className="mindmap-metadata-item">
                 <span>Cập nhật</span>
-                <strong>{formatDate(selectedMindmap.metadata.updatedAt)}</strong>
+                <strong>
+                  {formatDate(selectedMindmap.metadata.updatedAt)}
+                </strong>
               </div>
             </div>
 
@@ -579,6 +560,13 @@ const parsedMindmap = useMemo(
                     disabled={updating || !hasEditChanges}
                   >
                     {updating ? "Đang lưu..." : "Lưu thay đổi"}
+                  </button>
+                  <button
+                    type="button"
+                    className="mindmap-btn secondary"
+                    onClick={handleDownloadJSON}
+                  >
+                    Tải JSON
                   </button>
                   <button
                     type="button"
@@ -705,407 +693,384 @@ function buildTreeFromFlatNodes(nodes: RawMindmapNode[]): MindmapTreeNode[] {
   return roots;
 }
 
-function buildRadialLayout(root: LayoutTreeNode, radiusStep: number): RadialLayout {
-  const weights = new Map<string, number>();
-  computeLeafWeights(root, weights);
-  const nodes: PositionedMindmapNode[] = [];
-  const links: RadialLayout["links"] = [];
-  layoutNodeRadially(
-    root,
-    -Math.PI / 2,
-    (Math.PI * 3) / 2,
-    0,
-    radiusStep,
-    weights,
-    nodes,
-    links,
-    undefined
-  );
-  return { nodes, links };
-}
-
-function computeLeafWeights(node: LayoutTreeNode, map: Map<string, number>): number {
-  if (!node.children || node.children.length === 0) {
-    map.set(node.id, 1);
-    return 1;
-  }
-  let sum = 0;
-  node.children.forEach((child) => {
-    sum += computeLeafWeights(child, map);
-  });
-  map.set(node.id, sum);
-  return sum;
-}
-
-function layoutNodeRadially(
-  node: LayoutTreeNode,
-  startAngle: number,
-  endAngle: number,
-  depth: number,
-  radiusStep: number,
-  weights: Map<string, number>,
-  nodes: PositionedMindmapNode[],
-  links: RadialLayout["links"],
-  parentId?: string
-) {
-  const radius = depth * radiusStep;
-  const angle = depth === 0 ? 0 : (startAngle + endAngle) / 2;
-  const x = radius * Math.cos(angle);
-  const y = radius * Math.sin(angle);
-  nodes.push({
-    id: node.id,
-    label: node.label,
-    notes: node.notes,
-    depth,
-    x,
-    y,
-    parentId,
-  });
-
-  if (parentId) {
-    links.push({ sourceId: parentId, targetId: node.id });
-  }
-
-  if (!node.children || node.children.length === 0) {
-    return;
-  }
-
-  const totalWeight = node.children.reduce(
-    (acc, child) => acc + (weights.get(child.id) ?? 1),
-    0
-  );
-  const range = endAngle - startAngle;
-  let cursor = startAngle;
-
-  node.children.forEach((child) => {
-    const childWeight = weights.get(child.id) ?? 1;
-    const share = range * (childWeight / (totalWeight || 1));
-    layoutNodeRadially(
-      child,
-      cursor,
-      cursor + share,
-      depth + 1,
-      radiusStep,
-      weights,
-      nodes,
-      links,
-      node.id
-    );
-    cursor += share;
-  });
-}
-
-type LayoutTreeNode = {
-  id: string;
-  label: string;
-  notes?: string;
-  children: LayoutTreeNode[];
-};
-
-type PositionedMindmapNode = {
-  id: string;
-  label: string;
-  notes?: string;
-  depth: number;
-  x: number;
-  y: number;
-  parentId?: string;
-};
-
-type RadialLayout = {
-  nodes: PositionedMindmapNode[];
-  links: Array<{ sourceId: string; targetId: string }>;
-};
-
 function MindmapTreeView({ mindmap }: { mindmap: ParsedMindmap }) {
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const [dimensions, setDimensions] = useState({ width: 800, height: 500 });
-  const [zoom, setZoom] = useState(0.95);
+  const reactFlowWrapper = useRef<HTMLDivElement | null>(null);
+  const [editingNode, setEditingNode] = useState<{
+    id: string;
+    label: string;
+    notes?: string;
+  } | null>(null);
+  const [editedMindmap, setEditedMindmap] = useState<ParsedMindmap>(mindmap);
 
+  // Sync edited mindmap with props
   useEffect(() => {
-    function updateDimensions() {
-      if (!containerRef.current) {
-        return;
-      }
-      const rect = containerRef.current.getBoundingClientRect();
-      setDimensions({
-        width: Math.max(rect.width, 400),
-        height: Math.max(rect.height, 400),
-      });
-    }
-    updateDimensions();
-    window.addEventListener("resize", updateDimensions);
-    return () => window.removeEventListener("resize", updateDimensions);
-  }, []);
-
-  const layout = useMemo(() => {
-    if (!mindmap.roots.length) {
-      return null;
-    }
-    const rootedTree: LayoutTreeNode = {
-      id: "mindmap-root",
-      label: mindmap.title,
-      notes: mindmap.description,
-      children: mindmap.roots,
-    };
-    return buildRadialLayout(rootedTree, 170);
+    setEditedMindmap(mindmap);
   }, [mindmap]);
 
-  const adjustZoom = (delta: number) => {
-    setZoom((prev) => {
-      const next = Math.min(1.6, Math.max(0.5, prev + delta));
-      return parseFloat(next.toFixed(2));
-    });
+  // Convert mindmap tree to ReactFlow nodes and edges
+  const { nodes: flowNodes, edges: flowEdges } = useMemo(() => {
+    const nodes: Node[] = [];
+    const edges: Edge[] = [];
+    let nodeIdCounter = 0;
+
+    function processNode(
+      node: MindmapTreeNode,
+      depth: number,
+      parentId?: string,
+      angle?: number,
+      radius?: number
+    ) {
+      const nodeId = `node-${nodeIdCounter++}`;
+
+      // Calculate position (radial layout)
+      const rad = angle ?? 0;
+      const r = radius ?? 0;
+      const x = r * Math.cos(rad);
+      const y = r * Math.sin(rad);
+
+      // Determine node style based on depth
+      const nodeColors = [
+        { bg: "#FDBA1D", border: "#F97316", text: "#0F172A" }, // depth 0
+        { bg: "#3B82F6", border: "#1D4ED8", text: "#FFFFFF" }, // depth 1
+        { bg: "#38BDF8", border: "#0284C7", text: "#FFFFFF" }, // depth 2
+        { bg: "#10B981", border: "#059669", text: "#FFFFFF" }, // depth 3+
+      ];
+      const colors = nodeColors[Math.min(depth, nodeColors.length - 1)];
+
+      nodes.push({
+        id: nodeId,
+        type: "default",
+        position: { x, y },
+        data: {
+          label: (
+            <div
+              style={{ textAlign: "center", padding: "8px", cursor: "pointer" }}
+              onDoubleClick={() => {
+                setEditingNode({
+                  id: nodeId,
+                  label: node.label,
+                  notes: node.notes,
+                });
+              }}
+              title="Double-click để chỉnh sửa"
+            >
+              <div
+                style={{
+                  fontWeight: 600,
+                  fontSize: "14px",
+                  marginBottom: "4px",
+                }}
+              >
+                {node.label}
+              </div>
+              {node.notes && (
+                <div style={{ fontSize: "11px", opacity: 0.8 }}>
+                  {node.notes}
+                </div>
+              )}
+            </div>
+          ),
+          // Store original node data for editing
+          _originalNode: node,
+        },
+        style: {
+          background: colors.bg,
+          color: colors.text,
+          border: `2px solid ${colors.border}`,
+          borderRadius: depth === 0 ? "50%" : "12px",
+          width: depth === 0 ? 180 : 200,
+          height: depth === 0 ? 180 : "auto",
+          minHeight: depth === 0 ? 180 : 80,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: depth === 0 ? "20px" : "12px",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+        },
+      });
+
+      if (parentId) {
+        edges.push({
+          id: `edge-${parentId}-${nodeId}`,
+          source: parentId,
+          target: nodeId,
+          type: "smoothstep",
+          animated: depth <= 1,
+          style: { stroke: colors.border, strokeWidth: 2 },
+        });
+      }
+
+      // Process children in radial layout
+      if (node.children && node.children.length > 0) {
+        const childRadius = (depth + 1) * 200;
+        const startAngle = angle ?? -Math.PI / 2;
+        const angleRange = depth === 0 ? Math.PI * 2 : Math.PI / 2;
+        const angleStep = angleRange / Math.max(node.children.length, 1);
+
+        node.children.forEach((child, index) => {
+          const childAngle = startAngle + angleStep * index;
+          processNode(child, depth + 1, nodeId, childAngle, childRadius);
+        });
+      }
+    }
+
+    // Process root node
+    if (editedMindmap.roots.length > 0) {
+      const rootNode: MindmapTreeNode = {
+        id: "root",
+        label: editedMindmap.title,
+        notes: editedMindmap.description,
+        children: editedMindmap.roots,
+      };
+      processNode(rootNode, 0, undefined, 0, 0);
+    }
+
+    return { nodes, edges };
+  }, [editedMindmap]);
+
+  const [nodes, setNodes, onNodesChange] = useNodesState(flowNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(flowEdges);
+
+  // Update nodes/edges when mindmap changes
+  useEffect(() => {
+    setNodes(flowNodes);
+    setEdges(flowEdges);
+  }, [flowNodes, flowEdges, setNodes, setEdges]);
+
+  const handleSaveEdit = () => {
+    if (!editingNode) return;
+
+    // Find the node being edited
+    const currentNode = nodes.find((n) => n.id === editingNode.id);
+    if (!currentNode) return;
+
+    const originalNode = currentNode.data._originalNode as MindmapTreeNode;
+
+    // Recursive function to update node in tree
+    const updateNodeInTree = (node: MindmapTreeNode): MindmapTreeNode => {
+      // Check if this is the node we're editing (by reference or id)
+      if (node === originalNode || node.id === originalNode?.id) {
+        return {
+          ...node,
+          label: editingNode.label,
+          notes: editingNode.notes || undefined,
+        };
+      }
+
+      // Recursively update children
+      if (node.children && node.children.length > 0) {
+        return {
+          ...node,
+          children: node.children.map(updateNodeInTree),
+        };
+      }
+
+      return node;
+    };
+
+    // Check if editing root node (node-0)
+    if (editingNode.id === "node-0") {
+      setEditedMindmap({
+        ...editedMindmap,
+        title: editingNode.label,
+        description: editingNode.notes,
+      });
+    } else {
+      // Update children nodes
+      const updatedRoots = editedMindmap.roots.map(updateNodeInTree);
+      setEditedMindmap({
+        ...editedMindmap,
+        roots: updatedRoots,
+      });
+    }
+
+    setEditingNode(null);
   };
 
-  if (!layout) {
+  const downloadEditedMindmap = useCallback(() => {
+    const exportData = {
+      title: editedMindmap.title,
+      description: editedMindmap.description,
+      nodeTree: editedMindmap.roots,
+    };
+
+    const jsonData = JSON.stringify(exportData, null, 2);
+    const jsonBlob = new Blob([jsonData], { type: "application/json" });
+    const jsonUrl = URL.createObjectURL(jsonBlob);
+
+    const link = document.createElement("a");
+    link.download = `${editedMindmap.title || "mindmap"}-edited.json`;
+    link.href = jsonUrl;
+    link.click();
+    URL.revokeObjectURL(jsonUrl);
+  }, [editedMindmap]);
+
+  // Update nodes/edges when mindmap changes
+  useEffect(() => {
+    setNodes(flowNodes);
+    setEdges(flowEdges);
+  }, [flowNodes, flowEdges, setNodes, setEdges]);
+
+  const downloadImage = useCallback(
+    async (format: "png" | "svg" = "png") => {
+      const nodesBounds = getRectOfNodes(nodes);
+      const imageWidth = nodesBounds.width;
+      const imageHeight = nodesBounds.height;
+
+      const viewport = document.querySelector(
+        ".react-flow__viewport"
+      ) as HTMLElement;
+
+      if (!viewport) {
+        console.error("Viewport not found");
+        return;
+      }
+
+      try {
+        let dataUrl: string;
+        if (format === "png") {
+          dataUrl = await toPng(viewport, {
+            backgroundColor: "#ffffff",
+            width: imageWidth,
+            height: imageHeight,
+          });
+        } else {
+          dataUrl = await toSvg(viewport, {
+            backgroundColor: "#ffffff",
+            width: imageWidth,
+            height: imageHeight,
+          });
+        }
+
+        const link = document.createElement("a");
+        link.download = `${mindmap.title || "mindmap"}.${format}`;
+        link.href = dataUrl;
+        link.click();
+      } catch (error) {
+        console.error("Error downloading image:", error);
+      }
+    },
+    [nodes, mindmap.title]
+  );
+
+  if (flowNodes.length === 0) {
     return (
       <div className="mindmap-empty-detail">Mindmap chưa có dữ liệu cây.</div>
     );
   }
 
-  const centerX = dimensions.width / 2;
-  const centerY = dimensions.height / 2;
-
   return (
-    <div className="mindmap-tree mindmap-tree--d3">
+    <div className="mindmap-tree mindmap-tree--reactflow">
       <div className="mindmap-tree-header">
         <div>
-          <h3>{mindmap.title}</h3>
-          {mindmap.description && (
-            <p className="mindmap-tree-description">{mindmap.description}</p>
+          <h3>{editedMindmap.title}</h3>
+          {editedMindmap.description && (
+            <p className="mindmap-tree-description">
+              {editedMindmap.description}
+            </p>
           )}
         </div>
         <div className="mindmap-tree-controls">
           <button
             type="button"
-            className="mindmap-btn secondary"
-            onClick={() => adjustZoom(-0.1)}
-            aria-label="Thu nhỏ"
+            className="mindmap-btn primary"
+            onClick={downloadEditedMindmap}
+            title="Tải về mindmap đã chỉnh sửa"
           >
-            -
+            📥 Tải JSON đã sửa
           </button>
           <button
             type="button"
             className="mindmap-btn secondary"
-            onClick={() => adjustZoom(0.1)}
-            aria-label="Phóng to"
+            onClick={() => downloadImage("png")}
           >
-            +
+            Tải PNG
           </button>
           <button
             type="button"
             className="mindmap-btn secondary"
-            onClick={() => setZoom(0.95)}
+            onClick={() => downloadImage("svg")}
           >
-            Reset
+            Tải SVG
           </button>
         </div>
       </div>
-      <div className="mindmap-tree-canvas" ref={containerRef}>
-        <svg width="100%" height="100%">
-          <g transform={`translate(${centerX}, ${centerY}) scale(${zoom})`}>
-            {layout.links.map((link) => {
-              const source = layout.nodes.find((n) => n.id === link.sourceId);
-              const target = layout.nodes.find((n) => n.id === link.targetId);
-              if (!source || !target) {
-                return null;
-              }
-              return (
-                <line
-                  key={`${link.sourceId}-${link.targetId}`}
-                  className="mindmap-tree-link"
-                  x1={source.x}
-                  y1={source.y}
-                  x2={target.x}
-                  y2={target.y}
-                />
-              );
-            })}
-            {layout.nodes.map((node) => (
-              <g key={node.id} transform={`translate(${node.x}, ${node.y})`}>
-                <MindmapNode node={node} />
-              </g>
-            ))}
-          </g>
-        </svg>
+      <div className="mindmap-tree-canvas" ref={reactFlowWrapper}>
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          fitView
+          attributionPosition="bottom-left"
+        >
+          <Background variant={BackgroundVariant.Dots} gap={16} size={1} />
+          <Controls />
+          <Panel position="top-right" className="mindmap-panel-info">
+            <div style={{ fontSize: "12px", color: "#64748b" }}>
+              💡 Double-click node để chỉnh sửa • Kéo thả để di chuyển • Scroll
+              để zoom
+            </div>
+          </Panel>
+        </ReactFlow>
       </div>
+
+      {/* Edit Modal */}
+      {editingNode && (
+        <div
+          className="mindmap-edit-modal-overlay"
+          onClick={() => setEditingNode(null)}
+        >
+          <div
+            className="mindmap-edit-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mindmap-edit-modal-header">
+              <h3>Chỉnh sửa Node</h3>
+              <button
+                className="mindmap-btn secondary"
+                onClick={() => setEditingNode(null)}
+              >
+                ✕
+              </button>
+            </div>
+            <div className="mindmap-edit-modal-body">
+              <div className="mindmap-field">
+                <label>Tiêu đề</label>
+                <input
+                  type="text"
+                  value={editingNode.label}
+                  onChange={(e) =>
+                    setEditingNode({ ...editingNode, label: e.target.value })
+                  }
+                  autoFocus
+                />
+              </div>
+              <div className="mindmap-field">
+                <label>Ghi chú (Optional)</label>
+                <textarea
+                  value={editingNode.notes || ""}
+                  onChange={(e) =>
+                    setEditingNode({ ...editingNode, notes: e.target.value })
+                  }
+                  rows={3}
+                />
+              </div>
+            </div>
+            <div className="mindmap-edit-modal-footer">
+              <button
+                className="mindmap-btn secondary"
+                onClick={() => setEditingNode(null)}
+              >
+                Hủy
+              </button>
+              <button className="mindmap-btn primary" onClick={handleSaveEdit}>
+                Lưu thay đổi
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
-}
-
-function MindmapNode({ node }: { node: PositionedMindmapNode }) {
-  const depth = node.depth;
-  const config = getVisualConfig(depth);
-  const notes = node.notes;
-  const labelLines = wrapText(
-    node.label || "",
-    config.labelMaxChars,
-    config.labelMaxLines
-  );
-  const noteLines = wrapText(
-    notes,
-    config.noteMaxChars,
-    config.noteMaxLines
-  );
-  const labelLineHeight = config.labelFontSize + 4;
-  const noteLineHeight = config.noteFontSize + 2;
-  const blockSpacing = noteLines.length > 0 ? 10 : 0;
-  const totalHeight =
-    labelLines.length * labelLineHeight +
-    noteLines.length * noteLineHeight +
-    blockSpacing;
-  const firstLabelY = -totalHeight / 2 + labelLineHeight / 2;
-  const afterLabelsY =
-    firstLabelY + labelLines.length * labelLineHeight + blockSpacing - labelLineHeight / 2;
-
-  const labelElements = labelLines.map((line, idx) => {
-    const y = firstLabelY + idx * labelLineHeight;
-    return (
-      <text
-        key={`${node.id}-label-${idx}`}
-        className="mindmap-node-title"
-        x={0}
-        y={y}
-        fontSize={config.labelFontSize}
-        fill={config.labelColor}
-        dominantBaseline="middle"
-        textAnchor="middle"
-      >
-        {line}
-      </text>
-    );
-  });
-
-  const noteElements = noteLines.map((line, idx) => (
-    <text
-      key={`${node.id}-note-${idx}`}
-      className="mindmap-node-notes"
-      x={0}
-      y={afterLabelsY + idx * noteLineHeight}
-      fontSize={config.noteFontSize}
-      fill={config.noteColor}
-      dominantBaseline="middle"
-      textAnchor="middle"
-    >
-      {line}
-    </text>
-  ));
-
-  return (
-    <g className={`mindmap-node depth-${Math.min(depth, NODE_VISUALS.length - 1)}`}>
-      {renderNodeShape(config)}
-      {labelElements}
-      {noteElements}
-    </g>
-  );
-}
-
-function wrapText(text?: string, limit = 30, maxLines = 3): string[] {
-  if (!text) {
-    return [];
-  }
-  const words = text.split(/\s+/);
-  const lines: string[] = [];
-  let current = "";
-  let usedAllWords = true;
-
-  for (const word of words) {
-    const tentative = current ? `${current} ${word}` : word;
-    if (tentative.length <= limit) {
-      current = tentative;
-    } else {
-      if (current) {
-        lines.push(current);
-      }
-      current = word;
-      if (lines.length === maxLines - 1) {
-        usedAllWords = false;
-        break;
-      }
-    }
-  }
-
-  if (current && lines.length < maxLines) {
-    lines.push(current);
-  } else if (current && lines.length === maxLines) {
-    usedAllWords = false;
-    lines[maxLines - 1] = current;
-  }
-
-  if (!usedAllWords && lines.length > 0) {
-    const lastIdx = lines.length - 1;
-    if (!lines[lastIdx].endsWith("…")) {
-      lines[lastIdx] = `${lines[lastIdx]}…`;
-    }
-  }
-
-  return lines;
-}
-
-function getVisualConfig(depth: number): NodeVisualConfig {
-  return NODE_VISUALS[Math.min(depth, NODE_VISUALS.length - 1)];
-}
-
-function renderNodeShape(config: NodeVisualConfig) {
-  switch (config.type) {
-    case "circle": {
-      const radius = config.radius ?? 80;
-      return (
-        <circle
-          r={radius}
-          fill={config.fill}
-          stroke={config.stroke}
-          strokeWidth={5}
-        />
-      );
-    }
-    case "pill": {
-      const width = config.width ?? NODE_WIDTH;
-      const height = config.height ?? NODE_HEIGHT;
-      return (
-        <rect
-          x={-width / 2}
-          y={-height / 2}
-          width={width}
-          height={height}
-          rx={height / 2}
-          ry={height / 2}
-          fill={config.fill}
-          stroke={config.stroke}
-          strokeWidth={4}
-        />
-      );
-    }
-    case "hexagon":
-    default: {
-      const width = config.width ?? NODE_WIDTH * 0.85;
-      const height = config.height ?? NODE_HEIGHT;
-      const points = buildHexagonPoints(width, height);
-      return (
-        <polygon
-          points={points}
-          fill={config.fill}
-          stroke={config.stroke}
-          strokeWidth={4}
-        />
-      );
-    }
-  }
-}
-
-function buildHexagonPoints(width: number, height: number): string {
-  const w = width / 2;
-  const h = height / 2;
-  const top = -h;
-  const bottom = h;
-  const midX = w * 0.6;
-  return [
-    `${-midX},${top}`,
-    `${midX},${top}`,
-    `${w},0`,
-    `${midX},${bottom}`,
-    `${-midX},${bottom}`,
-    `${-w},0`,
-  ].join(" ");
 }

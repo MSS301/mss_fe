@@ -129,14 +129,62 @@ export async function triggerMindmapNotification(
   userId: string,
   mindmapId: string
 ): Promise<void> {
+  const resp = await fetch(`${API_BASE}/users/${userId}/${mindmapId}/notify`, {
+    method: "POST",
+    headers: authHeaders(token, userId),
+  });
+  if (!resp.ok) {
+    await throwApiError(resp);
+  }
+}
+
+export async function downloadMindmap(
+  token: string,
+  userId: string,
+  mindmapId: string
+): Promise<void> {
   const resp = await fetch(
-    `${API_BASE}/users/${userId}/${mindmapId}/notify`,
+    `${API_BASE}/users/${userId}/${mindmapId}/download`,
     {
-      method: "POST",
       headers: authHeaders(token, userId),
     }
   );
   if (!resp.ok) {
     await throwApiError(resp);
   }
+
+  const blob = await resp.blob();
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `mindmap-${mindmapId}.json`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
+}
+
+export async function downloadMindmapAdmin(
+  token: string,
+  mindmapId: string
+): Promise<void> {
+  const resp = await fetch(`${API_BASE}/admin/${mindmapId}/download`, {
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!resp.ok) {
+    await throwApiError(resp);
+  }
+
+  const blob = await resp.blob();
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `mindmap-${mindmapId}.json`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
 }
