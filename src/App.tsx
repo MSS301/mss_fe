@@ -24,6 +24,7 @@ import TeacherLessonManagement from "./pages/admin/TeacherLessonManagement";
 import CurriculumLessonManagement from "./pages/admin/CurriculumLessonManagement";
 import MySlides from "./pages/user/MySlides";
 import Wallet from "./pages/user/Wallet";
+import ManageMindmaps from "./pages/user/ManageMindmaps";
 import Packages from "./pages/user/Packages";
 import PaymentResult from "./pages/payment/PaymentResult";
 import Statistics from "./pages/user/Statistics";
@@ -44,6 +45,10 @@ import AdminNotificationCenter from "./pages/admin/NotificationCenter";
 function AppContent(): JSX.Element {
   const { token, isAuthenticated, isAdmin, logout: authLogout } = useAuth();
   const navigate = useNavigate();
+  const currentUserId =
+    token && token.split(".")[1]
+      ? JSON.parse(atob(token.split(".")[1])).sub
+      : "";
 
   function handleLogin(newToken: string) {
     // Login handled by AuthContext, just navigate to dashboard
@@ -132,10 +137,16 @@ function AppContent(): JSX.Element {
               <Layout title="Ví tiền" onLogout={handleLogout}>
                 <Wallet
                   token={token!}
-                  userId={
-                    token ? JSON.parse(atob(token.split(".")[1])).sub : ""
-                  }
+                  userId={currentUserId}
                 />
+              </Layout>
+            }
+          />
+          <Route
+            path="/mindmaps"
+            element={
+              <Layout title="Quản lý mindmap" onLogout={handleLogout}>
+                <ManageMindmaps token={token!} userId={currentUserId} />
               </Layout>
             }
           />
