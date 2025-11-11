@@ -211,27 +211,48 @@ export default function ManageMindmaps({ token, userId }: Props) {
     event.preventDefault();
     if (!createForm.prompt.trim()) return;
 
+    setCreating(true);
+
     try {
-      setCreating(true);
       const payload = {
         userId,
         prompt: createForm.prompt.trim(),
         name: createForm.name.trim() || undefined,
         project: createForm.project.trim() || undefined,
       };
-      const response = await createMindmap(token, payload);
-      setInfoMessage(
-        "Đã gửi yêu cầu tạo mindmap. Vui lòng chờ trong giây lát."
-      );
+
+      await createMindmap(token, payload);
+
       setCreateForm(emptyForm);
-      await loadMindmaps(false);
-      setSelectedId(response.metadata.id);
-      setSelectedMindmap(response);
+
+      // Wait 15 seconds for backend to process, then reload page
+      let countdown = 15;
+      setInfoMessage(
+        `Đang tạo mindmap. Tự động tải lại sau ${countdown} giây...`
+      );
+
+      const countdownInterval = setInterval(() => {
+        countdown--;
+        if (countdown > 0) {
+          setInfoMessage(
+            `Đang tạo mindmap. Tự động tải lại sau ${countdown} giây...`
+          );
+        } else {
+          setInfoMessage("Đang tải lại trang...");
+        }
+      }, 1000);
+
+      await new Promise((resolve) => setTimeout(resolve, 15000));
+
+      clearInterval(countdownInterval);
+
+      // Reload page to get fresh data
+      window.location.reload();
     } catch (error: any) {
-      setListError(describeError(error, "Không thể tạo mindmap mới"));
-    } finally {
       setCreating(false);
+      setListError(describeError(error, "Không thể tạo mindmap mới"));
     }
+    // Don't set setCreating(false) here - page will reload anyway
   }
 
   async function handleUpdate(event: React.FormEvent<HTMLFormElement>) {
@@ -355,11 +376,24 @@ export default function ManageMindmaps({ token, userId }: Props) {
       )}
       {listError && <div className="mindmap-alert error">{listError}</div>}
 
+      {/* Loading Popup */}
+      {creating && (
+        <div className="mindmap-edit-modal-overlay">
+          <div className="mindmap-loading-popup">
+            <div className="mindmap-loading-spinner"></div>
+            <h3>Đang tạo mindmap...</h3>
+            <p>
+              {infoMessage || "AI đang xử lý yêu cầu của bạn. Vui lòng chờ..."}
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="mindmap-grid">
         <section className="mindmap-card mindmap-list">
           <div className="mindmap-list-header">
             <div>
-              <h2>Mindmap của tôi {user?.id}</h2>
+              <h2>Mindmap của tôi</h2>
               <span className="mindmap-meta-info">
                 {mindmaps.length} mindmap đã được tạo
               </span>
@@ -408,9 +442,6 @@ export default function ManageMindmaps({ token, userId }: Props) {
         <section className="mindmap-card mindmap-create-form">
           <div className="mindmap-list-header">
             <h2>Tạo mindmap mới</h2>
-            <span className="mindmap-meta-info">
-              Gateway: mindmap-service/api/mindmaps
-            </span>
           </div>
 
           <form onSubmit={handleCreate}>
@@ -455,7 +486,7 @@ export default function ManageMindmaps({ token, userId }: Props) {
               className="mindmap-btn primary"
               disabled={creating || !createForm.prompt.trim()}
             >
-              {creating ? "Đang gửi..." : "Tạo mindmap"}
+              {creating ? "Đang tạo..." : "Tạo mindmap"}
             </button>
           </form>
         </section>
@@ -471,19 +502,6 @@ export default function ManageMindmaps({ token, userId }: Props) {
           )}
         </div>
 
-        {detailError && (
-          <div className="mindmap-alert error">
-            {detailError}
-            <button
-              className="mindmap-btn secondary"
-              style={{ marginLeft: "0.75rem" }}
-              onClick={() => setDetailError(null)}
-            >
-              X
-            </button>
-          </div>
-        )}
-
         {!selectedMindmap && !selectedId ? (
           <div className="mindmap-empty-detail">
             Hãy chọn mindmap trong danh sách bên trái để xem chi tiết.
@@ -494,18 +512,8 @@ export default function ManageMindmaps({ token, userId }: Props) {
           <div className="mindmap-detail-body">
             <div className="mindmap-metadata-grid">
               <div className="mindmap-metadata-item">
-                <span>Mã mindmap</span>
-                <strong>{selectedMindmap.metadata.id}</strong>
-              </div>
-              <div className="mindmap-metadata-item">
                 <span>Dự án</span>
                 <strong>{selectedMindmap.metadata.project || "Chưa có"}</strong>
-              </div>
-              <div className="mindmap-metadata-item">
-                <span>File</span>
-                <strong>
-                  {selectedMindmap.metadata.filename || "Chưa tạo"}
-                </strong>
               </div>
               <div className="mindmap-metadata-item">
                 <span>Cập nhật</span>

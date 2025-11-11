@@ -420,6 +420,45 @@
   min-width: 100px;
 }
 
+/* Loading Popup */
+.mindmap-loading-popup {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  padding: 2.5rem;
+  text-align: center;
+  max-width: 400px;
+  animation: slideUp 0.3s ease;
+}
+
+.mindmap-loading-popup h3 {
+  margin: 1rem 0 0.5rem;
+  font-size: 1.25rem;
+  color: #0f172a;
+}
+
+.mindmap-loading-popup p {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.mindmap-loading-spinner {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto;
+  border: 4px solid rgba(59, 130, 246, 0.1);
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .mindmap-tree-canvas .rd3t-svg {
   width: 100%;
   height: 100%;
