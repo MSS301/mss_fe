@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import "../css/Layout.css";
 import NotificationBell from "./NotificationBell";
+import { useAuth } from "../contexts/AuthContext";
+import { getCurrentUserProfile, getUserById, UserProfileResult, resolveAvatarUrl } from "../api/auth";
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -18,6 +20,9 @@ export default function Layout({
 }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const { token, user, isTeacher } = useAuth();
+  const [profile, setProfile] = useState<UserProfileResult | null>(null);
+  const [accountUser, setAccountUser] = useState<any | null>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
 
@@ -43,6 +48,37 @@ export default function Layout({
     }
   }, [userMenuOpen]);
 
+  // Load account user (from /users/{id}) first and then profile
+  useEffect(() => {
+    let mounted = true;
+    async function load() {
+      if (!token) return;
+      console.debug("Layout: loading header user by id", user?.id);
+      try {
+        if (user?.id) {
+          const u = await getUserById(token, user.id);
+          console.debug("getUserById result:", u);
+          if (mounted) setAccountUser(u);
+        }
+      } catch (e) {
+        console.warn("getUserById failed:", e);
+      }
+
+      try {
+        const p = await getCurrentUserProfile(token);
+        console.debug("getCurrentUserProfile result:", p);
+        if (mounted) setProfile(p);
+      } catch (err) {
+        console.warn("Failed to load user profile:", err);
+        if (mounted) setProfile(null);
+      }
+    }
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, [token, user?.id]);
+
   return (
     <div className="layout">
       {/* Sidebar */}
@@ -58,15 +94,27 @@ export default function Layout({
           {/* Main */}
           <div className="sidebar-section">
             <div className="sidebar-section-title">Tổng quan</div>
-            <Link
-              to="/dashboard"
-              className={`sidebar-link ${
-                isActive("/dashboard") ? "active" : ""
-              }`}
-            >
-              <span className="sidebar-link-icon">📊</span>
-              <span>Dashboard</span>
-            </Link>
+            {isTeacher ? (
+              <Link
+                to="/teacher/dashboard"
+                className={`sidebar-link ${
+                  isActive("/teacher/dashboard") ? "active" : ""
+                }`}
+              >
+                <span className="sidebar-link-icon">📊</span>
+                <span>Dashboard Giáo viên</span>
+              </Link>
+            ) : (
+              <Link
+                to="/dashboard"
+                className={`sidebar-link ${
+                  isActive("/dashboard") ? "active" : ""
+                }`}
+              >
+                <span className="sidebar-link-icon">📊</span>
+                <span>Dashboard</span>
+              </Link>
+            )}
             <Link
               to="/profile"
               className={`sidebar-link ${isActive("/profile") ? "active" : ""}`}
@@ -75,6 +123,22 @@ export default function Layout({
               <span>Hồ sơ</span>
             </Link>
           </div>
+
+          {/* Teacher Section */}
+          {isTeacher && (
+            <div className="sidebar-section">
+              <div className="sidebar-section-title">Giảng dạy</div>
+              <Link
+                to="/teacher/classrooms"
+                className={`sidebar-link ${
+                  isActive("/teacher/classrooms") ? "active" : ""
+                }`}
+              >
+                <span className="sidebar-link-icon">🏫</span>
+                <span>Lớp học</span>
+              </Link>
+            </div>
+          )}
 
           {/* Curriculum */}
           <div className="sidebar-section">
@@ -176,13 +240,19 @@ export default function Layout({
         <div className="sidebar-footer">
           <div className="sidebar-user">
             <img
-              src="https://i.pravatar.cc/150?img=12"
-              alt="User"
+              src={
+                resolveAvatarUrl(accountUser?.avatarUrl) ||
+                resolveAvatarUrl(profile?.avatarUrl) ||
+                "https://i.pravatar.cc/150?img=12"
+              }
+              alt={accountUser?.username || profile?.fullName || user?.email || "User"}
               className="avatar avatar-sm"
             />
             <div className="sidebar-user-info">
-              <div className="sidebar-user-name">Nguyễn Văn A</div>
-              <div className="sidebar-user-role">Giáo viên</div>
+              <div className="sidebar-user-name">
+                {accountUser?.username || profile?.fullName || user?.email || "Người dùng"}
+              </div>
+              <div className="sidebar-user-role">{user?.role || "User"}</div>
             </div>
             <span>▾</span>
           </div>
@@ -239,8 +309,12 @@ export default function Layout({
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
                 >
                   <img
-                    src="https://i.pravatar.cc/150?img=12"
-                    alt="User"
+                    src={
+                      resolveAvatarUrl(accountUser?.avatarUrl) ||
+                      resolveAvatarUrl(profile?.avatarUrl) ||
+                      "https://i.pravatar.cc/150?img=12"
+                    }
+                    alt={accountUser?.username || profile?.fullName || user?.email || "User"}
                     className="avatar avatar-sm"
                   />
                 </button>
@@ -249,15 +323,19 @@ export default function Layout({
                   <div className="user-menu-dropdown">
                     <div className="user-menu-header">
                       <img
-                        src="https://i.pravatar.cc/150?img=12"
-                        alt="User"
+                        src={
+                          resolveAvatarUrl(accountUser?.avatarUrl) ||
+                          resolveAvatarUrl(profile?.avatarUrl) ||
+                          "https://i.pravatar.cc/150?img=12"
+                        }
+                        alt={accountUser?.username || profile?.fullName || user?.email || "User"}
                         className="avatar avatar-md"
                       />
                       <div className="user-menu-info">
-                        <div className="user-menu-name">Nguyễn Văn A</div>
-                        <div className="user-menu-email">
-                          nguyenvana@gmail.com
+                        <div className="user-menu-name">
+                          {accountUser?.username || profile?.fullName || user?.email || "Người dùng"}
                         </div>
+                        <div className="user-menu-email">{user?.email}</div>
                       </div>
                     </div>
 

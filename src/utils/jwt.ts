@@ -3,8 +3,7 @@
 export type UserRole =
   | "ROLE_USER"
   | "ROLE_ADMIN"
-  | "ROLE_TEACHER"
-  | "ROLE_STUDENT";
+  | "ROLE_TEACHER";
 
 export interface DecodedToken {
   sub: string; // User ID
@@ -73,6 +72,20 @@ export function hasRole(token: string, role: UserRole): boolean {
  */
 export function isAdmin(token: string): boolean {
   return hasRole(token, "ROLE_ADMIN");
+}
+
+/**
+ * Check if user is teacher
+ */
+export function isTeacher(token: string): boolean {
+  return hasRole(token, "ROLE_TEACHER");
+}
+
+/**
+ * Check if user is student (same as regular user)
+ */
+export function isStudent(token: string): boolean {
+  return hasRole(token, "ROLE_USER");
 }
 
 /**

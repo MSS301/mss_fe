@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import "./AdminLayout.css";
 import NotificationBell from "./NotificationBell";
+import { getCurrentUserProfile, getUserById, UserProfileResult, resolveAvatarUrl } from "../api/auth";
 
 type AdminLayoutProps = {
   children: React.ReactNode;
@@ -18,6 +19,63 @@ export default function AdminLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, logout } = useAuth();
   const location = useLocation();
+  const [profile, setProfile] = useState<UserProfileResult | null>(null);
+  const [accountUser, setAccountUser] = useState<any | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    async function load() {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+      try {
+        if (user?.id) {
+          const u = await getUserById(token, user.id);
+          console.debug("AdminLayout getUserById:", u);
+          if (mounted) setAccountUser(u);
+        }
+      } catch (e) {
+        console.warn("AdminLayout getUserById failed", e);
+      }
+
+      try {
+        const p = await getCurrentUserProfile(token);
+        console.debug("AdminLayout getCurrentUserProfile:", p);
+        if (mounted) setProfile(p);
+      } catch (err) {
+        console.warn("Failed fetching admin profile", err);
+      }
+    }
+    load();
+    return () => {
+      mounted = false;
+    };
+  }, [user?.id]);
+
+  useEffect(() => {
+    let mounted = true;
+    async function loadFallback() {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+        const auth = await import("../utils/jwt");
+        const decoded = auth.decodeToken(token);
+        const userId = decoded?.sub;
+        if (userId) {
+          const u = await getCurrentUserProfile(token).catch(() => null);
+          if (!u) {
+            const ub = await (await import("../api/auth")).getUserById(token, userId);
+            if (mounted) setAccountUser(ub);
+          }
+        }
+      } catch (e) {
+        console.warn("AdminLayout fallback user fetch failed", e);
+      }
+    }
+    loadFallback();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -274,12 +332,18 @@ export default function AdminLayout({
         <div className="admin-sidebar-footer">
           <div className="admin-user" onClick={logout}>
             <img
-              src="https://i.pravatar.cc/150?img=68"
-              alt="Admin"
+              src={
+                resolveAvatarUrl(accountUser?.avatarUrl) ||
+                resolveAvatarUrl(profile?.avatarUrl) ||
+                "https://i.pravatar.cc/150?img=68"
+              }
+              alt={accountUser?.username || profile?.fullName || user?.email || "Admin"}
               className="avatar avatar-sm"
             />
             <div className="admin-user-info">
-              <div className="admin-user-name">{user?.email || "Admin"}</div>
+              <div className="admin-user-name">
+                {accountUser?.username || profile?.fullName || user?.email || "Admin"}
+              </div>
               <div className="admin-user-role">Administrator</div>
             </div>
             <span style={{ color: "rgba(226, 232, 240, 0.5)" }}>▾</span>
@@ -335,8 +399,12 @@ export default function AdminLayout({
                   onClick={() => setSidebarOpen(!sidebarOpen)}
                 >
                   <img
-                    src="https://i.pravatar.cc/150?img=68"
-                    alt="Admin"
+                    src={
+                      resolveAvatarUrl(accountUser?.avatarUrl) ||
+                      resolveAvatarUrl(profile?.avatarUrl) ||
+                      "https://i.pravatar.cc/150?img=68"
+                    }
+                    alt={accountUser?.username || profile?.fullName || user?.email || "Admin"}
                     className="avatar avatar-sm"
                   />
                 </button>
@@ -352,13 +420,17 @@ export default function AdminLayout({
                   >
                     <div className="user-menu-header">
                       <img
-                        src="https://i.pravatar.cc/150?img=68"
-                        alt="Admin"
+                        src={
+                          resolveAvatarUrl(accountUser?.avatarUrl) ||
+                          resolveAvatarUrl(profile?.avatarUrl) ||
+                          "https://i.pravatar.cc/150?img=68"
+                        }
+                        alt={accountUser?.username || profile?.fullName || user?.email || "Admin"}
                         className="avatar avatar-md"
                       />
                       <div className="user-menu-info">
                         <div className="user-menu-name">
-                          {user?.email || "Admin"}
+                          {accountUser?.username || profile?.fullName || user?.email || "Admin"}
                         </div>
                         <div className="user-menu-email">Quản trị viên</div>
                       </div>
@@ -394,14 +466,7 @@ export default function AdminLayout({
         <main className="content">{children}</main>
       </div>
 
-      {/* Mobile Overlay */}
-      {/* {sidebarOpen && (
-        <div
-          className="modal-overlay"
-          onClick={() => setSidebarOpen(false)}
-          style={{ background: "rgba(0,0,0,0.5)" }}
-        />
-      )} */}
+      {/* Mobile Overlay (disabled) */}
     </div>
   );
 }

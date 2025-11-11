@@ -9,6 +9,7 @@ import Login from "./components/Login";
 import Dashboard from "./components/Dashboard";
 import AdminDashboard from "./components/AdminDashboard";
 import Curriculum from "./pages/Curriculum";
+import Profile from "./pages/Profile";
 import SubjectManagement from "./pages/admin/SubjectManagement";
 import ChapterManagement from "./pages/admin/ChapterManagement";
 import LessonCommentManagement from "./pages/admin/LessonCommentManagement";
@@ -32,14 +33,21 @@ import Layout from "./components/Layout";
 import AdminLayout from "./components/AdminLayout";
 import UserNotifications from "./pages/user/Notifications";
 import AdminNotificationCenter from "./pages/admin/NotificationCenter";
+import TeacherVerification from "./pages/admin/TeacherVerification";
+import TeacherDashboard from "./pages/teacher/TeacherDashboard";
+import CreateLesson from "./pages/teacher/CreateLesson";
+import Classrooms from "./pages/teacher/Classrooms";
+import ClassroomDetail from "./pages/teacher/ClassroomDetail";
+import LessonDetail from "./pages/LessonDetail";
 
 function AppContent(): JSX.Element {
-  const { token, isAuthenticated, isAdmin, logout: authLogout } = useAuth();
+  const { token, isAuthenticated, isAdmin, isTeacher, isStudent, logout: authLogout } = useAuth();
   const navigate = useNavigate();
 
   function handleLogin(newToken: string) {
     // Login handled by AuthContext, just navigate to dashboard
-    navigate("/dashboard");
+    // Route will be determined by role in useEffect
+    navigate("/");
   }
 
   async function handleLogout() {
@@ -91,7 +99,15 @@ function AppContent(): JSX.Element {
       {/* Authenticated User Routes */}
       {isAuthenticated && !isAdmin && (
         <>
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route 
+            path="/" 
+            element={
+              <Navigate 
+                to={isTeacher ? "/teacher/dashboard" : "/dashboard"} 
+                replace 
+              />
+            } 
+          />
           <Route
             path="/dashboard"
             element={
@@ -105,6 +121,14 @@ function AppContent(): JSX.Element {
             element={
               <Layout title="Chương trình học" onLogout={handleLogout}>
                 <Curriculum />
+              </Layout>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <Layout title="Hồ sơ" onLogout={handleLogout}>
+                <Profile />
               </Layout>
             }
           />
@@ -267,6 +291,60 @@ function AppContent(): JSX.Element {
               </AdminLayout>
             }
           />
+          <Route
+            path="/admin/teacher-verification"
+            element={
+              <AdminLayout title="Phê duyệt giáo viên">
+                <TeacherVerification />
+              </AdminLayout>
+            }
+          />
+        </>
+      )}
+
+      {/* Teacher Routes */}
+      {isAuthenticated && (
+        <>
+          <Route
+            path="/teacher/dashboard"
+            element={
+              <Layout title="Dashboard Giáo viên" onLogout={handleLogout}>
+                <TeacherDashboard />
+              </Layout>
+            }
+          />
+          <Route
+            path="/teacher/classrooms"
+            element={
+              <Layout title="Lớp học của tôi" onLogout={handleLogout}>
+                <Classrooms />
+              </Layout>
+            }
+          />
+          <Route
+            path="/teacher/classrooms/:id"
+            element={
+              <Layout title="Chi tiết lớp học" onLogout={handleLogout}>
+                <ClassroomDetail />
+              </Layout>
+            }
+          />
+          <Route
+            path="/teacher/create-lesson"
+            element={
+              <Layout title="Tạo bài học" onLogout={handleLogout}>
+                <CreateLesson />
+              </Layout>
+            }
+          />
+          <Route
+            path="/lesson/:id"
+            element={
+              <Layout title="Chi tiết bài học" onLogout={handleLogout}>
+                <LessonDetail />
+              </Layout>
+            }
+          />
         </>
       )}
 
@@ -275,7 +353,16 @@ function AppContent(): JSX.Element {
         <Route
           path="*"
           element={
-            <Navigate to={isAdmin ? "/admin/dashboard" : "/dashboard"} replace />
+            <Navigate 
+              to={
+                isAdmin 
+                  ? "/admin/dashboard" 
+                  : isTeacher 
+                  ? "/teacher/dashboard" 
+                  : "/dashboard"
+              } 
+              replace 
+            />
           }
         />
       )}

@@ -19,6 +19,8 @@ interface AuthContextType {
   user: UserInfo | null;
   isAuthenticated: boolean;
   isAdmin: boolean;
+  isTeacher: boolean;
+  isStudent: boolean;
   login: (token: string) => void;
   logout: () => void;
 }
@@ -73,6 +75,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user,
     isAuthenticated: !!token && !!user,
     isAdmin: user?.role === "ROLE_ADMIN",
+    isTeacher: user?.role === "ROLE_TEACHER",
+    isStudent: user?.role === "ROLE_USER", // Students are regular users
     login,
     logout,
   };
