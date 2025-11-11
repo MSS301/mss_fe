@@ -176,35 +176,102 @@ export default function Login({ onLogin, onBack }: Props) {
     <div className="login-container">
       {onBack && (
         <button onClick={onBack} className="back-button">
-          ← Trang chủ
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path
+              d="M12.5 15L7.5 10L12.5 5"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+          <span>Trang chủ</span>
         </button>
       )}
+      
+      <div className="login-background-decoration">
+        <div className="decoration-circle circle-1"></div>
+        <div className="decoration-circle circle-2"></div>
+        <div className="decoration-circle circle-3"></div>
+      </div>
+
       <div className="login-card">
         <div className="login-header">
-          <div className="login-logo">S</div>
-          <h2>{isRegisterMode ? "Đăng ký" : "Đăng nhập"}</h2>
-          <p className="login-subtitle">Hệ thống Slide Giáo dục AI</p>
+          <div className="login-logo-wrapper">
+            <div className="login-logo">
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                <rect width="32" height="32" rx="8" fill="url(#logoGradient)"/>
+                <path
+                  d="M16 8L22 14H18V20H14V14H10L16 8Z"
+                  fill="white"
+                />
+                <path
+                  d="M10 24H22V22H10V24Z"
+                  fill="white"
+                />
+                <defs>
+                  <linearGradient id="logoGradient" x1="0" y1="0" x2="32" y2="32">
+                    <stop offset="0%" stopColor="#667eea"/>
+                    <stop offset="100%" stopColor="#764ba2"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+          </div>
+          <h1 className="login-title">
+            {isRegisterMode ? "Tạo tài khoản mới" : "Chào mừng trở lại"}
+          </h1>
+          <p className="login-subtitle">
+            {isRegisterMode
+              ? "Đăng ký để bắt đầu hành trình học tập của bạn"
+              : "Đăng nhập để tiếp tục học tập"}
+          </p>
         </div>
 
         <form className="login-form" onSubmit={handleSubmit}>
           {error && (
-            <div className="login-error">
-              <span>⚠️</span>
+            <div className="login-message login-error">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="2"/>
+                <path d="M10 6V10M10 14H10.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
               <span>{error}</span>
             </div>
           )}
 
           {successMessage && (
-            <div className="login-success">
-              <span>✓</span>
+            <div className="login-message login-success">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="2"/>
+                <path d="M6 10L9 13L14 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
               <span>{successMessage}</span>
             </div>
           )}
 
           {isRegisterMode && (
-            <label>
-              Tên đăng nhập
+            <div className="input-group">
+              <label htmlFor="username">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                  <path
+                    d="M9 9C11.0711 9 12.75 7.32107 12.75 5.25C12.75 3.17893 11.0711 1.5 9 1.5C6.92893 1.5 5.25 3.17893 5.25 5.25C5.25 7.32107 6.92893 9 9 9Z"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M15.75 16.5C15.75 13.5147 12.7279 11.25 9 11.25C5.27208 11.25 2.25 13.5147 2.25 16.5"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                Tên đăng nhập
+              </label>
               <input
+                id="username"
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
@@ -212,12 +279,31 @@ export default function Login({ onLogin, onBack }: Props) {
                 required
                 autoComplete="username"
               />
-            </label>
+            </div>
           )}
 
-          <label>
-            Email
+          <div className="input-group">
+            <label htmlFor="email">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <path
+                  d="M15.75 4.5H2.25C1.42157 4.5 0.75 5.17157 0.75 6V15C0.75 15.8284 1.42157 16.5 2.25 16.5H15.75C16.5784 16.5 17.25 15.8284 17.25 15V6C17.25 5.17157 16.5784 4.5 15.75 4.5Z"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M0.75 6L9 10.5L17.25 6"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              Email
+            </label>
             <input
+              id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -225,73 +311,80 @@ export default function Login({ onLogin, onBack }: Props) {
               required
               autoComplete="email"
             />
-          </label>
+          </div>
 
-          <label>
-            Mật khẩu
+          <div className="input-group">
+            <label htmlFor="password">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <rect
+                  x="3"
+                  y="8"
+                  width="12"
+                  height="7.5"
+                  rx="1.5"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M5.25 8V5.25C5.25 3.17893 6.92893 1.5 9 1.5C11.0711 1.5 12.75 3.17893 12.75 5.25V8"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <circle cx="9" cy="12" r="1.5" fill="currentColor"/>
+              </svg>
+              Mật khẩu
+            </label>
             <input
+              id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               required
-              autoComplete={
-                isRegisterMode ? "new-password" : "current-password"
-              }
+              autoComplete={isRegisterMode ? "new-password" : "current-password"}
             />
-          </label>
+          </div>
 
           <button type="submit" disabled={loading} className="login-btn">
             {loading ? (
               <>
-                <span className="spinner spinner-sm"></span>
-                <span>
-                  {isRegisterMode ? "Đang đăng ký..." : "Đang đăng nhập..."}
-                </span>
+                <span className="spinner"></span>
+                <span>{isRegisterMode ? "Đang đăng ký..." : "Đang đăng nhập..."}</span>
               </>
-            ) : isRegisterMode ? (
-              "Đăng ký"
             ) : (
-              "Đăng nhập"
+              <>
+                <span>{isRegisterMode ? "Đăng ký" : "Đăng nhập"}</span>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <path
+                    d="M5 10H15M15 10L11 6M15 10L11 14"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </>
             )}
           </button>
         </form>
 
         <div className="login-divider">
-          <span>hoặc</span>
+          <span className="divider-line"></span>
+          <span className="divider-text">hoặc</span>
+          <span className="divider-line"></span>
         </div>
 
-        {/* Google OAuth2 Login Button */}
         <button
           type="button"
           onClick={handleGoogleOAuth2Login}
           disabled={loading}
           className="google-oauth-btn"
-          style={{
-            width: "100%",
-            padding: "0.75rem",
-            border: "1px solid #dadce0",
-            borderRadius: "4px",
-            backgroundColor: "white",
-            color: "#3c4043",
-            fontSize: "14px",
-            fontWeight: 500,
-            cursor: loading ? "not-allowed" : "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "12px",
-            transition: "all 0.2s",
-            opacity: loading ? 0.6 : 1,
-          }}
-          onMouseEnter={(e) => {
-            if (!loading) e.currentTarget.style.backgroundColor = "#f8f9fa";
-          }}
-          onMouseLeave={(e) => {
-            if (!loading) e.currentTarget.style.backgroundColor = "white";
-          }}
         >
-          <svg width="18" height="18" viewBox="0 0 18 18">
+          <svg width="20" height="20" viewBox="0 0 18 18">
             <path
               fill="#4285F4"
               d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"
@@ -310,14 +403,14 @@ export default function Login({ onLogin, onBack }: Props) {
             />
           </svg>
           <span>
-            {isRegisterMode
-              ? "Đăng ký bằng Google"
-              : "Đăng nhập bằng Google"}
+            {isRegisterMode ? "Đăng ký bằng Google" : "Đăng nhập bằng Google"}
           </span>
         </button>
 
         <div className="login-footer">
-          {isRegisterMode ? "Đã có tài khoản? " : "Chưa có tài khoản? "}
+          <span className="footer-text">
+            {isRegisterMode ? "Đã có tài khoản? " : "Chưa có tài khoản? "}
+          </span>
           <button
             type="button"
             onClick={toggleMode}
