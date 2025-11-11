@@ -79,6 +79,22 @@ export default function AdminLayout({
 
   const isActive = (path: string) => location.pathname === path;
 
+  // Helper function to get avatar URL with proper priority
+  const getAvatarUrl = (): string => {
+    // Always prioritize profile.avatarUrl if it exists
+    if (profile?.avatarUrl) {
+      const resolvedUrl = resolveAvatarUrl(profile.avatarUrl);
+      if (resolvedUrl) return resolvedUrl;
+    }
+    // Only use accountUser avatar if profile avatar doesn't exist
+    if (accountUser?.avatarUrl) {
+      const resolvedUrl = resolveAvatarUrl(accountUser.avatarUrl);
+      if (resolvedUrl) return resolvedUrl;
+    }
+    // Fallback to default avatar
+    return "https://i.pravatar.cc/150?img=68";
+  };
+
   return (
     <div className="admin-layout">
       {/* Admin Sidebar */}
@@ -157,6 +173,15 @@ export default function AdminLayout({
             >
               <span className="admin-sidebar-link-icon">🔐</span>
               <span>Vai trò & Quyền</span>
+            </Link>
+            <Link
+              to="/admin/teacher-verification"
+              className={`admin-sidebar-link ${
+                isActive("/admin/teacher-verification") ? "active" : ""
+              }`}
+            >
+              <span className="admin-sidebar-link-icon">✅</span>
+              <span>Phê duyệt giáo viên</span>
             </Link>
           </div>
 
@@ -332,11 +357,7 @@ export default function AdminLayout({
         <div className="admin-sidebar-footer">
           <div className="admin-user" onClick={logout}>
             <img
-              src={
-                resolveAvatarUrl(accountUser?.avatarUrl) ||
-                resolveAvatarUrl(profile?.avatarUrl) ||
-                "https://i.pravatar.cc/150?img=68"
-              }
+              src={getAvatarUrl()}
               alt={accountUser?.username || profile?.fullName || user?.email || "Admin"}
               className="avatar avatar-sm"
             />
@@ -399,11 +420,7 @@ export default function AdminLayout({
                   onClick={() => setSidebarOpen(!sidebarOpen)}
                 >
                   <img
-                    src={
-                      resolveAvatarUrl(accountUser?.avatarUrl) ||
-                      resolveAvatarUrl(profile?.avatarUrl) ||
-                      "https://i.pravatar.cc/150?img=68"
-                    }
+                    src={getAvatarUrl()}
                     alt={accountUser?.username || profile?.fullName || user?.email || "Admin"}
                     className="avatar avatar-sm"
                   />
@@ -420,11 +437,7 @@ export default function AdminLayout({
                   >
                     <div className="user-menu-header">
                       <img
-                        src={
-                          resolveAvatarUrl(accountUser?.avatarUrl) ||
-                          resolveAvatarUrl(profile?.avatarUrl) ||
-                          "https://i.pravatar.cc/150?img=68"
-                        }
+                        src={getAvatarUrl()}
                         alt={accountUser?.username || profile?.fullName || user?.email || "Admin"}
                         className="avatar avatar-md"
                       />

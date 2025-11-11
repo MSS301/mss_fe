@@ -7,6 +7,10 @@ const API_BASE =
 
 export function resolveAvatarUrl(url?: string | null): string | null {
   if (!url) return null;
+  
+  // Base64 data URL -> use as-is
+  if (url.startsWith("data:")) return url;
+  
   // Absolute URL -> use as-is
   if (/^https?:\/\//i.test(url)) return url;
 
@@ -300,6 +304,43 @@ export async function createSelfUserProfile(
   return data.result;
 }
 
+export async function updateSelfUserProfile(
+  token: string,
+  formData: FormData
+): Promise<UserProfileResult> {
+  const url = `${API_BASE}/auth-service/user-profiles/me`;
+  if (!token) {
+    console.error("updateSelfUserProfile: missing bearer token");
+    throw new Error("Bearer token is required");
+  }
+
+  const resp = await fetch(url, {
+    method: "PUT",
+    headers: {
+      // Do NOT set Content-Type; browser will set multipart boundary
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+
+  const text = await resp.text();
+  let data: UserProfileResponse | null = null;
+  try {
+    data = text ? (JSON.parse(text) as UserProfileResponse) : null;
+  } catch (e) {
+    console.error("updateSelfUserProfile: failed to parse JSON response", { status: resp.status, text });
+  }
+
+  if (!resp.ok) {
+    console.error("updateSelfUserProfile: HTTP error", { status: resp.status, body: text });
+    throw new Error(`HTTP ${resp.status}: ${text}`);
+  }
+
+  if (!data || !data.result) throw new Error("Empty response from server");
+  return data.result;
+}
+
 export interface SchoolResult {
   id: number;
   name: string;
@@ -372,6 +413,38 @@ export async function getSchools(
 }
 
 // ==================== Admin Teacher Verification APIs ====================
+
+export async function getProfilesWithTeacherProof(
+  token: string,
+  page: number = 0,
+  size: number = 20
+): Promise<PaginatedList<UserProfileResult>> {
+  const url = `${API_BASE}/auth-service/user-profiles/teacher-proofs?page=${page}&size=${size}&sort=createdAt,desc`;
+  const resp = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!resp.ok) {
+    const text = await resp.text();
+    throw new Error(`HTTP ${resp.status}: ${text}`);
+  }
+
+  const data = await resp.json();
+  const content: UserProfileResult[] = data.content || [];
+  const meta = data.pagination || {};
+
+  return {
+    content,
+    totalElements: meta.totalElements || 0,
+    totalPages: meta.totalPages || 0,
+    size: meta.size || size,
+    number: meta.page || page,
+    first: !!meta.first,
+    last: !!meta.last,
+  } as PaginatedList<UserProfileResult>;
+}
 
 export async function getAllPendingTeacherProfiles(
   token: string,

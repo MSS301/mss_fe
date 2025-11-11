@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import "../css/Layout.css";
 import NotificationBell from "./NotificationBell";
 import { useAuth } from "../contexts/AuthContext";
@@ -20,11 +20,13 @@ export default function Layout({
 }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const { token, user, isTeacher } = useAuth();
+  const { token, user, isTeacher, isStudent } = useAuth();
   const [profile, setProfile] = useState<UserProfileResult | null>(null);
   const [accountUser, setAccountUser] = useState<any | null>(null);
+  const [profileChecked, setProfileChecked] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Helper to check if link is active
   const isActive = (path: string) => location.pathname === path;
@@ -71,6 +73,8 @@ export default function Layout({
       } catch (err) {
         console.warn("Failed to load user profile:", err);
         if (mounted) setProfile(null);
+      } finally {
+        if (mounted) setProfileChecked(true);
       }
     }
     load();
@@ -78,6 +82,20 @@ export default function Layout({
       mounted = false;
     };
   }, [token, user?.id]);
+
+  // Check if user needs to complete profile when accessing /user/classes
+  useEffect(() => {
+    if (!profileChecked || !isStudent) return;
+    
+    // Only check if user is on /user/classes page
+    if (location.pathname === "/user/classes") {
+      const hasValidSchool = profile && profile.schoolId && profile.schoolId > 0;
+      if (!hasValidSchool) {
+        alert("Vui lòng hoàn thành hồ sơ của bạn trước khi tham gia lớp học. Bạn cần chọn trường học.");
+        navigate("/profile");
+      }
+    }
+  }, [profileChecked, profile, location.pathname, isStudent, navigate]);
 
   return (
     <div className="layout">
@@ -152,6 +170,17 @@ export default function Layout({
               <span className="sidebar-link-icon">📚</span>
               <span>Khám phá</span>
             </Link>
+            {isStudent && (
+              <Link
+                to="/user/classes"
+                className={`sidebar-link ${
+                  isActive("/user/classes") ? "active" : ""
+                }`}
+              >
+                <span className="sidebar-link-icon">🏫</span>
+                <span>Lớp học của tôi</span>
+              </Link>
+            )}
           </div>
 
           {/* Slides */}

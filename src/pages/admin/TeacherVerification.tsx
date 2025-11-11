@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../contexts/AuthContext";
-import { getAllPendingTeacherProfiles, promoteToTeacher, resolveAvatarUrl } from "../../api/auth";
+import { getProfilesWithTeacherProof, promoteToTeacher, resolveAvatarUrl } from "../../api/auth";
 import type { UserProfileResult } from "../../api/auth";
 
 export default function TeacherVerification() {
@@ -17,7 +17,7 @@ export default function TeacherVerification() {
     setLoading(true);
     setError(null);
     try {
-      const result = await getAllPendingTeacherProfiles(token, page, 10);
+      const result = await getProfilesWithTeacherProof(token, page, 10);
       setProfiles(result.content);
       setTotalPages(result.totalPages);
     } catch (err: any) {

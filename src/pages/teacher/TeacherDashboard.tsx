@@ -16,35 +16,44 @@ export default function TeacherDashboard() {
     draft: 0,
     totalViews: 0,
   });
+  
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [pageSize] = useState(10);
 
   useEffect(() => {
-    async function load() {
-      if (!token) return;
-      setLoading(true);
-      setError(null);
-      try {
-        const result = await getMyLessons(token, 0, 100);
-        setLessons(result.content);
-
-        // Calculate stats
-        const published = result.content.filter((l) => l.lessonStatus === "PUBLISHED").length;
-        const draft = result.content.filter((l) => l.lessonStatus === "DRAFT").length;
-        const totalViews = result.content.reduce((sum, l) => sum + (l.viewCount || 0), 0);
-
-        setStats({
-          total: result.content.length,
-          published,
-          draft,
-          totalViews,
-        });
-      } catch (err: any) {
-        setError(err.message || String(err));
-      } finally {
-        setLoading(false);
-      }
-    }
-    load();
+    loadLessons(0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
+
+  const loadLessons = async (page: number = 0) => {
+    if (!token) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await getMyLessons(token, page, pageSize);
+      setLessons(result.content);
+      setCurrentPage(result.pagination.page);
+      setTotalPages(result.pagination.totalPages);
+
+      // Calculate stats
+      const published = result.content.filter((l) => l.lessonStatus === "PUBLISHED").length;
+      const draft = result.content.filter((l) => l.lessonStatus === "DRAFT").length;
+      const totalViews = result.content.reduce((sum, l) => sum + (l.viewCount || 0), 0);
+
+      setStats({
+        total: result.pagination.totalElements,
+        published,
+        draft,
+        totalViews,
+      });
+    } catch (err: any) {
+      setError(err.message || String(err));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (loading) {
     return <div style={{ padding: 24 }}>Đang tải...</div>;
@@ -175,6 +184,46 @@ export default function TeacherDashboard() {
             ))}
           </div>
         )}
+        
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 12, marginTop: 24 }}>
+            <button
+              onClick={() => loadLessons(currentPage - 1)}
+              disabled={currentPage === 0 || loading}
+              style={{
+                padding: "8px 16px",
+                fontSize: 14,
+                backgroundColor: currentPage === 0 ? "#ccc" : "#2196F3",
+                color: "white",
+                border: "none",
+                borderRadius: 6,
+                cursor: currentPage === 0 ? "not-allowed" : "pointer",
+              }}
+            >
+              ← Trang trước
+            </button>
+            <span style={{ fontSize: 14, color: "#666" }}>
+              Trang {currentPage + 1} / {totalPages}
+            </span>
+            <button
+              onClick={() => loadLessons(currentPage + 1)}
+              disabled={currentPage >= totalPages - 1 || loading}
+              style={{
+                padding: "8px 16px",
+                fontSize: 14,
+                backgroundColor: currentPage >= totalPages - 1 ? "#ccc" : "#2196F3",
+                color: "white",
+                border: "none",
+                borderRadius: 6,
+                cursor: currentPage >= totalPages - 1 ? "not-allowed" : "pointer",
+              }}
+            >
+              Trang sau →
+            </button>
+          </div>
+        )}
+        
         {lessons.length > 5 && (
           <div style={{ marginTop: 16, textAlign: "center" }}>
             <button
@@ -189,7 +238,7 @@ export default function TeacherDashboard() {
                 cursor: "pointer",
               }}
             >
-              Xem tất cả ({lessons.length})
+              Xem tất cả ({stats.total})
             </button>
           </div>
         )}

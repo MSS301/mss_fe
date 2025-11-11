@@ -16,6 +16,7 @@ import Dashboard from "./components/Dashboard";
 import AdminDashboard from "./components/AdminDashboard";
 import Curriculum from "./pages/Curriculum";
 import Profile from "./pages/Profile";
+import EditProfile from "./pages/EditProfile";
 import SubjectManagement from "./pages/admin/SubjectManagement";
 import ChapterManagement from "./pages/admin/ChapterManagement";
 import LessonCommentManagement from "./pages/admin/LessonCommentManagement";
@@ -24,6 +25,8 @@ import LessonFileManagement from "./pages/admin/LessonFileManagement";
 import TeacherLessonManagement from "./pages/admin/TeacherLessonManagement";
 import CurriculumLessonManagement from "./pages/admin/CurriculumLessonManagement";
 import MySlides from "./pages/user/MySlides";
+import MyClasses from "./pages/user/MyClasses";
+import ClassLessons from "./pages/user/ClassLessons";
 import Wallet from "./pages/user/Wallet";
 import Packages from "./pages/user/Packages";
 import PaymentResult from "./pages/payment/PaymentResult";
@@ -141,10 +144,34 @@ function AppContent(): JSX.Element {
             }
           />
           <Route
+            path="/profile/edit"
+            element={
+              <Layout title="Chỉnh sửa hồ sơ" onLogout={handleLogout}>
+                <EditProfile />
+              </Layout>
+            }
+          />
+          <Route
             path="/slides"
             element={
               <Layout title="Slides của tôi" onLogout={handleLogout}>
                 <MySlides />
+              </Layout>
+            }
+          />
+          <Route
+            path="/user/classes"
+            element={
+              <Layout title="Lớp học của tôi" onLogout={handleLogout}>
+                <MyClasses />
+              </Layout>
+            }
+          />
+          <Route
+            path="/user/classes/:classId/lessons"
+            element={
+              <Layout title="Bài học" onLogout={handleLogout}>
+                <ClassLessons />
               </Layout>
             }
           />

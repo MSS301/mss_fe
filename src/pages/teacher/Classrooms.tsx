@@ -321,8 +321,9 @@ export default function Classrooms() {
               <h3 style={{ margin: "0 0 12px 0", fontSize: 18, color: "#2196F3" }}>{classroom.name}</h3>
               <div style={{ fontSize: 13, color: "#999", marginBottom: 8 }}>
                 <div>Trường: {classroom.schoolName || "Chưa xác định"}</div>
+                {classroom.grade && <div>Khối: {classroom.grade}</div>}
                 <div>
-                  Học sinh: {classroom.enrollmentCount || 0}
+                  👥 Học sinh: {classroom.studentCount || 0}
                   {classroom.capacity ? ` / ${classroom.capacity}` : ""}
                 </div>
               </div>

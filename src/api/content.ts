@@ -30,17 +30,19 @@ export interface LessonFileResponse {
   lessonId: number;
   fileName: string;
   fileUrl: string;
-  fileType: string;
-  fileSize: number;
+  mimeType?: string;
+  sizeBytes?: number;
+  uploaderId: number;
+  uploaderName?: string;
   createdAt: string;
 }
 
-export interface LessonFileRequest {
+export interface SelfLessonFileRequest {
   lessonId: number;
-  fileName: string;
   fileUrl: string;
-  fileType: string;
-  fileSize: number;
+  fileName?: string;
+  mimeType?: string;
+  sizeBytes?: number;
 }
 
 // ==================== Comment Types ====================
@@ -205,6 +207,30 @@ export async function updateLesson(
   return data.result;
 }
 
+/**
+ * Publish a draft lesson (change status from DRAFT to PUBLISHED)
+ */
+export async function publishLesson(
+  token: string,
+  id: number
+): Promise<TeacherLessonResponse> {
+  const url = `${CONTENT_API_BASE}/teacher-lessons/${id}/publish`;
+  const resp = await fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!resp.ok) {
+    const text = await resp.text();
+    throw new Error(`HTTP ${resp.status}: ${text}`);
+  }
+
+  const data: ApiResponse<TeacherLessonResponse> = await resp.json();
+  return data.result;
+}
+
 export async function deleteLesson(token: string, id: number): Promise<void> {
   const url = `${CONTENT_API_BASE}/teacher-lessons/${id}`;
   const resp = await fetch(url, {
@@ -239,11 +265,11 @@ export async function incrementLessonView(
 
 // ==================== Lesson File APIs ====================
 
-export async function createLessonFile(
+export async function uploadSelfLessonFile(
   token: string,
-  request: LessonFileRequest
+  request: SelfLessonFileRequest
 ): Promise<LessonFileResponse> {
-  const url = `${CONTENT_API_BASE}/lesson-files`;
+  const url = `${CONTENT_API_BASE}/lesson-files/me`;
   const resp = await fetch(url, {
     method: "POST",
     headers: {
@@ -264,9 +290,11 @@ export async function createLessonFile(
 
 export async function getLessonFiles(
   token: string,
-  lessonId: number
-): Promise<LessonFileResponse[]> {
-  const url = `${CONTENT_API_BASE}/lesson-files?lessonId=${lessonId}`;
+  lessonId: number,
+  page: number = 0,
+  size: number = 20
+): Promise<PaginatedResponse<LessonFileResponse>> {
+  const url = `${CONTENT_API_BASE}/lesson-files?lessonId=${lessonId}&page=${page}&size=${size}`;
   const resp = await fetch(url, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -278,8 +306,25 @@ export async function getLessonFiles(
     throw new Error(`HTTP ${resp.status}: ${text}`);
   }
 
-  const data: ApiResponse<LessonFileResponse[]> = await resp.json();
-  return data.result;
+  return await resp.json();
+}
+
+export async function deleteLessonFile(
+  token: string,
+  fileId: number
+): Promise<void> {
+  const url = `${CONTENT_API_BASE}/lesson-files/${fileId}`;
+  const resp = await fetch(url, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!resp.ok) {
+    const text = await resp.text();
+    throw new Error(`HTTP ${resp.status}: ${text}`);
+  }
 }
 
 // ==================== Comment APIs ====================

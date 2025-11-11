@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { getClassroomById } from "../../api/classroom";
-import { getMyLessons, createSelfLesson } from "../../api/content";
+import { getMyLessons, createSelfLesson, publishLesson, deleteLesson, updateLesson } from "../../api/content";
 import type { ClassroomResponse } from "../../api/classroom";
 import type { TeacherLessonResponse, SelfTeacherLessonRequest } from "../../api/content";
 
@@ -16,11 +16,22 @@ export default function ClassroomDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [pageSize] = useState(10);
+  
   // Create lesson form
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [lessonTitle, setLessonTitle] = useState("");
   const [lessonStatus, setLessonStatus] = useState<"DRAFT" | "PUBLISHED">("DRAFT");
   const [submitting, setSubmitting] = useState(false);
+  const [publishingLessonId, setPublishingLessonId] = useState<number | null>(null);
+  
+  // Edit lesson form
+  const [editingLessonId, setEditingLessonId] = useState<number | null>(null);
+  const [editLessonTitle, setEditLessonTitle] = useState("");
+  const [editLessonStatus, setEditLessonStatus] = useState<"DRAFT" | "PUBLISHED">("DRAFT");
 
   useEffect(() => {
     if (id && token) {
@@ -40,17 +51,19 @@ export default function ClassroomDetail() {
     }
   };
 
-  const loadLessons = async () => {
+  const loadLessons = async (page: number = 0) => {
     if (!token) return;
     setLoading(true);
     setError(null);
     try {
-      const result = await getMyLessons(token, 0, 100);
+      const result = await getMyLessons(token, page, pageSize);
       // Filter lessons by classId
       const classLessons = result.content.filter(
         (lesson) => lesson.classId === Number(id)
       );
       setLessons(classLessons);
+      setCurrentPage(result.pagination.page);
+      setTotalPages(result.pagination.totalPages);
     } catch (err: any) {
       setError(err.message || String(err));
     } finally {
@@ -86,6 +99,79 @@ export default function ClassroomDetail() {
     }
   };
 
+  const handlePublishLesson = async (lessonId: number) => {
+    if (!token) return;
+    if (!globalThis.confirm("Bạn có chắc chắn muốn xuất bản bài học này? Học sinh sẽ có thể xem được nội dung.")) {
+      return;
+    }
+
+    setPublishingLessonId(lessonId);
+    setError(null);
+
+    try {
+      await publishLesson(token, lessonId);
+      alert("Xuất bản bài học thành công!");
+      loadLessons(currentPage); // Reload to get updated status
+    } catch (err: any) {
+      setError(err.message || String(err));
+    } finally {
+      setPublishingLessonId(null);
+    }
+  };
+
+  const handleDeleteLesson = async (lessonId: number, lessonTitle: string) => {
+    if (!token) return;
+    if (!globalThis.confirm(`Bạn có chắc chắn muốn xóa bài học "${lessonTitle}"?`)) {
+      return;
+    }
+
+    setError(null);
+    try {
+      await deleteLesson(token, lessonId);
+      alert("Đã xóa bài học!");
+      loadLessons(currentPage);
+    } catch (err: any) {
+      setError(err.message || String(err));
+    }
+  };
+
+  const handleEditLesson = (lesson: TeacherLessonResponse) => {
+    setEditingLessonId(lesson.id);
+    setEditLessonTitle(lesson.title);
+    setEditLessonStatus(lesson.lessonStatus as "DRAFT" | "PUBLISHED");
+  };
+
+  const handleUpdateLesson = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!token || !editingLessonId) return;
+    if (!editLessonTitle.trim()) return setError("Tiêu đề bài học không được để trống");
+
+    setSubmitting(true);
+    setError(null);
+
+    try {
+      await updateLesson(token, editingLessonId, {
+        title: editLessonTitle.trim(),
+        lessonStatus: editLessonStatus,
+      });
+      alert("Cập nhật bài học thành công!");
+      setEditingLessonId(null);
+      setEditLessonTitle("");
+      setEditLessonStatus("DRAFT");
+      loadLessons(currentPage);
+    } catch (err: any) {
+      setError(err.message || String(err));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingLessonId(null);
+    setEditLessonTitle("");
+    setEditLessonStatus("DRAFT");
+  };
+
   if (loading && !classroom) {
     return <div style={{ padding: 24 }}>Đang tải...</div>;
   }
@@ -119,7 +205,7 @@ export default function ClassroomDetail() {
             <h2 style={{ margin: 0, marginBottom: 8 }}>{classroom.name}</h2>
             <p style={{ margin: 0, color: "#666" }}>
               Trường: {classroom.schoolName || "Chưa xác định"} | 
-              Học sinh: {classroom.enrollmentCount || 0}
+              👥 Học sinh: {classroom.studentCount || 0}
               {classroom.capacity ? ` / ${classroom.capacity}` : ""}
             </p>
           </div>
@@ -319,57 +405,270 @@ export default function ClassroomDetail() {
                   backgroundColor: "white",
                   borderRadius: 8,
                   border: "1px solid #e0e0e0",
-                  cursor: "pointer",
+                  cursor: editingLessonId === lesson.id ? "default" : "pointer",
                   transition: "all 0.2s",
                   display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
+                  flexDirection: "column",
+                  gap: 16,
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)";
-                  e.currentTarget.style.transform = "translateY(-2px)";
+                  if (editingLessonId !== lesson.id) {
+                    e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)";
+                    e.currentTarget.style.transform = "translateY(-2px)";
+                  }
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.boxShadow = "none";
-                  e.currentTarget.style.transform = "translateY(0)";
+                  if (editingLessonId !== lesson.id) {
+                    e.currentTarget.style.boxShadow = "none";
+                    e.currentTarget.style.transform = "translateY(0)";
+                  }
                 }}
               >
-                <div>
-                  <h4 style={{ margin: 0, marginBottom: 8, color: "#2196F3" }}>
-                    {lesson.title}
-                  </h4>
-                  <div style={{ fontSize: 13, color: "#666" }}>
-                    Lượt xem: {lesson.viewCount || 0}
+                {editingLessonId === lesson.id ? (
+                  // Edit form
+                  <form onSubmit={handleUpdateLesson} onClick={(e) => e.stopPropagation()} style={{ width: "100%" }}>
+                    <div style={{ marginBottom: 16 }}>
+                      <label style={{ display: "block", marginBottom: 8, fontSize: 14, fontWeight: 600 }}>
+                        Tiêu đề bài học
+                      </label>
+                      <input
+                        type="text"
+                        value={editLessonTitle}
+                        onChange={(e) => setEditLessonTitle(e.target.value)}
+                        required
+                        style={{
+                          width: "100%",
+                          padding: 12,
+                          fontSize: 14,
+                          border: "1px solid #ddd",
+                          borderRadius: 6,
+                          boxSizing: "border-box",
+                        }}
+                        placeholder="Nhập tiêu đề bài học"
+                        autoFocus
+                      />
+                    </div>
+                    <div style={{ marginBottom: 16 }}>
+                      <label style={{ display: "block", marginBottom: 8, fontSize: 14, fontWeight: 600 }}>
+                        Trạng thái
+                      </label>
+                      <select
+                        value={editLessonStatus}
+                        onChange={(e) => setEditLessonStatus(e.target.value as "DRAFT" | "PUBLISHED")}
+                        style={{
+                          width: "100%",
+                          padding: 12,
+                          fontSize: 14,
+                          border: "1px solid #ddd",
+                          borderRadius: 6,
+                          boxSizing: "border-box",
+                        }}
+                      >
+                        <option value="DRAFT">Nháp</option>
+                        <option value="PUBLISHED">Xuất bản</option>
+                      </select>
+                    </div>
+                    <div style={{ display: "flex", gap: 12 }}>
+                      <button
+                        type="submit"
+                        style={{
+                          padding: "10px 20px",
+                          backgroundColor: "#4caf50",
+                          color: "white",
+                          border: "none",
+                          borderRadius: 6,
+                          fontSize: 14,
+                          fontWeight: 600,
+                          cursor: "pointer",
+                          transition: "all 0.2s",
+                        }}
+                      >
+                        💾 Lưu
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleCancelEdit}
+                        style={{
+                          padding: "10px 20px",
+                          backgroundColor: "#757575",
+                          color: "white",
+                          border: "none",
+                          borderRadius: 6,
+                          fontSize: 14,
+                          fontWeight: 600,
+                          cursor: "pointer",
+                          transition: "all 0.2s",
+                        }}
+                      >
+                        ❌ Hủy
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  // Normal lesson display
+                  <>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <div>
+                        <h4 style={{ margin: 0, marginBottom: 8, color: "#2196F3" }}>
+                          {lesson.title}
+                        </h4>
+                        <div style={{ fontSize: 13, color: "#666" }}>
+                          Lượt xem: {lesson.viewCount || 0}
+                        </div>
+                      </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }} onClick={(e) => e.stopPropagation()}>
+                  {lesson.lessonStatus === "DRAFT" && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePublishLesson(lesson.id);
+                      }}
+                      disabled={publishingLessonId === lesson.id}
+                      style={{
+                        padding: "8px 16px",
+                        backgroundColor: "#4caf50",
+                        color: "white",
+                        border: "none",
+                        borderRadius: 6,
+                        fontSize: 13,
+                        fontWeight: 600,
+                        cursor: publishingLessonId === lesson.id ? "not-allowed" : "pointer",
+                        opacity: publishingLessonId === lesson.id ? 0.6 : 1,
+                        transition: "all 0.2s",
+                      }}
+                      onMouseEnter={(e) => {
+                        if (publishingLessonId !== lesson.id) {
+                          e.currentTarget.style.backgroundColor = "#45a049";
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = "#4caf50";
+                      }}
+                    >
+                      {publishingLessonId === lesson.id ? "Đang xuất bản..." : "📤 Xuất bản"}
+                    </button>
+                  )}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEditLesson(lesson);
+                    }}
+                    style={{
+                      padding: "8px 16px",
+                      backgroundColor: "#2196F3",
+                      color: "white",
+                      border: "none",
+                      borderRadius: 6,
+                      fontSize: 13,
+                      fontWeight: 600,
+                      cursor: "pointer",
+                      transition: "all 0.2s",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = "#1976D2";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "#2196F3";
+                    }}
+                  >
+                    ✏️ Sửa
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteLesson(lesson.id, lesson.title);
+                    }}
+                    style={{
+                      padding: "8px 16px",
+                      backgroundColor: "#f44336",
+                      color: "white",
+                      border: "none",
+                      borderRadius: 6,
+                      fontSize: 13,
+                      fontWeight: 600,
+                      cursor: "pointer",
+                      transition: "all 0.2s",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = "#d32f2f";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "#f44336";
+                    }}
+                  >
+                    🗑️ Xóa
+                  </button>
+                  <div
+                    style={{
+                      padding: "6px 12px",
+                      borderRadius: 6,
+                      fontSize: 13,
+                      fontWeight: 600,
+                      backgroundColor:
+                        lesson.lessonStatus === "PUBLISHED"
+                          ? "#e8f5e9"
+                          : lesson.lessonStatus === "DRAFT"
+                          ? "#fff3e0"
+                          : "#f5f5f5",
+                      color:
+                        lesson.lessonStatus === "PUBLISHED"
+                          ? "#2e7d32"
+                          : lesson.lessonStatus === "DRAFT"
+                          ? "#f57c00"
+                          : "#666",
+                    }}
+                  >
+                    {lesson.lessonStatus === "PUBLISHED"
+                      ? "Xuất bản"
+                      : lesson.lessonStatus === "DRAFT"
+                      ? "Nháp"
+                      : "Lưu trữ"}
                   </div>
                 </div>
-                <div
-                  style={{
-                    padding: "6px 12px",
-                    borderRadius: 6,
-                    fontSize: 13,
-                    fontWeight: 600,
-                    backgroundColor:
-                      lesson.lessonStatus === "PUBLISHED"
-                        ? "#e8f5e9"
-                        : lesson.lessonStatus === "DRAFT"
-                        ? "#fff3e0"
-                        : "#f5f5f5",
-                    color:
-                      lesson.lessonStatus === "PUBLISHED"
-                        ? "#2e7d32"
-                        : lesson.lessonStatus === "DRAFT"
-                        ? "#f57c00"
-                        : "#666",
-                  }}
-                >
-                  {lesson.lessonStatus === "PUBLISHED"
-                    ? "Xuất bản"
-                    : lesson.lessonStatus === "DRAFT"
-                    ? "Nháp"
-                    : "Lưu trữ"}
-                </div>
+                    </div>
+                  </>
+                )}
               </div>
             ))}
+          </div>
+        )}
+        
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 12, marginTop: 24 }}>
+            <button
+              onClick={() => loadLessons(currentPage - 1)}
+              disabled={currentPage === 0 || loading}
+              style={{
+                padding: "8px 16px",
+                fontSize: 14,
+                backgroundColor: currentPage === 0 ? "#ccc" : "#2196F3",
+                color: "white",
+                border: "none",
+                borderRadius: 6,
+                cursor: currentPage === 0 ? "not-allowed" : "pointer",
+              }}
+            >
+              ← Trang trước
+            </button>
+            <span style={{ fontSize: 14, color: "#666" }}>
+              Trang {currentPage + 1} / {totalPages}
+            </span>
+            <button
+              onClick={() => loadLessons(currentPage + 1)}
+              disabled={currentPage >= totalPages - 1 || loading}
+              style={{
+                padding: "8px 16px",
+                fontSize: 14,
+                backgroundColor: currentPage >= totalPages - 1 ? "#ccc" : "#2196F3",
+                color: "white",
+                border: "none",
+                borderRadius: 6,
+                cursor: currentPage >= totalPages - 1 ? "not-allowed" : "pointer",
+              }}
+            >
+              Trang sau →
+            </button>
           </div>
         )}
       </div>

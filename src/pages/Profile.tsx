@@ -81,26 +81,46 @@ export default function Profile(): JSX.Element {
     if (!fullName) return setError("Full name is required");
     if (!choice) return setError("Please choose Student or Teacher");
 
-    // Build FormData because backend expects multipart for teacher proof and controller accepts multipart
-    const form = new FormData();
-    if (schoolId !== "") form.append("schoolId", String(schoolId));
-    form.append("fullName", fullName);
-    if (dateOfBirth) form.append("dateOfBirth", dateOfBirth);
-    form.append("role", choice);
-    if (avatarFile) {
-      form.append("avatar", avatarFile, avatarFile.name);
-    }
-    if (teacherProofFile) {
-      form.append("teacherProof", teacherProofFile, teacherProofFile.name);
-    }
-
     setSubmitting(true);
     try {
-      const created = await createSelfUserProfile(token, form);
-      setProfile(created);
+      const form = new FormData();
+      if (schoolId !== "") form.append("schoolId", String(schoolId));
+      form.append("fullName", fullName);
+      if (dateOfBirth) form.append("dateOfBirth", dateOfBirth);
+      form.append("role", choice);
+
+      // If avatar file is selected, convert to Base64 and send as avatarUrl
+      if (avatarFile) {
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+          const base64Data = reader.result as string;
+          form.append("avatarUrl", base64Data);
+          await submitProfileForm(form);
+        };
+        reader.onerror = () => {
+          setError("Lỗi khi đọc ảnh avatar");
+          setSubmitting(false);
+        };
+        reader.readAsDataURL(avatarFile);
+      } else {
+        await submitProfileForm(form);
+      }
     } catch (err: any) {
       console.error("Create profile error:", err);
       setError(err?.message || String(err));
+      setSubmitting(false);
+    }
+  }
+
+  async function submitProfileForm(form: FormData) {
+    try {
+      if (teacherProofFile) {
+        form.append("teacherProof", teacherProofFile, teacherProofFile.name);
+      }
+      const created = await createSelfUserProfile(token!, form);
+      setProfile(created);
+    } catch (err: any) {
+      throw err;
     } finally {
       setSubmitting(false);
     }
@@ -110,32 +130,50 @@ export default function Profile(): JSX.Element {
 
   if (profile) {
     return (
-      <div className="container">
-        <h2>Hồ sơ của bạn</h2>
-        <div style={{ display: "flex", gap: 20, alignItems: "center" }}>
+      <div className="container" style={{ maxWidth: 650, margin: '40px auto', padding: '24px', backgroundColor: '#f9f9f9', borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
+        <h2 style={{ textAlign: 'center', marginBottom: 24, color: '#333' }}>Hồ sơ của bạn</h2>
+        <div style={{ display: "flex", gap: 20, alignItems: "center", marginBottom: 24, padding: 20, backgroundColor: 'white', borderRadius: 8 }}>
           <img
             src={resolveAvatarUrl(profile.avatarUrl) || "https://i.pravatar.cc/150"}
             alt={profile.fullName || "Avatar"}
             className="avatar avatar-lg"
-            style={{ width: 120, height: 120 }}
+            style={{ width: 120, height: 120, borderRadius: '50%', objectFit: 'cover', border: '3px solid #2196F3' }}
           />
-          <div>
-            <div>
-              <strong>Họ và tên:</strong> {profile.fullName}
+          <div style={{ flex: 1 }}>
+            <div style={{ marginBottom: 12, fontSize: 15 }}>
+              <strong style={{ color: '#555' }}>Họ và tên:</strong> <span style={{ color: '#333' }}>{profile.fullName}</span>
             </div>
-            <div>
-              <strong>Vai trò:</strong> {profile.role}
+            <div style={{ marginBottom: 12, fontSize: 15 }}>
+              <strong style={{ color: '#555' }}>Vai trò:</strong> <span style={{ color: '#333' }}>{profile.role === "TEACHER" ? "Giáo viên" : "Học sinh"}</span>
             </div>
-            <div>
-              <strong>Trường:</strong> {profile.schoolName || profile.schoolId || "-"}
+            <div style={{ marginBottom: 12, fontSize: 15 }}>
+              <strong style={{ color: '#555' }}>Trường:</strong> <span style={{ color: '#333' }}>{profile.schoolName || profile.schoolId || "-"}</span>
             </div>
-            <div>
-              <strong>Ngày sinh:</strong> {profile.dateOfBirth || "-"}
+            <div style={{ fontSize: 15 }}>
+              <strong style={{ color: '#555' }}>Ngày sinh:</strong> <span style={{ color: '#333' }}>{profile.dateOfBirth || "-"}</span>
             </div>
           </div>
         </div>
-        <div style={{ marginTop: 20 }}>
-          <button onClick={() => navigate("/profile/edit")}>Chỉnh sửa</button>
+        <div style={{ textAlign: 'center' }}>
+          <button 
+            onClick={() => navigate("/profile/edit")}
+            style={{
+              padding: '12px 32px',
+              fontSize: 16,
+              backgroundColor: '#2196F3',
+              color: 'white',
+              border: 'none',
+              borderRadius: 8,
+              cursor: 'pointer',
+              fontWeight: 600,
+              transition: 'all 0.3s ease',
+              boxShadow: '0 2px 6px rgba(33,150,243,0.3)'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1976D2'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#2196F3'}
+          >
+            ✏️ Chỉnh sửa hồ sơ
+          </button>
         </div>
       </div>
     );

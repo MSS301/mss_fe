@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import {
@@ -12,11 +12,15 @@ import {
   createSelfRating,
   updateRating,
   deleteRating,
+  getLessonFiles,
+  uploadSelfLessonFile,
+  deleteLessonFile,
 } from "../api/content";
 import type {
   TeacherLessonResponse,
   LessonCommentResponse,
   LessonRatingResponse,
+  LessonFileResponse,
 } from "../api/content";
 import { getCurrentUserProfile } from "../api/auth";
 
@@ -31,6 +35,10 @@ export default function LessonDetail() {
   const [commentsTotalPages, setCommentsTotalPages] = useState(0);
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [ratings, setRatings] = useState<LessonRatingResponse[]>([]);
+  const [files, setFiles] = useState<LessonFileResponse[]>([]);
+  const [filesPage, setFilesPage] = useState(0);
+  const [filesTotalPages, setFilesTotalPages] = useState(0);
+  const [filesLoading, setFilesLoading] = useState(false);
   const [userProfileId, setUserProfileId] = useState<number | null>(null);
   const [userRating, setUserRating] = useState<LessonRatingResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -38,14 +46,19 @@ export default function LessonDetail() {
 
   const [newComment, setNewComment] = useState("");
   const [newRating, setNewRating] = useState(5);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [submittingComment, setSubmittingComment] = useState(false);
   const [submittingRating, setSubmittingRating] = useState(false);
+  const [submittingFile, setSubmittingFile] = useState(false);
 
   // Editing states
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
   const [editCommentText, setEditCommentText] = useState("");
   const [editingRating, setEditingRating] = useState(false);
   const [editRatingValue, setEditRatingValue] = useState(5);
+  
+  // Ref to track if view has been incremented (to prevent double increment)
+  const viewIncrementedRef = useRef(false);
 
   // Calculate average rating - show 0 if no ratings
   const averageRating =
@@ -68,18 +81,25 @@ export default function LessonDetail() {
         const lessonData = await getLessonById(token, Number(id));
         setLesson(lessonData);
         
-        // Increment view count
-        incrementLessonView(token, Number(id));
+        // Increment view count only once
+        if (!viewIncrementedRef.current) {
+          incrementLessonView(token, Number(id));
+          viewIncrementedRef.current = true;
+        }
 
         // Load comments and ratings
-        const [commentsData, ratingsData] = await Promise.all([
+        const [commentsData, ratingsData, filesData] = await Promise.all([
           getCommentsByLesson(token, Number(id), 0, 10),
           getRatingsByLesson(token, Number(id)),
+          getLessonFiles(token, Number(id), 0, 20),
         ]);
         setComments(commentsData.content);
         setCommentsPage(0);
         setCommentsTotalPages(commentsData.pagination.totalPages);
         setRatings(ratingsData.content);
+        setFiles(filesData.content);
+        setFilesPage(0);
+        setFilesTotalPages(filesData.pagination.totalPages);
 
         // Check if user has already rated
         if (profile) {
@@ -124,12 +144,18 @@ export default function LessonDetail() {
 
     setSubmittingComment(true);
     try {
-      const created = await createSelfComment(token, {
+      await createSelfComment(token, {
         lessonId: Number(id),
         comment: newComment.trim(),
       });
-      setComments([created, ...comments]);
       setNewComment("");
+      
+      // Reload comments to get enriched data with user names
+      const commentsData = await getCommentsByLesson(token, Number(id), 0, 10);
+      setComments(commentsData.content);
+      setCommentsPage(0);
+      setCommentsTotalPages(commentsData.pagination.totalPages);
+      
       alert("Đã gửi bình luận!");
     } catch (err: any) {
       alert(`Lỗi: ${err.message}`);
@@ -247,6 +273,87 @@ export default function LessonDetail() {
     setEditCommentText("");
   };
 
+  const handleSubmitFile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!token || !id || !selectedFile) return;
+
+    setSubmittingFile(true);
+    try {
+      // Convert file to Base64 data URL
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        try {
+          const base64Data = reader.result as string;
+          
+          await uploadSelfLessonFile(token, {
+            lessonId: Number(id),
+            fileUrl: base64Data,
+            fileName: selectedFile.name,
+            mimeType: selectedFile.type,
+            sizeBytes: selectedFile.size,
+          });
+          
+          setSelectedFile(null);
+          // Reset file input
+          const fileInput = document.getElementById('file-input') as HTMLInputElement;
+          if (fileInput) fileInput.value = '';
+          
+          // Reload files
+          const filesData = await getLessonFiles(token, Number(id), 0, 20);
+          setFiles(filesData.content);
+          setFilesPage(0);
+          setFilesTotalPages(filesData.pagination.totalPages);
+          
+          alert("Đã thêm tệp!");
+        } catch (err: any) {
+          alert(`Lỗi: ${err.message}`);
+        } finally {
+          setSubmittingFile(false);
+        }
+      };
+      
+      reader.onerror = () => {
+        alert("Lỗi khi đọc tệp!");
+        setSubmittingFile(false);
+      };
+      
+      reader.readAsDataURL(selectedFile);
+    } catch (err: any) {
+      alert(`Lỗi: ${err.message}`);
+      setSubmittingFile(false);
+    }
+  };
+
+  const handleDeleteFile = async (fileId: number, fileName: string) => {
+    if (!token) return;
+    if (!globalThis.confirm(`Xóa tệp "${fileName}"?`)) return;
+
+    try {
+      await deleteLessonFile(token, fileId);
+      setFiles(files.filter((f) => f.id !== fileId));
+      alert("Đã xóa tệp!");
+    } catch (err: any) {
+      alert(`Lỗi: ${err.message}`);
+    }
+  };
+
+  const loadMoreFiles = async () => {
+    if (!token || !id || filesLoading) return;
+    const nextPage = filesPage + 1;
+    if (nextPage >= filesTotalPages) return;
+
+    setFilesLoading(true);
+    try {
+      const filesData = await getLessonFiles(token, Number(id), nextPage, 20);
+      setFiles([...files, ...filesData.content]);
+      setFilesPage(nextPage);
+    } catch (err: any) {
+      console.error("Failed to load more files:", err);
+    } finally {
+      setFilesLoading(false);
+    }
+  };
+
   if (loading) {
     return <div style={{ padding: 24 }}>Đang tải bài học...</div>;
   }
@@ -306,47 +413,139 @@ export default function LessonDetail() {
               marginBottom: 24,
             }}
           >
-            <h3>Tài liệu bài học</h3>
-            {lesson.lessonFiles && lesson.lessonFiles.length > 0 ? (
-              <div style={{ display: "grid", gap: 12 }}>
-                {lesson.lessonFiles.map((file) => (
-                  <div
-                    key={file.id}
+            <h3>📎 Tài liệu bài học ({files.length})</h3>
+            
+            {/* Add File Form */}
+            <form onSubmit={handleSubmitFile} style={{ marginBottom: 24 }}>
+              <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                <div style={{ flex: 1 }}>
+                  <input
+                    id="file-input"
+                    type="file"
+                    onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                    required
                     style={{
+                      width: "100%",
                       padding: 12,
-                      backgroundColor: "#f5f5f5",
+                      fontSize: 14,
+                      border: "1px solid #ddd",
                       borderRadius: 6,
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
                     }}
-                  >
-                    <div>
-                      <div style={{ fontWeight: 600 }}>{file.fileName}</div>
-                      <div style={{ fontSize: 12, color: "#666" }}>
-                        {(file.fileSize / 1024).toFixed(2)} KB • {file.fileType}
-                      </div>
+                  />
+                  {selectedFile && (
+                    <div style={{ marginTop: 8, fontSize: 13, color: "#666" }}>
+                      📄 {selectedFile.name} ({(selectedFile.size / 1024).toFixed(2)} KB)
                     </div>
-                    <a
-                      href={file.fileUrl}
-                      download
+                  )}
+                </div>
+                <button
+                  type="submit"
+                  disabled={submittingFile || !selectedFile}
+                  style={{
+                    padding: "12px 24px",
+                    fontSize: 14,
+                    fontWeight: 600,
+                    backgroundColor: submittingFile ? "#ccc" : "#4caf50",
+                    color: "white",
+                    border: "none",
+                    borderRadius: 6,
+                    cursor: submittingFile || !selectedFile ? "not-allowed" : "pointer",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {submittingFile ? "Đang tải..." : "⬆️ Tải lên"}
+                </button>
+              </div>
+              <div style={{ marginTop: 8, fontSize: 12, color: "#666" }}>
+                💡 Chọn tệp từ máy tính của bạn để tải lên
+              </div>
+            </form>
+
+            {/* Files List */}
+            {files.length > 0 ? (
+              <>
+                <div style={{ display: "grid", gap: 12 }}>
+                  {files.map((file) => (
+                    <div
+                      key={file.id}
                       style={{
-                        padding: "6px 16px",
-                        fontSize: 14,
-                        backgroundColor: "#2196F3",
-                        color: "white",
-                        border: "none",
-                        borderRadius: 4,
-                        textDecoration: "none",
+                        padding: 16,
+                        backgroundColor: "#f5f5f5",
+                        borderRadius: 6,
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
                       }}
                     >
-                      Tải xuống
-                    </a>
-                  </div>
-                ))}
-              </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: 600, marginBottom: 4 }}>{file.fileName}</div>
+                        <div style={{ fontSize: 12, color: "#666" }}>
+                          {file.sizeBytes && `${(file.sizeBytes / 1024).toFixed(2)} KB`}
+                          {file.mimeType && ` • ${file.mimeType}`}
+                          {file.uploaderName && ` • Người tải: ${file.uploaderName}`}
+                        </div>
+                      </div>
+                      <div style={{ display: "flex", gap: 8 }}>
+                        <a
+                          href={file.fileUrl}
+                          download={file.fileName}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            padding: "8px 16px",
+                            fontSize: 14,
+                            backgroundColor: "#2196F3",
+                            color: "white",
+                            border: "none",
+                            borderRadius: 4,
+                            textDecoration: "none",
+                            display: "inline-block",
+                          }}
+                        >
+                          📥 Tải xuống
+                        </a>
+                        {userProfileId === file.uploaderId && (
+                          <button
+                            onClick={() => handleDeleteFile(file.id, file.fileName)}
+                            style={{
+                              padding: "8px 16px",
+                              fontSize: 14,
+                              backgroundColor: "#f44336",
+                              color: "white",
+                              border: "none",
+                              borderRadius: 4,
+                              cursor: "pointer",
+                            }}
+                          >
+                            🗑️ Xóa
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {filesPage + 1 < filesTotalPages && (
+                  <button
+                    onClick={loadMoreFiles}
+                    disabled={filesLoading}
+                    style={{
+                      width: "100%",
+                      padding: "12px",
+                      marginTop: 16,
+                      fontSize: 14,
+                      backgroundColor: filesLoading ? "#ccc" : "#f5f5f5",
+                      color: "#333",
+                      border: "1px solid #ddd",
+                      borderRadius: 6,
+                      cursor: filesLoading ? "not-allowed" : "pointer",
+                    }}
+                  >
+                    {filesLoading ? "Đang tải..." : "Xem thêm tệp"}
+                  </button>
+                )}
+              </>
             ) : (
-              <p style={{ color: "#999" }}>Chưa có tài liệu nào</p>
+              <p style={{ color: "#999", marginBottom: 0 }}>Chưa có tài liệu nào. Thêm tệp đầu tiên bằng form ở trên!</p>
             )}
           </div>
 
