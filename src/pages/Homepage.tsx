@@ -13,7 +13,25 @@ export default function Homepage({ onNavigateToLogin }: Props) {
         <nav className="navbar">
           <div className="navbar-container">
             <div className="navbar-logo">
-              <div className="logo-icon">S</div>
+              <div className="logo-icon">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                  <rect width="32" height="32" rx="8" fill="url(#logoGradient)"/>
+                  <path
+                    d="M16 8L22 14H18V20H14V14H10L16 8Z"
+                    fill="white"
+                  />
+                  <path
+                    d="M10 24H22V22H10V24Z"
+                    fill="white"
+                  />
+                  <defs>
+                    <linearGradient id="logoGradient" x1="0" y1="0" x2="32" y2="32">
+                      <stop offset="0%" stopColor="#667eea"/>
+                      <stop offset="100%" stopColor="#764ba2"/>
+                    </linearGradient>
+                  </defs>
+                </svg>
+              </div>
               <span className="logo-text">SlideAI</span>
             </div>
             <ul className="navbar-menu">
@@ -44,7 +62,9 @@ export default function Homepage({ onNavigateToLogin }: Props) {
         {/* Hero Section */}
         <div className="hero-content">
           <div className="hero-badge">
-            <span className="badge-icon">✨</span>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="badge-icon">
+              <path d="M10 2L12.5 7.5L18.5 8.5L14 12.5L15 18.5L10 15.5L5 18.5L6 12.5L1.5 8.5L7.5 7.5L10 2Z" fill="currentColor"/>
+            </svg>
             <span>Powered by AI - Tạo slide trong 60 giây</span>
           </div>
           <h1 className="hero-title">
@@ -60,10 +80,14 @@ export default function Homepage({ onNavigateToLogin }: Props) {
           <div className="hero-actions">
             <button onClick={onNavigateToLogin} className="btn-primary-large">
               <span>Bắt đầu ngay</span>
-              <span className="btn-icon">→</span>
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="btn-icon">
+                <path d="M5 10H15M15 10L11 6M15 10L11 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
             </button>
             <button className="btn-secondary-large">
-              <span className="play-icon">▶</span>
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" className="play-icon">
+                <path d="M6 4.5L14.25 9L6 13.5V4.5Z" fill="currentColor"/>
+              </svg>
               <span>Xem demo</span>
             </button>
           </div>
@@ -87,10 +111,37 @@ export default function Homepage({ onNavigateToLogin }: Props) {
 
         {/* Floating Elements */}
         <div className="floating-elements">
-          <div className="float-card card-1">📚 Toán học</div>
-          <div className="float-card card-2">🌍 Địa lý</div>
-          <div className="float-card card-3">🔬 Khoa học</div>
-          <div className="float-card card-4">✍️ Ngữ văn</div>
+          <div className="float-card card-1">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            <span>Toán học</span>
+          </div>
+          <div className="float-card card-2">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+              <path d="M12 2C15.31 2 18.23 3.92 19.77 6.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M12 22C8.69 22 5.77 20.08 4.23 17.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+            <span>Địa lý</span>
+          </div>
+          <div className="float-card card-3">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            <span>Khoa học</span>
+          </div>
+          <div className="float-card card-4">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M14 2V8H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            <span>Ngữ văn</span>
+          </div>
         </div>
       </header>
 
@@ -300,7 +351,25 @@ export default function Homepage({ onNavigateToLogin }: Props) {
           <div className="footer-content">
             <div className="footer-column">
               <div className="footer-logo">
-                <div className="logo-icon">S</div>
+                <div className="logo-icon">
+                  <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                    <rect width="32" height="32" rx="8" fill="url(#footerLogoGradient)"/>
+                    <path
+                      d="M16 8L22 14H18V20H14V14H10L16 8Z"
+                      fill="white"
+                    />
+                    <path
+                      d="M10 24H22V22H10V24Z"
+                      fill="white"
+                    />
+                    <defs>
+                      <linearGradient id="footerLogoGradient" x1="0" y1="0" x2="32" y2="32">
+                        <stop offset="0%" stopColor="#667eea"/>
+                        <stop offset="100%" stopColor="#764ba2"/>
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                </div>
                 <span className="logo-text">SlideAI</span>
               </div>
               <p className="footer-description">
