@@ -3,7 +3,12 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import "../css/Layout.css";
 import NotificationBell from "./NotificationBell";
 import { useAuth } from "../contexts/AuthContext";
-import { getCurrentUserProfile, getUserById, UserProfileResult, resolveAvatarUrl } from "../api/auth";
+import {
+  getCurrentUserProfile,
+  getUserById,
+  UserProfileResult,
+  resolveAvatarUrl,
+} from "../api/auth";
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -86,12 +91,15 @@ export default function Layout({
   // Check if user needs to complete profile when accessing /user/classes
   useEffect(() => {
     if (!profileChecked || !isStudent) return;
-    
+
     // Only check if user is on /user/classes page
     if (location.pathname === "/user/classes") {
-      const hasValidSchool = profile && profile.schoolId && profile.schoolId > 0;
+      const hasValidSchool =
+        profile && profile.schoolId && profile.schoolId > 0;
       if (!hasValidSchool) {
-        alert("Vui lòng hoàn thành hồ sơ của bạn trước khi tham gia lớp học. Bạn cần chọn trường học.");
+        alert(
+          "Vui lòng hoàn thành hồ sơ của bạn trước khi tham gia lớp học. Bạn cần chọn trường học."
+        );
         navigate("/profile");
       }
     }
@@ -162,13 +170,11 @@ export default function Layout({
           <div className="sidebar-section">
             <div className="sidebar-section-title">Chương trình học</div>
             <Link
-              to="/curriculum"
-              className={`sidebar-link ${
-                isActive("/curriculum") ? "active" : ""
-              }`}
+              to="/genai"
+              className={`sidebar-link ${isActive("/genai") ? "active" : ""}`}
             >
-              <span className="sidebar-link-icon">📚</span>
-              <span>Khám phá</span>
+              <span className="sidebar-link-icon">🤖</span>
+              <span>Gen AI</span>
             </Link>
             {isStudent && (
               <Link
@@ -288,12 +294,20 @@ export default function Layout({
                 resolveAvatarUrl(profile?.avatarUrl) ||
                 "https://i.pravatar.cc/150?img=12"
               }
-              alt={accountUser?.username || profile?.fullName || user?.email || "User"}
+              alt={
+                accountUser?.username ||
+                profile?.fullName ||
+                user?.email ||
+                "User"
+              }
               className="avatar avatar-sm"
             />
             <div className="sidebar-user-info">
               <div className="sidebar-user-name">
-                {accountUser?.username || profile?.fullName || user?.email || "Người dùng"}
+                {accountUser?.username ||
+                  profile?.fullName ||
+                  user?.email ||
+                  "Người dùng"}
               </div>
               <div className="sidebar-user-role">{user?.role || "User"}</div>
             </div>
@@ -357,7 +371,12 @@ export default function Layout({
                       resolveAvatarUrl(profile?.avatarUrl) ||
                       "https://i.pravatar.cc/150?img=12"
                     }
-                    alt={accountUser?.username || profile?.fullName || user?.email || "User"}
+                    alt={
+                      accountUser?.username ||
+                      profile?.fullName ||
+                      user?.email ||
+                      "User"
+                    }
                     className="avatar avatar-sm"
                   />
                 </button>
@@ -371,12 +390,20 @@ export default function Layout({
                           resolveAvatarUrl(profile?.avatarUrl) ||
                           "https://i.pravatar.cc/150?img=12"
                         }
-                        alt={accountUser?.username || profile?.fullName || user?.email || "User"}
+                        alt={
+                          accountUser?.username ||
+                          profile?.fullName ||
+                          user?.email ||
+                          "User"
+                        }
                         className="avatar avatar-md"
                       />
                       <div className="user-menu-info">
                         <div className="user-menu-name">
-                          {accountUser?.username || profile?.fullName || user?.email || "Người dùng"}
+                          {accountUser?.username ||
+                            profile?.fullName ||
+                            user?.email ||
+                            "Người dùng"}
                         </div>
                         <div className="user-menu-email">{user?.email}</div>
                       </div>

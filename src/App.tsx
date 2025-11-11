@@ -15,6 +15,7 @@ import Login from "./components/Login";
 import Dashboard from "./components/Dashboard";
 import AdminDashboard from "./components/AdminDashboard";
 import Curriculum from "./pages/Curriculum";
+import GenAI from "./pages/GenAI";
 import Profile from "./pages/Profile";
 import EditProfile from "./pages/EditProfile";
 import SubjectManagement from "./pages/admin/SubjectManagement";
@@ -153,6 +154,21 @@ function AppContent(): JSX.Element {
                 onLogout={handleLogout}
               >
                 <Curriculum />
+              </Layout>
+            }
+          />
+          <Route
+            path="/genai"
+            element={
+              <Layout
+                title="Gen AI"
+                breadcrumb={[
+                  { label: "Trang chủ", href: "/dashboard" },
+                  { label: "Gen AI - Tạo Slide" },
+                ]}
+                onLogout={handleLogout}
+              >
+                <GenAI />
               </Layout>
             }
           />
