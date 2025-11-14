@@ -496,3 +496,45 @@ export async function exportPPTX(
   );
   return response.blob();
 }
+
+// List User's Generated Slides
+export interface SlideListItem {
+  content_id: string;
+  content_text?: string | null;
+  grade_id?: string | null;
+  book_id?: string | null;
+  chapter_id?: string | null;
+  lesson_id?: string | null;
+  subject_id?: string | null;
+  slidesgpt?: {
+    id?: string;
+    embed?: string;
+    download?: string;
+    created_at?: string;
+    created_by?: string;
+  } | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+}
+
+export interface SlidesListResponse {
+  slides: SlideListItem[];
+  total: number;
+  limit: number;
+  skip: number;
+}
+
+export async function listMySlides(
+  token: string,
+  limit: number = 20,
+  skip: number = 0
+): Promise<SlidesListResponse> {
+  const response = await fetchWithAuth(
+    `/ai_service/slides/my?limit=${limit}&skip=${skip}`,
+    token,
+    {
+      method: "GET",
+    }
+  );
+  return response.json();
+}

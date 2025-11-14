@@ -193,9 +193,9 @@ export default function Layout({
           <div className="sidebar-section">
             <div className="sidebar-section-title">Slide</div>
             <Link
-              to="/slides/create"
+              to="/genai"
               className={`sidebar-link ${
-                isActive("/slides/create") ? "active" : ""
+                isActive("/genai") ? "active" : ""
               }`}
             >
               <span className="sidebar-link-icon">➕</span>

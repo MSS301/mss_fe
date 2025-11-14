@@ -23,15 +23,18 @@ import {
   Lesson,
   Template,
 } from "../api/aiService";
+import { getMyWallet, deductToken } from "../api/wallet";
 import "../css/GenAI.css";
 
 type Step = "selection" | "content" | "option" | "review" | "template" | "result";
 
 export default function GenAI() {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<Step>("selection");
+  const [tokenBalance, setTokenBalance] = useState<number | null>(null);
+  const [checkingBalance, setCheckingBalance] = useState(false);
 
   // Data states
   const [subjects, setSubjects] = useState<Subject[]>([]);
@@ -331,8 +334,48 @@ export default function GenAI() {
       return;
     }
 
-    // Move to option selection step
-    setCurrentStep("option");
+    if (!token || !user) {
+      setError("Vui lòng đăng nhập để sử dụng tính năng này");
+      return;
+    }
+
+    // Check token balance before proceeding
+    setCheckingBalance(true);
+    setError(null);
+
+    try {
+      // Get current wallet balance
+      const wallet = await getMyWallet(token, user.id);
+      const currentBalance = wallet.token || 0;
+
+      if (currentBalance < 1) {
+        setError("Số dư token không đủ. Vui lòng nạp thêm token để tiếp tục.");
+        setCheckingBalance(false);
+        return;
+      }
+
+      // Deduct 1 token
+      const deductResponse = await deductToken(token, user.id, {
+        tokens: 1,
+        description: "promt slide",
+        user_id: user.id,
+        reference_type: "AI_GENERATION",
+        reference_id: `genai_${Date.now()}`,
+      });
+
+      // Update token balance
+      setTokenBalance(deductResponse.token_after);
+
+      // Move to option selection step
+      setCurrentStep("option");
+    } catch (err: any) {
+      console.error("[GenAI] Error checking/deducting token:", err);
+      setError(
+        `Lỗi khi kiểm tra/trừ token: ${err.message || "Lỗi không xác định"}`
+      );
+    } finally {
+      setCheckingBalance(false);
+    }
   };
 
   const handleOptionSelect = async (option: "default" | "template") => {
@@ -590,6 +633,7 @@ export default function GenAI() {
     try {
       const slideResponse = await createSlideFromContent(token, {
         content_id: contentId,
+        created_by: user?.id || null, // Backend will use user.user_id from token if not provided
       });
 
       setSlideResult(slideResponse);
@@ -628,6 +672,19 @@ export default function GenAI() {
     setSelectedTemplateId("");
   };
 
+  // Load token balance on mount
+  useEffect(() => {
+    if (token && user) {
+      getMyWallet(token, user.id)
+        .then((wallet) => {
+          setTokenBalance(wallet.token || 0);
+        })
+        .catch((err) => {
+          console.error("[GenAI] Error loading token balance:", err);
+        });
+    }
+  }, [token, user]);
+
   if (!token) {
     return (
       <div className="genai-container">
@@ -643,6 +700,12 @@ export default function GenAI() {
       <div className="genai-header">
         <h1>🤖 Gen AI - Tạo Slide Thông Minh</h1>
         <p>Chọn môn học, khối, sách và bài học để tạo slide tự động</p>
+        {tokenBalance !== null && (
+          <div className="genai-token-balance">
+            <span className="genai-token-label">Số dư token:</span>
+            <span className="genai-token-value">{tokenBalance}</span>
+          </div>
+        )}
       </div>
 
       {error && (
@@ -854,12 +917,12 @@ export default function GenAI() {
               <button
                 type="submit"
                 className="genai-submit-btn"
-                disabled={loading || !userContent.trim()}
+                disabled={loading || checkingBalance || !userContent.trim()}
               >
-                {loading ? (
+                {loading || checkingBalance ? (
                   <>
-                    <span className="genai-btn-spinner"></span>
-                    Vui lòng chờ AI gen nội dung...
+                    <div className="genai-btn-spinner"></div>
+                    {checkingBalance ? "Đang kiểm tra token..." : "Vui lòng chờ AI gen nội dung..."}
                   </>
                 ) : (
                   "🚀 Tạo nội dung"
