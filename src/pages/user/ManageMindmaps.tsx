@@ -849,7 +849,7 @@ function MindmapTreeView({ mindmap }: { mindmap: ParsedMindmap }) {
     if (!editingNode) return;
 
     // Find the node being edited
-    const currentNode = nodes.find((n) => n.id === editingNode.id);
+    const currentNode = nodes.find((n: Node) => n.id === editingNode.id);
     if (!currentNode) return;
 
     const originalNode = currentNode.data._originalNode as MindmapTreeNode;

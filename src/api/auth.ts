@@ -451,7 +451,7 @@ export async function getAllPendingTeacherProfiles(
   page: number = 0,
   size: number = 20
 ): Promise<PaginatedList<UserProfileResult>> {
-  const url = `${API_BASE}/auth-service/user-profiles?teacherProofVerified=false&page=${page}&size=${size}&sort=createdAt,desc`;
+  const url = `${API_BASE}/auth-service/user-profiles?teacherProofVerified=FALSE&page=${page}&size=${size}&sort=createdAt,desc`;
   const resp = await fetch(url, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -482,9 +482,9 @@ export async function promoteToTeacher(
   token: string,
   userId: string
 ): Promise<void> {
-  const url = `${API_BASE}/auth-service/users/${userId}/promote-teacher`;
+  const url = `${API_BASE}/auth-service/users/${userId}/promote/teacher`;
   const resp = await fetch(url, {
-    method: "PUT",
+    method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
     },
