@@ -18,7 +18,7 @@ import {
 } from "../api/aiService";
 import "../css/GenAI.css";
 
-type Step = "selection" | "content" | "review" | "result";
+type Step = "selection" | "content" | "option" | "review" | "template" | "result";
 
 export default function GenAI() {
   const { token } = useAuth();
@@ -50,6 +50,7 @@ export default function GenAI() {
     download?: string;
     id?: string;
   } | null>(null);
+  const [selectedOption, setSelectedOption] = useState<"default" | "template" | null>(null);
 
   // Loading states for each dropdown
   const [loadingSubjects, setLoadingSubjects] = useState(false);
@@ -313,34 +314,47 @@ export default function GenAI() {
       return;
     }
 
-    if (!token) {
-      setError("Vui lòng đăng nhập để sử dụng tính năng này");
-      return;
-    }
+    // Move to option selection step
+    setCurrentStep("option");
+  };
 
-    setLoading(true);
+  const handleOptionSelect = async (option: "default" | "template") => {
+    setSelectedOption(option);
     setError(null);
 
-    try {
-      // Call RAG query API
-      const ragResponse = await ragQuery(token, {
-        grade_id: selectedGradeId,
-        book_id: selectedBookId,
-        chapter_id: selectedChapterId,
-        lesson_id: selectedLessonId,
-        content: userContent,
-        subject_id: selectedSubjectId,
-        k: 8,
-      });
+    if (option === "default") {
+      // Option 1: Tạo Slide theo mẫu mặc định
+      if (!token) {
+        setError("Vui lòng đăng nhập để sử dụng tính năng này");
+        return;
+      }
 
-      setContentId(ragResponse.content_id);
-      setGeneratedContent(ragResponse.content_text);
-      setCurrentStep("review");
-    } catch (err: any) {
-      setError(`Lỗi khi tạo nội dung: ${err.message || "Lỗi không xác định"}`);
-      console.error("[GenAI] Error in RAG query:", err);
-    } finally {
-      setLoading(false);
+      setLoading(true);
+
+      try {
+        // Call RAG query API
+        const ragResponse = await ragQuery(token, {
+          grade_id: selectedGradeId,
+          book_id: selectedBookId,
+          chapter_id: selectedChapterId,
+          lesson_id: selectedLessonId,
+          content: userContent,
+          subject_id: selectedSubjectId,
+          k: 8,
+        });
+
+        setContentId(ragResponse.content_id);
+        setGeneratedContent(ragResponse.content_text);
+        setCurrentStep("review");
+      } catch (err: any) {
+        setError(`Lỗi khi tạo nội dung: ${err.message || "Lỗi không xác định"}`);
+        console.error("[GenAI] Error in RAG query:", err);
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      // Option 2: Tạo Slide theo template có sẵn
+      setCurrentStep("template");
     }
   };
 
@@ -412,10 +426,16 @@ export default function GenAI() {
     setGeneratedContent("");
     setReviseInstruction("");
     setSlideResult(null);
+    setSelectedOption(null);
   };
 
   const handleBackToContent = () => {
     setCurrentStep("content");
+    setError(null);
+  };
+
+  const handleBackToOption = () => {
+    setCurrentStep("option");
     setError(null);
   };
 
@@ -658,6 +678,123 @@ export default function GenAI() {
               </button>
             </div>
           </form>
+        </>
+      )}
+
+      {/* Option Selection Step */}
+      {currentStep === "option" && (
+        <>
+          {loading && (
+            <div className="genai-loading-overlay">
+              <div className="genai-loading-content">
+                <div className="genai-loading-spinner"></div>
+                <h3>Vui lòng chờ AI gen nội dung</h3>
+                <p>Quá trình này có thể mất vài phút, vui lòng không đóng trang...</p>
+              </div>
+            </div>
+          )}
+          <div className="genai-option-selection">
+            <div className="genai-option-header">
+              <h2>Chọn phương thức tạo slide</h2>
+              <p>Vui lòng chọn một trong hai phương thức dưới đây</p>
+            </div>
+
+            <div className="genai-option-cards">
+              <div
+                className={`genai-option-card ${selectedOption === "default" ? "selected" : ""}`}
+                onClick={() => !loading && handleOptionSelect("default")}
+              >
+                <div className="genai-option-card-icon">
+                  <svg
+                    width="48"
+                    height="48"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="9" y1="3" x2="9" y2="21"></line>
+                    <line x1="3" y1="9" x2="21" y2="9"></line>
+                  </svg>
+                </div>
+                <h3>Option 1: Tạo Slide theo mẫu mặc định</h3>
+                <p>
+                  Sử dụng mẫu slide mặc định của hệ thống. Nội dung sẽ được tạo tự động từ ghi chú của bạn.
+                </p>
+                <div className="genai-option-card-arrow">
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                  </svg>
+                </div>
+              </div>
+
+              <div
+                className={`genai-option-card ${selectedOption === "template" ? "selected" : ""}`}
+                onClick={() => !loading && handleOptionSelect("template")}
+              >
+                <div className="genai-option-card-icon">
+                  <svg
+                    width="48"
+                    height="48"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                  </svg>
+                </div>
+                <h3>Option 2: Tạo Slide theo template có sẵn</h3>
+                <p>
+                  Chọn từ các template slide có sẵn trong hệ thống để tạo slide với thiết kế chuyên nghiệp.
+                </p>
+                <div className="genai-option-card-arrow">
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            <div className="genai-form-actions">
+              <button
+                onClick={handleBackToContent}
+                className="genai-back-btn"
+                disabled={loading}
+              >
+                ← Quay lại
+              </button>
+            </div>
+          </div>
         </>
       )}
 
