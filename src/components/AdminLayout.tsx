@@ -121,14 +121,6 @@ export default function AdminLayout({
               <span className="admin-sidebar-link-icon">📊</span>
               <span>Dashboard</span>
             </Link>
-            <Link
-              to="/admin/analytics"
-              className={`admin-sidebar-link ${isActive("/admin/analytics") ? "active" : ""
-                }`}
-            >
-              <span className="admin-sidebar-link-icon">📈</span>
-              <span>Analytics</span>
-            </Link>
           </div>
 
           {/* User Management */}
