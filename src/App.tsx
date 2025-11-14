@@ -53,6 +53,8 @@ import Classrooms from "./pages/teacher/Classrooms";
 import ClassroomDetail from "./pages/teacher/ClassroomDetail";
 import LessonDetail from "./pages/LessonDetail";
 import TeacherMindmapManagement from "pages/admin/TeacherMindmapManagement";
+import TemplateManagement from "./pages/admin/TemplateManagement";
+import BookManagement from "./pages/admin/BookManagement";
 
 function AppContent(): JSX.Element {
   const {
@@ -293,6 +295,22 @@ function AppContent(): JSX.Element {
             element={
               <AdminLayout title="Quản lý Slides">
                 <SlideManagement />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/admin/templates"
+            element={
+              <AdminLayout title="CRUD Templates">
+                <TemplateManagement />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/admin/books"
+            element={
+              <AdminLayout title="Quản lý Sách">
+                <BookManagement />
               </AdminLayout>
             }
           />

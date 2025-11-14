@@ -160,6 +160,24 @@ export default function AdminLayout({
               <span>Quản lý Slide</span>
             </Link>
             <Link
+              to="/admin/templates"
+              className={`admin-sidebar-link ${
+                isActive("/admin/templates") ? "active" : ""
+              }`}
+            >
+              <span className="admin-sidebar-link-icon">🎨</span>
+              <span>CRUD Templates</span>
+            </Link>
+            <Link
+              to="/admin/books"
+              className={`admin-sidebar-link ${
+                isActive("/admin/books") ? "active" : ""
+              }`}
+            >
+              <span className="admin-sidebar-link-icon">📚</span>
+              <span>Quản lý Sách</span>
+            </Link>
+            <Link
               to="/admin/subject"
               className={`admin-sidebar-link ${
                 isActive("/admin/subject") ? "active" : ""
