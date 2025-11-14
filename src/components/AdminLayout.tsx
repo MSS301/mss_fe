@@ -144,39 +144,6 @@ export default function AdminLayout({
               <span className="admin-sidebar-link-icon">👥</span>
               <span>Tất cả người dùng</span>
             </Link>
-            <Link
-              to="/admin/teachers"
-              className={`admin-sidebar-link ${isActive("/admin/teachers") ? "active" : ""
-                }`}
-            >
-              <span className="admin-sidebar-link-icon">👨‍🏫</span>
-              <span>Giáo viên</span>
-            </Link>
-            <Link
-              to="/admin/students"
-              className={`admin-sidebar-link ${isActive("/admin/students") ? "active" : ""
-                }`}
-            >
-              <span className="admin-sidebar-link-icon">👨‍🎓</span>
-              <span>Học sinh</span>
-            </Link>
-            <Link
-              to="/admin/roles"
-              className={`admin-sidebar-link ${isActive("/admin/roles") ? "active" : ""
-                }`}
-            >
-              <span className="admin-sidebar-link-icon">🔐</span>
-              <span>Vai trò & Quyền</span>
-            </Link>
-            <Link
-              to="/admin/teacher-verification"
-              className={`admin-sidebar-link ${
-                isActive("/admin/teacher-verification") ? "active" : ""
-              }`}
-            >
-              <span className="admin-sidebar-link-icon">✅</span>
-              <span>Phê duyệt giáo viên</span>
-            </Link>
           </div>
 
           {/* Content Management */}
