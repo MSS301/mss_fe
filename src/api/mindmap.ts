@@ -38,6 +38,13 @@ function authHeaders(token: string, userId: string) {
   };
 }
 
+function adminHeaders(token: string) {
+  return {
+    Accept: "application/json",
+    Authorization: `Bearer ${token}`,
+  };
+}
+
 type ApiError = Error & { status?: number; body?: string };
 
 async function throwApiError(resp: Response): Promise<never> {
@@ -118,6 +125,36 @@ export async function deleteMindmap(
   const resp = await fetch(`${API_BASE}/users/${userId}/${mindmapId}`, {
     method: "DELETE",
     headers: authHeaders(token, userId),
+  });
+  if (!resp.ok) {
+    await throwApiError(resp);
+  }
+}
+
+export async function listAllMindmaps(token: string): Promise<MindmapSummary[]> {
+  const resp = await fetch(`${API_BASE}/admin`, {
+    headers: adminHeaders(token),
+  });
+  return handleJsonResponse<MindmapSummary[]>(resp);
+}
+
+export async function getMindmapAdmin(
+  token: string,
+  mindmapId: string
+): Promise<MindmapResponse> {
+  const resp = await fetch(`${API_BASE}/admin/${mindmapId}`, {
+    headers: adminHeaders(token),
+  });
+  return handleJsonResponse<MindmapResponse>(resp);
+}
+
+export async function deleteMindmapAdmin(
+  token: string,
+  mindmapId: string
+): Promise<void> {
+  const resp = await fetch(`${API_BASE}/admin/${mindmapId}`, {
+    method: "DELETE",
+    headers: adminHeaders(token),
   });
   if (!resp.ok) {
     await throwApiError(resp);
