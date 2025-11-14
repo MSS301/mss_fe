@@ -29,6 +29,7 @@ import {
   triggerMindmapNotification,
   updateMindmap,
 } from "../../api/mindmap";
+import { getMyWallet } from "../../api/wallet";
 import { useAuth } from "contexts/AuthContext";
 
 type Props = {
@@ -108,18 +109,36 @@ export default function ManageMindmaps({ token, userId }: Props) {
 
   const [createForm, setCreateForm] = useState<FormState>(emptyForm);
   const [creating, setCreating] = useState(false);
+  const [walletToken, setWalletToken] = useState<number | null>(null);
+  const [walletLoading, setWalletLoading] = useState(false);
+  const [walletError, setWalletError] = useState<string | null>(null);
 
   const [editForm, setEditForm] = useState<FormState>(emptyForm);
   const [updating, setUpdating] = useState(false);
 
   const [infoMessage, setInfoMessage] = useState<string | null>(null);
 
-  const { user } = useAuth();
+  useAuth();
 
   useEffect(() => {
     void loadMindmaps();
+    void loadWallet();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, userId]);
+
+  async function loadWallet() {
+    setWalletLoading(true);
+    setWalletError(null);
+    try {
+      const w = await getMyWallet(token, userId);
+      setWalletToken(w.token ?? null);
+    } catch (err: any) {
+      setWalletError(describeError(err, "Không thể tải thông tin ví"));
+      setWalletToken(null);
+    } finally {
+      setWalletLoading(false);
+    }
+  }
 
   useEffect(() => {
     if (selectedMindmap?.metadata) {
@@ -210,9 +229,17 @@ export default function ManageMindmaps({ token, userId }: Props) {
   async function handleCreate(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!createForm.prompt.trim()) return;
+    // ensure we have latest wallet token
+    if (walletToken === null && !walletLoading) {
+      await loadWallet();
+    }
+
+    if ((walletToken ?? 0) <= 0) {
+      setDetailError("Không đủ token để tạo mindmap. Vui lòng nạp thêm token.");
+      return;
+    }
 
     setCreating(true);
-
     try {
       const payload = {
         userId,
@@ -223,36 +250,36 @@ export default function ManageMindmaps({ token, userId }: Props) {
 
       await createMindmap(token, payload);
 
+      // clear form and show countdown only on successful request
       setCreateForm(emptyForm);
 
-      // Wait 15 seconds for backend to process, then reload page
-      let countdown = 15;
-      setInfoMessage(
-        `Đang tạo mindmap. Tự động tải lại sau ${countdown} giây...`
-      );
+      // Wait 10 seconds for backend to process, then reload list and wallet
+      let countdown = 10;
+      setInfoMessage(`Đang tạo mindmap. Vui lòng đợi sau ${countdown} giây...`);
 
       const countdownInterval = setInterval(() => {
         countdown--;
         if (countdown > 0) {
           setInfoMessage(
-            `Đang tạo mindmap. Tự động tải lại sau ${countdown} giây...`
+            `Đang tạo mindmap. Vui lòng đợi sau ${countdown} giây...`
           );
         } else {
           setInfoMessage("Đang tải lại trang...");
         }
       }, 1000);
 
-      await new Promise((resolve) => setTimeout(resolve, 15000));
+      await new Promise((resolve) => setTimeout(resolve, 10000));
 
       clearInterval(countdownInterval);
 
-      // Reload page to get fresh data
-      window.location.reload();
+      // reload mindmaps and wallet to reflect deduction
+      await loadMindmaps();
+      await loadWallet();
     } catch (error: any) {
+      setDetailError(describeError(error, "Không thể tạo mindmap"));
+    } finally {
       setCreating(false);
-      setListError(describeError(error, "Không thể tạo mindmap mới"));
     }
-    // Don't set setCreating(false) here - page will reload anyway
   }
 
   async function handleUpdate(event: React.FormEvent<HTMLFormElement>) {
@@ -362,20 +389,14 @@ export default function ManageMindmaps({ token, userId }: Props) {
 
   return (
     <div className="mindmap-page">
-      {infoMessage && (
-        <div className="mindmap-alert info">
-          {infoMessage}
-          <button
-            className="mindmap-btn secondary"
-            style={{ marginLeft: "0.75rem" }}
-            onClick={() => setInfoMessage(null)}
-          >
-            X
-          </button>
+      {/* Global errors */}
+      {(listError || detailError || walletError) && (
+        <div className="mindmap-global-error">
+          {listError && <div className="error-text">{listError}</div>}
+          {detailError && <div className="error-text">{detailError}</div>}
+          {walletError && <div className="error-text">{walletError}</div>}
         </div>
       )}
-      {listError && <div className="mindmap-alert error">{listError}</div>}
-
       {/* Loading Popup */}
       {creating && (
         <div className="mindmap-edit-modal-overlay">
@@ -442,6 +463,13 @@ export default function ManageMindmaps({ token, userId }: Props) {
         <section className="mindmap-card mindmap-create-form">
           <div className="mindmap-list-header">
             <h2>Tạo mindmap mới</h2>
+            <div style={{ marginLeft: 12, fontSize: 14, color: "#0f172a" }}>
+              {walletLoading ? (
+                <span>Đang kiểm tra token...</span>
+              ) : (
+                <span>🪙 Tokens: {walletToken ?? "—"}</span>
+              )}
+            </div>
           </div>
 
           <form onSubmit={handleCreate}>

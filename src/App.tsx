@@ -470,7 +470,7 @@ function AppContent(): JSX.Element {
                   ? "/admin/dashboard"
                   : isTeacher
                   ? "/teacher/dashboard"
-                  : "/dashboard"
+                  : "/"
               }
               replace
             />

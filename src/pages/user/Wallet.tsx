@@ -10,7 +10,6 @@ import {
   Transaction,
 } from "../../api/wallet";
 import "../../css/Wallet.css";
-import "boxicons/css/boxicons.min.css";
 
 type Props = {
   token: string;
@@ -160,15 +159,7 @@ export default function Wallet({ token, userId }: Props) {
       {/* Page Header */}
       <div className="wallet-page-header">
         <div className="wallet-header-content">
-          <h1 className="wallet-page-title">
-            {/* boxicons wallet-alt icon */}
-            <i
-              className="bx bx-wallet-alt"
-              style={{ fontSize: 32 }}
-              aria-hidden="true"
-            />
-            Ví của tôi
-          </h1>
+          <h1 className="wallet-page-title">Ví của tôi</h1>
           <p className="wallet-page-subtitle">
             Quản lý số dư, nạp tiền và xem lịch sử giao dịch của bạn
           </p>
