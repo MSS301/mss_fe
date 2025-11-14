@@ -226,7 +226,7 @@ export default function ManageMindmaps({ token, userId }: Props) {
       setCreateForm(emptyForm);
 
       // Wait 15 seconds for backend to process, then reload page
-      let countdown = 15;
+      let countdown = 45;
       setInfoMessage(
         `Đang tạo mindmap. Tự động tải lại sau ${countdown} giây...`
       );
@@ -325,9 +325,8 @@ export default function ManageMindmaps({ token, userId }: Props) {
 
       const downloadLink = document.createElement("a");
       downloadLink.href = jsonUrl;
-      downloadLink.download = `${
-        selectedMindmap.metadata.name || "mindmap"
-      }-${selectedId}.json`;
+      downloadLink.download = `${selectedMindmap.metadata.name || "mindmap"
+        }-${selectedId}.json`;
       document.body.appendChild(downloadLink);
       downloadLink.click();
       document.body.removeChild(downloadLink);
@@ -374,7 +373,7 @@ export default function ManageMindmaps({ token, userId }: Props) {
           </button>
         </div>
       )}
-      {listError && <div className="mindmap-alert error">{listError}</div>}
+      {/* {listError && <div className="mindmap-alert error">{listError}</div>} */}
 
       {/* Loading Popup */}
       {creating && (
@@ -418,9 +417,8 @@ export default function ManageMindmaps({ token, userId }: Props) {
               {mindmaps.map((map) => (
                 <div
                   key={map.id}
-                  className={`mindmap-item ${
-                    selectedId === map.id ? "active" : ""
-                  }`}
+                  className={`mindmap-item ${selectedId === map.id ? "active" : ""
+                    }`}
                   onClick={() => void loadMindmapDetail(map)}
                 >
                   <div className="mindmap-item-title">
@@ -662,8 +660,8 @@ function normalizeNode(node?: RawMindmapNode | null): MindmapTreeNode | null {
   }
   const children = Array.isArray(node.children)
     ? node.children
-        .map(normalizeNode)
-        .filter((child): child is MindmapTreeNode => Boolean(child))
+      .map(normalizeNode)
+      .filter((child): child is MindmapTreeNode => Boolean(child))
     : [];
   return {
     id: node.id,
