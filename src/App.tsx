@@ -52,6 +52,7 @@ import CreateLesson from "./pages/teacher/CreateLesson";
 import Classrooms from "./pages/teacher/Classrooms";
 import ClassroomDetail from "./pages/teacher/ClassroomDetail";
 import LessonDetail from "./pages/LessonDetail";
+import TeacherMindmapManagement from "pages/admin/TeacherMindmapManagement";
 
 function AppContent(): JSX.Element {
   const {
@@ -356,6 +357,14 @@ function AppContent(): JSX.Element {
             element={
               <AdminLayout title="Quản lý bài học của giáo viên">
                 <TeacherLessonManagement />
+              </AdminLayout>
+            }
+          />
+          <Route
+            path="/admin/teacher-mindmap"
+            element={
+              <AdminLayout title="Quản lý bài học của giáo viên">
+                <TeacherMindmapManagement />
               </AdminLayout>
             }
           />
