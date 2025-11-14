@@ -40,9 +40,9 @@ export default function OAuth2Callback() {
           localStorage.setItem("tokenExpiryTime", expiryTime);
         }
 
-        // Redirect to dashboard after short delay
+        // Redirect to homepage after short delay (dashboard removed)
         setTimeout(() => {
-          navigate("/dashboard");
+          navigate("/");
         }, 1000);
       } catch (err: any) {
         console.error("OAuth2 callback error:", err);

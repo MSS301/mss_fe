@@ -42,7 +42,6 @@ export default function Statistics() {
         </div>
 
         <div className="stat-card">
-          <div className="stat-icon info">💬</div>
           <div className="stat-content">
             <div className="stat-label">Bình luận</div>
             <div className="stat-value">156</div>
@@ -175,16 +174,6 @@ export default function Statistics() {
               <div className="activity-content">
                 <div className="activity-text">5 đánh giá 5 sao</div>
                 <div className="activity-time">1 ngày trước</div>
-              </div>
-            </div>
-
-            <div className="activity-item">
-              <div className="activity-icon" style={{ background: "#fce7f3" }}>
-                💬
-              </div>
-              <div className="activity-content">
-                <div className="activity-text">8 bình luận mới</div>
-                <div className="activity-time">2 ngày trước</div>
               </div>
             </div>
           </div>
