@@ -8,7 +8,7 @@ import { useAuth } from "../contexts/AuthContext";
 import "../css/login.css";
 
 const API_BASE =
-  (process.env.REACT_APP_API_BASE?.trim().replace(/\/$/, "")) ||
+  process.env.REACT_APP_API_BASE?.trim().replace(/\/$/, "") ||
   "http://localhost:8080";
 
 type Props = {
@@ -23,13 +23,13 @@ declare global {
 }
 
 const FRIENDLY_STATUS_CODE_MESSAGES: Record<number, string> = {
-  400: "Du lieu gui len khong hop le, vui long kiem tra lai.",
-  401: "Ban chua dang nhap hoac phien da het han.",
-  403: "Email hoac mat khau khong dung.",
-  404: "Khong tim thay tai khoan.",
-  429: "Ban thao tac qua nhanh, vui long thu lai sau.",
-  500: "May chu dang co su co, vui long thu lai.",
-  503: "Dich vu dang tam thoi ngung, vui long thu lai sau.",
+  400: "Dữ liệu gửi lên không hợp lệ, vui lòng kiểm tra lại.",
+  401: "Bạn chưa đăng nhập hoặc phiên đã hết hạn.",
+  403: "Email hoặc mật khẩu không đúng.",
+  404: "Không tìm thấy tài khoản.",
+  429: "Bạn thao tác quá nhanh, vui lòng thử lại sau.",
+  500: "Máy chủ đang có sự cố, vui lòng thử lại.",
+  503: "Dịch vụ đang tạm thời ngừng, vui lòng thử lại sau.",
 };
 
 type WithStatusError = {
@@ -58,9 +58,7 @@ function extractStatusFromError(error: unknown): number | null {
   }
 
   const message =
-    typeof error === "string"
-      ? error
-      : (error as WithStatusError).message;
+    typeof error === "string" ? error : (error as WithStatusError).message;
   if (typeof message === "string") {
     const match = message.match(/HTTP\s+(\d{3})/);
     if (match) {
@@ -85,9 +83,7 @@ function getFriendlyErrorMessage(error: unknown, fallback: string): string {
   }
 
   const message =
-    typeof error === "string"
-      ? error
-      : (error as WithStatusError).message;
+    typeof error === "string" ? error : (error as WithStatusError).message;
   if (typeof message === "string" && message.trim().length) {
     return message;
   }
@@ -263,7 +259,7 @@ export default function Login({ onLogin, onBack }: Props) {
           <span>Trang chủ</span>
         </button>
       )}
-      
+
       <div className="login-background-decoration">
         <div className="decoration-circle circle-1"></div>
         <div className="decoration-circle circle-2"></div>
@@ -275,19 +271,19 @@ export default function Login({ onLogin, onBack }: Props) {
           <div className="login-logo-wrapper">
             <div className="login-logo">
               <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-                <rect width="32" height="32" rx="8" fill="url(#logoGradient)"/>
-                <path
-                  d="M16 8L22 14H18V20H14V14H10L16 8Z"
-                  fill="white"
-                />
-                <path
-                  d="M10 24H22V22H10V24Z"
-                  fill="white"
-                />
+                <rect width="32" height="32" rx="8" fill="url(#logoGradient)" />
+                <path d="M16 8L22 14H18V20H14V14H10L16 8Z" fill="white" />
+                <path d="M10 24H22V22H10V24Z" fill="white" />
                 <defs>
-                  <linearGradient id="logoGradient" x1="0" y1="0" x2="32" y2="32">
-                    <stop offset="0%" stopColor="#667eea"/>
-                    <stop offset="100%" stopColor="#764ba2"/>
+                  <linearGradient
+                    id="logoGradient"
+                    x1="0"
+                    y1="0"
+                    x2="32"
+                    y2="32"
+                  >
+                    <stop offset="0%" stopColor="#667eea" />
+                    <stop offset="100%" stopColor="#764ba2" />
                   </linearGradient>
                 </defs>
               </svg>
@@ -307,8 +303,19 @@ export default function Login({ onLogin, onBack }: Props) {
           {error && (
             <div className="login-message login-error">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="2"/>
-                <path d="M10 6V10M10 14H10.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                <circle
+                  cx="10"
+                  cy="10"
+                  r="9"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                />
+                <path
+                  d="M10 6V10M10 14H10.01"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                />
               </svg>
               <span>{error}</span>
             </div>
@@ -317,8 +324,20 @@ export default function Login({ onLogin, onBack }: Props) {
           {successMessage && (
             <div className="login-message login-success">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="2"/>
-                <path d="M6 10L9 13L14 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <circle
+                  cx="10"
+                  cy="10"
+                  r="9"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                />
+                <path
+                  d="M6 10L9 13L14 7"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
               <span>{successMessage}</span>
             </div>
@@ -409,7 +428,7 @@ export default function Login({ onLogin, onBack }: Props) {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 />
-                <circle cx="9" cy="12" r="1.5" fill="currentColor"/>
+                <circle cx="9" cy="12" r="1.5" fill="currentColor" />
               </svg>
               Mật khẩu
             </label>
@@ -420,7 +439,9 @@ export default function Login({ onLogin, onBack }: Props) {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               required
-              autoComplete={isRegisterMode ? "new-password" : "current-password"}
+              autoComplete={
+                isRegisterMode ? "new-password" : "current-password"
+              }
             />
           </div>
 
@@ -428,7 +449,9 @@ export default function Login({ onLogin, onBack }: Props) {
             {loading ? (
               <>
                 <span className="spinner"></span>
-                <span>{isRegisterMode ? "Đang đăng ký..." : "Đang đăng nhập..."}</span>
+                <span>
+                  {isRegisterMode ? "Đang đăng ký..." : "Đang đăng nhập..."}
+                </span>
               </>
             ) : (
               <>
