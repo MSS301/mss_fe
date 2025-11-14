@@ -10,14 +10,8 @@ type NotificationBellProps = {
 const NotificationBell: React.FC<NotificationBellProps> = ({
   variant = "user",
 }) => {
-  const {
-    notifications,
-    unreadCount,
-    loading,
-    error,
-    markAsRead,
-    refresh,
-  } = useNotifications();
+  const { notifications, unreadCount, loading, error, markAsRead, refresh } =
+    useNotifications();
 
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -45,26 +39,6 @@ const NotificationBell: React.FC<NotificationBellProps> = ({
 
   return (
     <div className="notification-bell" ref={containerRef}>
-      <button
-        type="button"
-        aria-label="Thong bao"
-        className="notification-trigger header-action-btn"
-        onClick={async () => {
-          const nextOpen = !isOpen;
-          setIsOpen(nextOpen);
-          if (nextOpen) {
-            await refresh();
-          }
-        }}
-      >
-        <span aria-hidden>🔔</span>
-        {unreadCount > 0 && (
-          <span className="notification-badge">
-            {unreadCount > 9 ? "9+" : unreadCount}
-          </span>
-        )}
-      </button>
-
       {isOpen && (
         <div className="notification-popover">
           <div className="notification-popover__header">
