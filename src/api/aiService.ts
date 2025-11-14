@@ -471,6 +471,175 @@ export async function getTemplatePreview(
   return URL.createObjectURL(blob);
 }
 
+// Template CRUD API
+export interface TemplateUploadRequest {
+  name: string;
+  description?: string;
+  file: File;
+}
+
+export async function uploadTemplate(
+  token: string,
+  req: TemplateUploadRequest
+): Promise<Template> {
+  const formData = new FormData();
+  formData.append("name", req.name);
+  if (req.description) {
+    formData.append("description", req.description);
+  }
+  formData.append("file", req.file);
+
+  const response = await fetchWithAuth("/ai_service/slides/templates", token, {
+    method: "POST",
+    body: formData,
+  });
+  return response.json();
+}
+
+export async function updateTemplate(
+  token: string,
+  templateId: string,
+  name: string,
+  description?: string
+): Promise<Template> {
+  // Note: Backend may not have update endpoint, using PUT if available
+  const response = await fetchWithAuth(
+    `/ai_service/slides/templates/${templateId}`,
+    token,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ name, description }),
+    }
+  );
+  return response.json();
+}
+
+export async function deleteTemplate(
+  token: string,
+  templateId: string
+): Promise<void> {
+  await fetchWithAuth(`/ai_service/slides/templates/${templateId}`, token, {
+    method: "DELETE",
+  });
+}
+
+// Books Management API
+export interface IngestBookRequest {
+  pdf_url: string;
+  book_name: string;
+  grade_id: string;
+  force_reparse?: boolean;
+  force_clear_cache?: boolean;
+}
+
+export interface IngestBookResponse {
+  book_id: string;
+  book_name: string;
+  grade_id: string;
+  status: string;
+  chunks_count?: number;
+  pages_count?: number;
+}
+
+export interface BookInfo {
+  book_id: string;
+  book_name: string;
+  grade_id: string;
+  structure?: any;
+  chunks?: number;
+  pages?: number[];
+}
+
+export interface BooksListResponse {
+  books: Record<string, BookInfo>;
+}
+
+export interface BookStructureResponse {
+  book_id: string;
+  book_name: string;
+  grade_id: string;
+  structure: any;
+}
+
+export async function ingestBook(
+  token: string,
+  req: IngestBookRequest
+): Promise<IngestBookResponse> {
+  const response = await fetchWithAuth(
+    "/ai_service/ingestion",
+    token,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(req),
+    },
+    null // No timeout for ingest
+  );
+  return response.json();
+}
+
+export async function getAllIngestedBooks(
+  token: string
+): Promise<BooksListResponse> {
+  const response = await fetchWithAuth("/ai_service/ingestion", token);
+  return response.json();
+}
+
+export async function getIngestedBookById(
+  token: string,
+  bookId: string
+): Promise<BookInfo> {
+  const response = await fetchWithAuth(
+    `/ai_service/ingestion/id/${bookId}`,
+    token
+  );
+  return response.json();
+}
+
+export async function getBookStructure(
+  token: string,
+  bookId: string
+): Promise<BookStructureResponse> {
+  const response = await fetchWithAuth(
+    `/ai_service/ingestion/id/${bookId}/structure`,
+    token
+  );
+  return response.json();
+}
+
+export async function deleteBookById(
+  token: string,
+  bookId: string
+): Promise<any> {
+  const response = await fetchWithAuth(
+    `/ai_service/ingestion/by-id/${bookId}`,
+    token,
+    {
+      method: "DELETE",
+    }
+  );
+  return response.json();
+}
+
+export async function deleteBookByName(
+  token: string,
+  bookName: string
+): Promise<any> {
+  const response = await fetchWithAuth(
+    `/ai_service/ingestion/${encodeURIComponent(bookName)}`,
+    token,
+    {
+      method: "DELETE",
+    }
+  );
+  return response.json();
+}
+
 // Export PPTX API
 export interface ExportPPTXRequest {
   content_yaml_id: string;
