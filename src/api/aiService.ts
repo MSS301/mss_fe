@@ -391,3 +391,108 @@ export async function createSlideFromContent(
   );
   return response.json();
 }
+
+// Template YAML API
+export interface GenerateYAMLRequest {
+  content_id: string;
+  created_by?: string | null;
+}
+
+export interface GenerateYAMLResponse {
+  content_yaml_id: string;
+  yaml: string;
+}
+
+export async function generateYAMLFromContent(
+  token: string,
+  req: GenerateYAMLRequest
+): Promise<GenerateYAMLResponse> {
+  // No timeout - wait for response indefinitely (AI generation can take time)
+  const response = await fetchWithAuth(
+    "/ai_service/slides/template/yaml",
+    token,
+    {
+      method: "POST",
+      body: JSON.stringify(req),
+    },
+    null // No timeout - wait indefinitely for YAML generation
+  );
+  return response.json();
+}
+
+// Template API
+export interface Template {
+  template_id: string;
+  name: string;
+  filename: string;
+  content_type: string;
+  size?: number | null;
+  description?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+}
+
+export async function listTemplates(token: string): Promise<Template[]> {
+  const response = await fetchWithAuth("/ai_service/slides/templates", token);
+  return response.json();
+}
+
+export async function getTemplate(
+  token: string,
+  templateId: string
+): Promise<Template> {
+  const response = await fetchWithAuth(
+    `/ai_service/slides/templates/${templateId}`,
+    token
+  );
+  return response.json();
+}
+
+export async function downloadTemplate(
+  token: string,
+  templateId: string
+): Promise<Blob> {
+  const response = await fetchWithAuth(
+    `/ai_service/slides/templates/${templateId}/download`,
+    token
+  );
+  return response.blob();
+}
+
+export async function getTemplatePreview(
+  token: string,
+  templateId: string
+): Promise<string> {
+  const response = await fetchWithAuth(
+    `/ai_service/slides/templates/${templateId}/preview`,
+    token
+  );
+  const blob = await response.blob();
+  return URL.createObjectURL(blob);
+}
+
+// Export PPTX API
+export interface ExportPPTXRequest {
+  content_yaml_id: string;
+  template_id: string;
+  filename?: string | null;
+  overwrite_existing?: boolean | null;
+}
+
+export async function exportPPTX(
+  token: string,
+  req: ExportPPTXRequest
+): Promise<Blob> {
+  // No timeout - wait for response indefinitely (PPTX generation can take time)
+  // Endpoint: /ai_service/slides/template/export (router prefix: /ai_service/slides, route: /template/export)
+  const response = await fetchWithAuth(
+    "/ai_service/slides/template/export",
+    token,
+    {
+      method: "POST",
+      body: JSON.stringify(req),
+    },
+    null // No timeout - wait indefinitely for PPTX export
+  );
+  return response.blob();
+}

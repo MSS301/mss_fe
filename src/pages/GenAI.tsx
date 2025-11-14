@@ -10,11 +10,18 @@ import {
   ragQuery,
   reviseContent,
   createSlideFromContent,
+  generateYAMLFromContent,
+  listTemplates,
+  getTemplate,
+  downloadTemplate,
+  getTemplatePreview,
+  exportPPTX,
   Subject,
   Grade,
   Book,
   Chapter,
   Lesson,
+  Template,
 } from "../api/aiService";
 import "../css/GenAI.css";
 
@@ -51,6 +58,16 @@ export default function GenAI() {
     id?: string;
   } | null>(null);
   const [selectedOption, setSelectedOption] = useState<"default" | "template" | null>(null);
+
+  // Template states
+  const [contentYamlId, setContentYamlId] = useState<string | null>(null);
+  const [yamlContent, setYamlContent] = useState<string>("");
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
+  const [loadingTemplates, setLoadingTemplates] = useState(false);
+  const [templateStep, setTemplateStep] = useState<"generate" | "select" | "export">("generate");
+  const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   // Loading states for each dropdown
   const [loadingSubjects, setLoadingSubjects] = useState(false);
@@ -243,7 +260,7 @@ export default function GenAI() {
   const formatBookName = (name: string): string => {
     // Remove "Sách giáo khoa" prefix if exists
     let formatted = name.replace(/^Sách giáo khoa\s*/i, "").trim();
-
+    
     // Helper to convert to title case (first letter of each word uppercase)
     const toTitleCase = (str: string): string => {
       return str
@@ -252,7 +269,7 @@ export default function GenAI() {
         .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
         .join(" ");
     };
-
+    
     // Handle multiple parentheses: keep first one, convert second to en dash
     // Pattern: "Text (first) (second)" -> "Text (first) – second"
     const parenMatch = formatted.match(
@@ -274,7 +291,7 @@ export default function GenAI() {
         .replace(/\s*\(\s*/g, " (")
         .replace(/\s*\)\s*/g, ") ");
     }
-
+    
     return formatted.trim();
   };
 
@@ -354,7 +371,174 @@ export default function GenAI() {
       }
     } else {
       // Option 2: Tạo Slide theo template có sẵn
-      setCurrentStep("template");
+      // Cần gọi RAG query trước để có content_id
+      if (!token) {
+        setError("Vui lòng đăng nhập để sử dụng tính năng này");
+        return;
+      }
+
+      setLoading(true);
+
+      try {
+        // Call RAG query API để có content_id
+        const ragResponse = await ragQuery(token, {
+          grade_id: selectedGradeId,
+          book_id: selectedBookId,
+          chapter_id: selectedChapterId,
+          lesson_id: selectedLessonId,
+          content: userContent,
+          subject_id: selectedSubjectId,
+          k: 8,
+        });
+
+        setContentId(ragResponse.content_id);
+        setGeneratedContent(ragResponse.content_text);
+        // Chuyển sang review step để người dùng có thể xem và revise content trước
+        setCurrentStep("review");
+      } catch (err: any) {
+        setError(`Lỗi khi tạo nội dung: ${err.message || "Lỗi không xác định"}`);
+        console.error("[GenAI] Error in RAG query:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  // Template flow handlers
+  const handleGenerateYAML = async () => {
+    if (!contentId || !token) {
+      setError("Không tìm thấy content_id hoặc chưa đăng nhập");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const yamlResponse = await generateYAMLFromContent(token, {
+        content_id: contentId,
+      });
+
+      setContentYamlId(yamlResponse.content_yaml_id);
+      setYamlContent(yamlResponse.yaml);
+      setTemplateStep("select");
+      
+      // Load templates
+      await loadTemplates();
+    } catch (err: any) {
+      setError(`Lỗi khi sinh YAML: ${err.message || "Lỗi không xác định"}`);
+      console.error("[GenAI] Error generating YAML:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadTemplates = async () => {
+    if (!token) return;
+    
+    setLoadingTemplates(true);
+    try {
+      const templatesList = await listTemplates(token);
+      setTemplates(templatesList);
+    } catch (err: any) {
+      setError(`Lỗi khi tải templates: ${err.message || "Lỗi không xác định"}`);
+      console.error("[GenAI] Error loading templates:", err);
+    } finally {
+      setLoadingTemplates(false);
+    }
+  };
+
+  const handleSelectTemplate = (templateId: string) => {
+    setSelectedTemplateId(templateId);
+    // Không chuyển step ngay, để người dùng có thể xem lại và click button
+  };
+
+  const handlePreviewTemplate = async (template: Template) => {
+    setPreviewTemplate(template);
+    setPreviewUrl(null); // Reset preview URL
+    if (!token) return;
+
+    try {
+      // Get preview image from backend
+      const previewImageUrl = await getTemplatePreview(token, template.template_id);
+      setPreviewUrl(previewImageUrl);
+    } catch (err: any) {
+      console.error("[GenAI] Error loading template preview:", err);
+      setPreviewUrl(null);
+    }
+  };
+
+  const handleClosePreview = () => {
+    setPreviewTemplate(null);
+    if (previewUrl) {
+      window.URL.revokeObjectURL(previewUrl);
+      setPreviewUrl(null);
+    }
+  };
+
+  const handleDownloadTemplate = async () => {
+    if (!previewTemplate || !token) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const blob = await downloadTemplate(token, previewTemplate.template_id);
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = previewTemplate.filename || `template_${previewTemplate.template_id}.pptx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err: any) {
+      setError(`Lỗi khi tải template: ${err.message || "Lỗi không xác định"}`);
+      console.error("[GenAI] Error downloading template:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleExportPPTX = async () => {
+    if (!contentYamlId || !selectedTemplateId || !token) {
+      setError("Vui lòng chọn template");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const blob = await exportPPTX(token, {
+        content_yaml_id: contentYamlId,
+        template_id: selectedTemplateId,
+        overwrite_existing: true,
+      });
+
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `slides_${contentYamlId}.pptx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      // Set result for display
+      setSlideResult({
+        download: url,
+        id: contentYamlId,
+      });
+      setCurrentStep("result");
+    } catch (err: any) {
+      setError(`Lỗi khi tạo slide: ${err.message || "Lỗi không xác định"}`);
+      console.error("[GenAI] Error exporting PPTX:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -437,6 +621,11 @@ export default function GenAI() {
   const handleBackToOption = () => {
     setCurrentStep("option");
     setError(null);
+    setTemplateStep("generate");
+    setContentYamlId(null);
+    setYamlContent("");
+    setTemplates([]);
+    setSelectedTemplateId("");
   };
 
   if (!token) {
@@ -466,157 +655,157 @@ export default function GenAI() {
 
       {currentStep === "selection" && (
         <form onSubmit={handleSubmit} className="genai-form">
-          {/* Step 1: Subject */}
+        {/* Step 1: Subject */}
+        <div className="genai-form-group">
+          <label htmlFor="subject" className="genai-label required">
+            <span className="step-number">1</span>
+            Môn học
+          </label>
+          <select
+            id="subject"
+            value={selectedSubjectId}
+            onChange={handleSubjectChange}
+            className="genai-select"
+            required
+            disabled={loadingSubjects}
+          >
+            <option value="">
+              {loadingSubjects ? "Đang tải..." : "-- Chọn môn học --"}
+            </option>
+            {subjects.map((subject) => (
+              <option key={subject.subject_id} value={subject.subject_id}>
+                {formatSubjectName(subject.subject_name)}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Step 2: Grade */}
+        {selectedSubjectId && (
           <div className="genai-form-group">
-            <label htmlFor="subject" className="genai-label required">
-              <span className="step-number">1</span>
-              Môn học
+            <label htmlFor="grade" className="genai-label required">
+              <span className="step-number">2</span>
+              Khối
             </label>
             <select
-              id="subject"
-              value={selectedSubjectId}
-              onChange={handleSubjectChange}
+              id="grade"
+              value={selectedGradeId}
+              onChange={handleGradeChange}
               className="genai-select"
               required
-              disabled={loadingSubjects}
+              disabled={loadingGrades}
             >
               <option value="">
-                {loadingSubjects ? "Đang tải..." : "-- Chọn môn học --"}
+                {loadingGrades ? "Đang tải..." : "-- Chọn khối --"}
               </option>
-              {subjects.map((subject) => (
-                <option key={subject.subject_id} value={subject.subject_id}>
-                  {formatSubjectName(subject.subject_name)}
+              {grades.map((grade) => (
+                <option key={grade.grade_id} value={grade.grade_id}>
+                  {grade.grade_number}
                 </option>
               ))}
             </select>
           </div>
+        )}
 
-          {/* Step 2: Grade */}
-          {selectedSubjectId && (
-            <div className="genai-form-group">
-              <label htmlFor="grade" className="genai-label required">
-                <span className="step-number">2</span>
-                Khối
-              </label>
-              <select
-                id="grade"
-                value={selectedGradeId}
-                onChange={handleGradeChange}
-                className="genai-select"
-                required
-                disabled={loadingGrades}
-              >
-                <option value="">
-                  {loadingGrades ? "Đang tải..." : "-- Chọn khối --"}
+        {/* Step 3: Book */}
+        {selectedGradeId && (
+          <div className="genai-form-group">
+            <label htmlFor="book" className="genai-label required">
+              <span className="step-number">3</span>
+              Sách giáo khoa
+            </label>
+            <select
+              id="book"
+              value={selectedBookId}
+              onChange={handleBookChange}
+              className="genai-select"
+              required
+              disabled={loadingBooks}
+            >
+              <option value="">
+                {loadingBooks ? "Đang tải..." : "-- Chọn sách giáo khoa --"}
+              </option>
+              {books.map((book) => (
+                <option key={book.book_id} value={book.book_id}>
+                  {formatBookName(book.book_name)}
                 </option>
-                {grades.map((grade) => (
-                  <option key={grade.grade_id} value={grade.grade_id}>
-                    {grade.grade_number}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
+              ))}
+            </select>
+          </div>
+        )}
 
-          {/* Step 3: Book */}
-          {selectedGradeId && (
-            <div className="genai-form-group">
-              <label htmlFor="book" className="genai-label required">
-                <span className="step-number">3</span>
-                Sách giáo khoa
-              </label>
-              <select
-                id="book"
-                value={selectedBookId}
-                onChange={handleBookChange}
-                className="genai-select"
-                required
-                disabled={loadingBooks}
-              >
-                <option value="">
-                  {loadingBooks ? "Đang tải..." : "-- Chọn sách giáo khoa --"}
+        {/* Step 4: Chapter */}
+        {selectedBookId && (
+          <div className="genai-form-group">
+            <label htmlFor="chapter" className="genai-label required">
+              <span className="step-number">4</span>
+              Chương
+            </label>
+            <select
+              id="chapter"
+              value={selectedChapterId}
+              onChange={handleChapterChange}
+              className="genai-select"
+              required
+              disabled={loadingChapters}
+            >
+              <option value="">
+                {loadingChapters ? "Đang tải..." : "-- Chọn chương --"}
+              </option>
+              {chapters.map((chapter) => (
+                <option key={chapter.chapter_id} value={chapter.chapter_id}>
+                  {formatChapterTitle(chapter.title)}
                 </option>
-                {books.map((book) => (
-                  <option key={book.book_id} value={book.book_id}>
-                    {formatBookName(book.book_name)}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
+              ))}
+            </select>
+          </div>
+        )}
 
-          {/* Step 4: Chapter */}
-          {selectedBookId && (
-            <div className="genai-form-group">
-              <label htmlFor="chapter" className="genai-label required">
-                <span className="step-number">4</span>
-                Chương
-              </label>
-              <select
-                id="chapter"
-                value={selectedChapterId}
-                onChange={handleChapterChange}
-                className="genai-select"
-                required
-                disabled={loadingChapters}
-              >
-                <option value="">
-                  {loadingChapters ? "Đang tải..." : "-- Chọn chương --"}
+        {/* Step 5: Lesson */}
+        {selectedChapterId && (
+          <div className="genai-form-group">
+            <label htmlFor="lesson" className="genai-label required">
+              <span className="step-number">5</span>
+              Bài học
+            </label>
+            <select
+              id="lesson"
+              value={selectedLessonId}
+              onChange={handleLessonChange}
+              className="genai-select"
+              required
+              disabled={loadingLessons}
+            >
+              <option value="">
+                {loadingLessons ? "Đang tải..." : "-- Chọn bài học --"}
+              </option>
+              {lessons.map((lesson) => (
+                <option key={lesson.lesson_id} value={lesson.lesson_id}>
+                  {formatLessonTitle(lesson.title)}
+                  {lesson.page && ` (Trang ${lesson.page})`}
                 </option>
-                {chapters.map((chapter) => (
-                  <option key={chapter.chapter_id} value={chapter.chapter_id}>
-                    {formatChapterTitle(chapter.title)}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
+              ))}
+            </select>
+          </div>
+        )}
 
-          {/* Step 5: Lesson */}
-          {selectedChapterId && (
-            <div className="genai-form-group">
-              <label htmlFor="lesson" className="genai-label required">
-                <span className="step-number">5</span>
-                Bài học
-              </label>
-              <select
-                id="lesson"
-                value={selectedLessonId}
-                onChange={handleLessonChange}
-                className="genai-select"
-                required
-                disabled={loadingLessons}
-              >
-                <option value="">
-                  {loadingLessons ? "Đang tải..." : "-- Chọn bài học --"}
-                </option>
-                {lessons.map((lesson) => (
-                  <option key={lesson.lesson_id} value={lesson.lesson_id}>
-                    {formatLessonTitle(lesson.title)}
-                    {lesson.page && ` (Trang ${lesson.page})`}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          {/* Submit Button */}
+        {/* Submit Button */}
           {selectedSubjectId &&
             selectedGradeId &&
             selectedBookId &&
             selectedChapterId &&
             selectedLessonId && (
-              <div className="genai-form-actions">
-                <button
-                  type="submit"
-                  className="genai-submit-btn"
-                  disabled={loading}
-                >
+          <div className="genai-form-actions">
+            <button
+              type="submit"
+              className="genai-submit-btn"
+              disabled={loading}
+            >
                   {loading ? "Đang xử lý..." : "Tiếp theo →"}
-                </button>
-              </div>
-            )}
-        </form>
+            </button>
+          </div>
+        )}
+      </form>
       )}
 
       {/* Content Input Step */}
@@ -856,23 +1045,403 @@ export default function GenAI() {
             >
               ← Quay lại
             </button>
-            <button
-              onClick={handleCreateSlide}
-              className="genai-submit-btn"
-              disabled={loading}
-            >
-              {loading ? (
-                <>
-                  <span className="genai-btn-spinner"></span>
-                  Vui lòng chờ AI tạo slide...
-                </>
-              ) : (
-                "🚀 Tạo Slide"
-              )}
-            </button>
+            {selectedOption === "template" ? (
+              <button
+                onClick={() => {
+                  setTemplateStep("generate");
+                  setCurrentStep("template");
+                }}
+                className="genai-submit-btn"
+                disabled={loading}
+              >
+                Tiếp tục với Template →
+              </button>
+            ) : (
+              <button
+                onClick={handleCreateSlide}
+                className="genai-submit-btn"
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <span className="genai-btn-spinner"></span>
+                    Vui lòng chờ AI tạo slide...
+                  </>
+                ) : (
+                  "🚀 Tạo Slide"
+                )}
+              </button>
+            )}
           </div>
         </div>
         </>
+      )}
+
+      {/* Template Step */}
+      {currentStep === "template" && (
+        <>
+          {loading && (
+            <div className="genai-loading-overlay">
+              <div className="genai-loading-content">
+                <div className="genai-loading-spinner"></div>
+                <h3>
+                  {templateStep === "generate" && "Vui lòng chờ AI sinh YAML slide"}
+                  {templateStep === "select" && "Đang tải templates..."}
+                  {templateStep === "export" && "Vui lòng chờ tạo slide từ template"}
+                </h3>
+                <p>Quá trình này có thể mất vài phút, vui lòng không đóng trang...</p>
+              </div>
+            </div>
+          )}
+
+          {/* Step 1: Generate YAML */}
+          {templateStep === "generate" && (
+            <div className="genai-template-step">
+          <div className="genai-template-header">
+                <h2>Bước 1: Sinh YAML slide từ nội dung</h2>
+                <p>Hệ thống sẽ tự động chuyển đổi nội dung đã tạo thành định dạng YAML cho slide</p>
+          </div>
+
+              <div className="genai-content-preview">
+                <div className="genai-content-header">
+                  <h3>Nội dung đã tạo:</h3>
+                </div>
+                <div className="genai-content-text">
+                  <ReactMarkdown>{generatedContent}</ReactMarkdown>
+                </div>
+              </div>
+
+              <div className="genai-form-actions">
+                <button
+                  onClick={handleBackToOption}
+                  className="genai-back-btn"
+                  disabled={loading}
+                >
+                  ← Quay lại
+                </button>
+                <button
+                  onClick={handleGenerateYAML}
+                  className="genai-submit-btn"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <span className="genai-btn-spinner"></span>
+                      Đang sinh YAML...
+                    </>
+                  ) : (
+                    "🚀 Sinh YAML Slide"
+                  )}
+                </button>
+            </div>
+            </div>
+          )}
+
+          {/* Step 2: Select Template */}
+          {templateStep === "select" && (
+            <div className="genai-template-step">
+              <div className="genai-template-header">
+                <h2>Bước 2: Chọn template slide</h2>
+                <p>Chọn một template từ danh sách bên dưới để tạo slide</p>
+              </div>
+
+              {loadingTemplates ? (
+                <div className="genai-loading-state">
+                  <div className="genai-loading-spinner"></div>
+                  <p>Đang tải templates...</p>
+                </div>
+              ) : templates.length === 0 ? (
+                <div className="genai-empty-state">
+                  <p>Không có template nào trong hệ thống</p>
+                </div>
+              ) : (
+                <div className="genai-template-grid">
+                  {templates.map((template) => (
+                    <div
+                      key={template.template_id}
+                      className={`genai-template-card ${
+                        selectedTemplateId === template.template_id ? "selected" : ""
+                      }`}
+                    >
+                      <div className="genai-template-card-content">
+                        <div className="genai-template-card-icon">
+                          <svg
+                            width="48"
+                            height="48"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                          </svg>
+            </div>
+                        <h3>{template.name}</h3>
+                        {template.description && (
+                          <p className="genai-template-description">{template.description}</p>
+                        )}
+                        <div className="genai-template-meta">
+                          <span>{template.filename}</span>
+                          {template.size && (
+                            <span>{(template.size / 1024).toFixed(2)} KB</span>
+                          )}
+          </div>
+                      </div>
+                      <div className="genai-template-card-actions">
+                        <button
+                          className="genai-template-preview-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handlePreviewTemplate(template);
+                          }}
+                          title="Xem preview"
+                        >
+                          <svg
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                          </svg>
+                          Xem preview
+                        </button>
+                        <button
+                          className={`genai-template-select-btn ${
+                            selectedTemplateId === template.template_id ? "selected" : ""
+                          }`}
+                          onClick={() => handleSelectTemplate(template.template_id)}
+                        >
+                          {selectedTemplateId === template.template_id ? (
+                            <>
+                              <svg
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                              </svg>
+                              Đã chọn
+                            </>
+                          ) : (
+                            "Chọn template"
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {selectedTemplateId && (
+                <div className="genai-template-selected-info">
+                  <div className="genai-template-selected-badge">
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    <span>Đã chọn: {templates.find(t => t.template_id === selectedTemplateId)?.name}</span>
+                  </div>
+                </div>
+              )}
+
+              <div className="genai-form-actions">
+            <button
+                  onClick={() => {
+                    setTemplateStep("generate");
+                    setSelectedTemplateId("");
+                  }}
+              className="genai-back-btn"
+                  disabled={loading}
+            >
+              ← Quay lại
+            </button>
+                {selectedTemplateId && (
+                  <button
+                    onClick={handleExportPPTX}
+                    className="genai-submit-btn"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <>
+                        <span className="genai-btn-spinner"></span>
+                        Đang tạo slide...
+                      </>
+                    ) : (
+                      "🚀 Tạo Slide từ Template"
+                    )}
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Step 3: Export (handled by handleExportPPTX, will move to result step) */}
+        </>
+      )}
+
+      {/* Template Preview Modal */}
+      {previewTemplate && (
+        <div className="genai-preview-modal-overlay" onClick={handleClosePreview}>
+          <div className="genai-preview-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="genai-preview-modal-header">
+              <h2>Preview Template: {previewTemplate.name}</h2>
+              <button
+                className="genai-preview-modal-close"
+                onClick={handleClosePreview}
+              >
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+            <div className="genai-preview-modal-content">
+              {previewTemplate.description && (
+                <div className="genai-preview-description">
+                  <p>{previewTemplate.description}</p>
+                </div>
+              )}
+              <div className="genai-preview-info">
+                <div className="genai-preview-info-item">
+                  <strong>Tên file:</strong> {previewTemplate.filename}
+                </div>
+                {previewTemplate.size && (
+                  <div className="genai-preview-info-item">
+                    <strong>Kích thước:</strong> {(previewTemplate.size / 1024).toFixed(2)} KB
+                  </div>
+                )}
+                {previewTemplate.created_at && (
+                  <div className="genai-preview-info-item">
+                    <strong>Ngày tạo:</strong> {new Date(previewTemplate.created_at).toLocaleDateString('vi-VN')}
+                  </div>
+                )}
+              </div>
+              {previewUrl ? (
+                <div className="genai-preview-content">
+                  <div className="genai-preview-image-wrapper">
+                    <img
+                      src={previewUrl}
+                      alt={`Preview của ${previewTemplate.name}`}
+                      className="genai-preview-image"
+                    />
+                    <div className="genai-preview-image-label">
+                      <span>Preview slide đầu tiên</span>
+                      <button
+                        className="genai-preview-download-image-btn"
+                        onClick={() => {
+                          const a = document.createElement("a");
+                          a.href = previewUrl;
+                          a.download = `preview_${previewTemplate.template_id}.png`;
+                          document.body.appendChild(a);
+                          a.click();
+                          document.body.removeChild(a);
+                        }}
+                        title="Tải preview image"
+                      >
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                          <polyline points="7 10 12 15 17 10"></polyline>
+                          <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div className="genai-preview-note">
+                    <p>💡 Đây là preview của slide đầu tiên trong template. Template sẽ được sử dụng để tạo slide từ nội dung YAML đã sinh.</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="genai-preview-loading">
+                  <div className="genai-loading-spinner"></div>
+                  <p>Đang tải preview...</p>
+                </div>
+              )}
+            </div>
+            <div className="genai-preview-modal-footer">
+              <button
+                className="genai-preview-download-btn"
+                onClick={handleDownloadTemplate}
+                disabled={loading}
+              >
+                {loading ? (
+                  <>
+                    <div className="genai-btn-spinner"></div>
+                    Đang tải...
+                  </>
+                ) : (
+                  <>
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                      <polyline points="7 10 12 15 17 10"></polyline>
+                      <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Tải template
+                  </>
+                )}
+              </button>
+              <button
+                className="genai-preview-select-btn"
+                onClick={() => {
+                  handleSelectTemplate(previewTemplate.template_id);
+                  handleClosePreview();
+                }}
+              >
+                Chọn template này
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Result Step */}
