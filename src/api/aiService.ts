@@ -379,9 +379,15 @@ export async function createSlideFromContent(
   token: string,
   req: CreateSlideRequest
 ): Promise<CreateSlideResponse> {
-  const response = await fetchWithAuth("/ai_service/slide/gpt", token, {
-    method: "POST",
-    body: JSON.stringify(req),
-  });
+  // No timeout - wait for response indefinitely (AI generation can take time)
+  const response = await fetchWithAuth(
+    "/ai_service/slides/gpt",
+    token,
+    {
+      method: "POST",
+      body: JSON.stringify(req),
+    },
+    null // No timeout - wait indefinitely for slide generation
+  );
   return response.json();
 }

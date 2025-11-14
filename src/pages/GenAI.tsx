@@ -663,7 +663,17 @@ export default function GenAI() {
 
       {/* Review Content Step */}
       {currentStep === "review" && (
-        <div className="genai-review">
+        <>
+          {loading && (
+            <div className="genai-loading-overlay">
+              <div className="genai-loading-content">
+                <div className="genai-loading-spinner"></div>
+                <h3>Vui lòng chờ AI tạo slide</h3>
+                <p>Quá trình này có thể mất vài phút, vui lòng không đóng trang...</p>
+              </div>
+            </div>
+          )}
+          <div className="genai-review">
           <div className="genai-review-header">
             <h2>Xem lại nội dung đã tạo</h2>
             <p>Bạn có thể chỉnh sửa nội dung nếu cần thiết</p>
@@ -714,10 +724,18 @@ export default function GenAI() {
               className="genai-submit-btn"
               disabled={loading}
             >
-              {loading ? "Đang tạo slide..." : "🚀 Tạo Slide"}
+              {loading ? (
+                <>
+                  <span className="genai-btn-spinner"></span>
+                  Vui lòng chờ AI tạo slide...
+                </>
+              ) : (
+                "🚀 Tạo Slide"
+              )}
             </button>
           </div>
         </div>
+        </>
       )}
 
       {/* Result Step */}
@@ -725,17 +743,36 @@ export default function GenAI() {
         <div className="genai-result">
           <div className="genai-result-header">
             <h2>✅ Slide đã được tạo thành công!</h2>
+            <p>Bạn có thể xem trước hoặc tải xuống slide</p>
           </div>
 
           {slideResult.embed && (
             <div className="genai-embed-preview">
-              <h3>Xem trước:</h3>
-              <iframe
-                src={slideResult.embed}
-                className="genai-embed-iframe"
-                title="Slide Preview"
-                allowFullScreen
-              />
+              <div className="genai-embed-header">
+                <h3>📊 Xem trước Slide</h3>
+                <p className="genai-embed-hint">
+                  {slideResult.embed.includes('.pdf') 
+                    ? 'Đang hiển thị PDF. Bạn có thể cuộn để xem các trang.'
+                    : 'Đang hiển thị slide. Bạn có thể tương tác với slide bên dưới.'}
+                </p>
+              </div>
+              <div className="genai-embed-wrapper">
+                {slideResult.embed.includes('.pdf') ? (
+                  <iframe
+                    src={`${slideResult.embed}#toolbar=0`}
+                    className="genai-embed-iframe"
+                    title="Slide Preview"
+                    allowFullScreen
+                  />
+                ) : (
+                  <iframe
+                    src={slideResult.embed}
+                    className="genai-embed-iframe"
+                    title="Slide Preview"
+                    allowFullScreen
+                  />
+                )}
+              </div>
             </div>
           )}
 
@@ -743,10 +780,48 @@ export default function GenAI() {
             {slideResult.download && (
               <a
                 href={slideResult.download}
-                download
+                target="_blank"
+                rel="noopener noreferrer"
                 className="genai-download-btn"
               >
-                📥 Tải xuống Slide
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Tải xuống Slide
+              </a>
+            )}
+            {slideResult.embed && (
+              <a
+                href={slideResult.embed}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="genai-view-btn"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                Mở trong tab mới
               </a>
             )}
             <button onClick={handleBackToSelection} className="genai-back-btn">

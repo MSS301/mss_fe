@@ -663,18 +663,36 @@
   border: 1px solid #e5e7eb;
 }
 
-.genai-embed-preview h3 {
+.genai-embed-header {
+  margin-bottom: 1rem;
+}
+
+.genai-embed-header h3 {
   font-size: 1.25rem;
   color: #1f2937;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   font-weight: 600;
+}
+
+.genai-embed-hint {
+  color: #6b7280;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.genai-embed-wrapper {
+  margin-top: 1rem;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 .genai-embed-iframe {
   width: 100%;
   height: 600px;
   border: none;
-  border-radius: 0.5rem;
+  display: block;
   background: white;
 }
 
@@ -706,6 +724,43 @@
   background: linear-gradient(135deg, #059669 0%, #047857 100%);
   transform: translateY(-1px);
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.genai-download-btn svg {
+  flex-shrink: 0;
+}
+
+.genai-view-btn {
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.genai-view-btn:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.genai-view-btn svg {
+  flex-shrink: 0;
+}
+
+@media (min-width: 768px) {
+  .genai-embed-iframe {
+    height: 700px;
+  }
 }
 
 /* Responsive */
