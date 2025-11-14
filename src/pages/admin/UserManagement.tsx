@@ -58,10 +58,6 @@ export default function UserManagement() {
     fetchUsers();
   }, []);
 
-  useEffect(() => {
-    console.log(JSON.stringify(users))
-  }, [users])
-
   // Đã thay thế bằng getToken()
 
   const handleEdit = async (id: string) => {
@@ -143,6 +139,66 @@ export default function UserManagement() {
 
   return (
     <div className="dashboard">
+            {/* ...existing code for stats-grid... */}
+      <div className="stats-grid">
+        <div className="stat-card">
+          <div className="stat-icon primary">👥</div>
+          <div className="stat-content">
+            <div className="stat-label">Tổng người dùng</div>
+            <div className="stat-value">{users.length}</div>
+            <div className="stat-change positive">
+              <span>↑ 12%</span>
+              <span>tháng này</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-icon success">👨‍🏫</div>
+          <div className="stat-content">
+            <div className="stat-label">Giáo viên</div>
+            <div className="stat-value">
+              {
+                users.filter(
+                  (u) => u.roles && u.roles.some((r) => r.name === "TEACHER")
+                ).length
+              }
+            </div>
+            <div className="stat-change positive">
+              <span>↑ 8%</span>
+              <span>tháng này</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-icon info">👨‍🎓</div>
+          <div className="stat-content">
+            <div className="stat-label">Học sinh</div>
+            <div className="stat-value">
+              {users.filter((u) => !u.roles || u.roles.length === 0).length}
+            </div>
+            <div className="stat-change positive">
+              <span>↑ 15%</span>
+              <span>tháng này</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-icon warning">⏳</div>
+          <div className="stat-content">
+            <div className="stat-label">Chờ duyệt</div>
+            <div className="stat-value">
+              {users.filter((u) => !u.emailVerified).length}
+            </div>
+            <div className="stat-change">
+              <span>Cần xử lý</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="card">
         <div className="card-header">
           <button className="btn btn-primary">
@@ -546,66 +602,6 @@ export default function UserManagement() {
           </div>
         </div>
       )}
-
-      {/* ...existing code for stats-grid... */}
-      <div className="stats-grid">
-        <div className="stat-card">
-          <div className="stat-icon primary">👥</div>
-          <div className="stat-content">
-            <div className="stat-label">Tổng người dùng</div>
-            <div className="stat-value">{users.length}</div>
-            <div className="stat-change positive">
-              <span>↑ 12%</span>
-              <span>tháng này</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-icon success">👨‍🏫</div>
-          <div className="stat-content">
-            <div className="stat-label">Giáo viên</div>
-            <div className="stat-value">
-              {
-                users.filter(
-                  (u) => u.roles && u.roles.some((r) => r.name === "TEACHER")
-                ).length
-              }
-            </div>
-            <div className="stat-change positive">
-              <span>↑ 8%</span>
-              <span>tháng này</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-icon info">👨‍🎓</div>
-          <div className="stat-content">
-            <div className="stat-label">Học sinh</div>
-            <div className="stat-value">
-              {users.filter((u) => !u.roles || u.roles.length === 0).length}
-            </div>
-            <div className="stat-change positive">
-              <span>↑ 15%</span>
-              <span>tháng này</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-icon warning">⏳</div>
-          <div className="stat-content">
-            <div className="stat-label">Chờ duyệt</div>
-            <div className="stat-value">
-              {users.filter((u) => !u.emailVerified).length}
-            </div>
-            <div className="stat-change">
-              <span>Cần xử lý</span>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
