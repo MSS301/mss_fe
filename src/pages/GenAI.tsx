@@ -561,19 +561,21 @@ export default function GenAI() {
         overwrite_existing: true,
       });
 
-      // Create download link
-      const url = window.URL.createObjectURL(blob);
+      // Create download link from blob
+      const blobUrl = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.href = url;
+      a.href = blobUrl;
       a.download = `slides_${contentYamlId}.pptx`;
       document.body.appendChild(a);
       a.click();
-      window.URL.revokeObjectURL(url);
+      window.URL.revokeObjectURL(blobUrl);
       document.body.removeChild(a);
 
-      // Set result for display
+      // Set result for display - use backend download link
+      // Backend đã lưu download link vào DB, tạo link từ endpoint
+      const downloadLink = `/ai_service/slides/template/export/download?content_yaml_id=${contentYamlId}&template_id=${selectedTemplateId}`;
       setSlideResult({
-        download: url,
+        download: downloadLink,
         id: contentYamlId,
       });
       setCurrentStep("result");
@@ -582,6 +584,44 @@ export default function GenAI() {
       console.error("[GenAI] Error exporting PPTX:", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDownloadFromResult = async () => {
+    if (!slideResult?.download || !token) return;
+
+    // Nếu là relative URL (template export), cần gọi API với auth
+    if (slideResult.download.startsWith("/")) {
+      try {
+        const response = await fetch(
+          `http://localhost:8080/ai-chatbot-service${slideResult.download}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "X-User-Id": user?.id || "",
+            },
+          }
+        );
+        if (response.ok) {
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `slide_${slideResult.id || "download"}.pptx`;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        } else {
+          setError("Không thể tải slide. Vui lòng thử lại.");
+        }
+      } catch (err: any) {
+        console.error("[GenAI] Error downloading slide:", err);
+        setError("Lỗi khi tải slide: " + (err.message || "Lỗi không xác định"));
+      }
+    } else {
+      // External URL (SlidesGPT) - mở trong tab mới
+      window.open(slideResult.download, "_blank");
     }
   };
 
@@ -1548,10 +1588,21 @@ export default function GenAI() {
           <div className="genai-result-actions">
             {slideResult.download && (
               <a
-                href={slideResult.download}
+                href={
+                  slideResult.download.startsWith("/")
+                    ? `http://localhost:8080/ai-chatbot-service${slideResult.download}`
+                    : slideResult.download
+                }
                 target="_blank"
                 rel="noopener noreferrer"
                 className="genai-download-btn"
+                onClick={(e) => {
+                  // Nếu là relative URL, cần xử lý download với auth
+                  if (slideResult.download?.startsWith("/")) {
+                    e.preventDefault();
+                    handleDownloadFromResult();
+                  }
+                }}
               >
                 <svg
                   width="20"

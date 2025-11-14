@@ -189,46 +189,56 @@ export default function MySlides() {
   };
 
   const handleDownloadSlide = async (slide: SlideListItem) => {
-    if (!slide.slidesgpt?.download) {
-      setError("Không có link download cho slide này");
+    // Ưu tiên download link
+    if (slide.slidesgpt?.download) {
+      // Nếu là relative URL (template export), cần gọi API với full URL
+      if (slide.slidesgpt.download.startsWith("/")) {
+        try {
+          const response = await fetch(
+            `http://localhost:8080/ai-chatbot-service${slide.slidesgpt.download}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "X-User-Id": user?.id || "",
+              },
+            }
+          );
+          if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download =
+              (slide.slidesgpt as any)?.filename ||
+              `slide_${slide.content_id}.pptx`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+          } else {
+            setError("Không thể tải slide. Vui lòng thử lại.");
+          }
+        } catch (err: any) {
+          console.error("[MySlides] Error downloading slide:", err);
+          setError(
+            "Lỗi khi tải slide: " + (err.message || "Lỗi không xác định")
+          );
+        }
+      } else {
+        // External URL (SlidesGPT)
+        window.open(slide.slidesgpt.download, "_blank");
+      }
       return;
     }
 
-    // Nếu là relative URL (template export), cần gọi API với full URL
-    if (slide.slidesgpt.download.startsWith("/")) {
-      try {
-        const response = await fetch(
-          `http://localhost:8080/ai-chatbot-service${slide.slidesgpt.download}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "X-User-Id": user?.id || "",
-            },
-          }
-        );
-        if (response.ok) {
-          const blob = await response.blob();
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download =
-            (slide.slidesgpt as any)?.filename ||
-            `slide_${slide.content_id}.pptx`;
-          document.body.appendChild(a);
-          a.click();
-          window.URL.revokeObjectURL(url);
-          document.body.removeChild(a);
-        } else {
-          setError("Không thể tải slide. Vui lòng thử lại.");
-        }
-      } catch (err: any) {
-        console.error("[MySlides] Error downloading slide:", err);
-        setError("Lỗi khi tải slide: " + (err.message || "Lỗi không xác định"));
-      }
-    } else {
-      // External URL (SlidesGPT)
-      window.open(slide.slidesgpt.download, "_blank");
+    // Nếu không có download link nhưng có embed link, thử dùng embed
+    if (slide.slidesgpt?.embed) {
+      window.open(slide.slidesgpt.embed, "_blank");
+      return;
     }
+
+    // Nếu không có cả hai, hiển thị thông báo
+    setError("Slide này chưa có link download. Vui lòng tạo lại slide.");
   };
 
   const totalPages = Math.ceil(total / limit);
@@ -381,29 +391,27 @@ export default function MySlides() {
                         </svg>
                         Chi tiết
                       </button>
-                      {slide.slidesgpt?.download && (
-                        <button
-                          className="btn btn-primary btn-sm"
-                          onClick={() => handleDownloadSlide(slide)}
-                          title="Tải xuống"
+                      <button
+                        className="btn btn-primary btn-sm"
+                        onClick={() => handleDownloadSlide(slide)}
+                        title="Tải xuống"
+                      >
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
                         >
-                          <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                            <polyline points="7 10 12 15 17 10"></polyline>
-                            <line x1="12" y1="15" x2="12" y2="3"></line>
-                          </svg>
-                          Tải xuống
-                        </button>
-                      )}
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                          <polyline points="7 10 12 15 17 10"></polyline>
+                          <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Tải xuống
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -534,31 +542,29 @@ export default function MySlides() {
               </div>
             </div>
             <div className="slide-details-footer">
-              {selectedSlide.slidesgpt?.download && (
-                <button
-                  className="btn btn-primary"
-                  onClick={() => {
-                    handleDownloadSlide(selectedSlide);
-                    setSelectedSlide(null);
-                  }}
+              <button
+                className="btn btn-primary"
+                onClick={() => {
+                  handleDownloadSlide(selectedSlide);
+                  setSelectedSlide(null);
+                }}
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
                 >
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="7 10 12 15 17 10"></polyline>
-                    <line x1="12" y1="15" x2="12" y2="3"></line>
-                  </svg>
-                  Tải xuống
-                </button>
-              )}
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Tải xuống
+              </button>
               <button
                 className="btn btn-ghost"
                 onClick={() => setSelectedSlide(null)}
