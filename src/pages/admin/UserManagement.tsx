@@ -28,17 +28,26 @@ export default function UserManagement() {
   useEffect(() => {
     async function fetchUsers() {
       try {
-        const res = await axios.get<{ code: number; result: User[] }>(
-          "http://localhost:8080/auth-service/users",
-          {
-            headers: {
-              Accept: "*/*",
-              Authorization: `Bearer ${getToken()}`,
-            },
-          }
-        );
-        if (res.data.code === 1000) {
+        const res = await axios.get<{
+          code: number;
+          result?: User[];
+          content?: User[];
+          data?: { code: number; result?: User[]; content?: User[] };
+        }>("http://localhost:8080/auth-service/users", {
+          headers: {
+            Accept: "*/*",
+            Authorization: `Bearer ${getToken()}`,
+          },
+        });
+        console.log(JSON.stringify(res))
+        const body = res.data?.data ?? res.data;
+        const list = body?.result ?? body?.content;
+        if (body?.code === 1000 && Array.isArray(list)) {
+          setUsers(list);
+        } else if (Array.isArray(res.data?.result)) {
           setUsers(res.data.result);
+        } else if (Array.isArray(res.data?.content)) {
+          setUsers(res.data.content);
         }
       } catch (err) {
         // handle error
@@ -48,6 +57,10 @@ export default function UserManagement() {
     }
     fetchUsers();
   }, []);
+
+  useEffect(() => {
+    console.log(JSON.stringify(users))
+  }, [users])
 
   // Đã thay thế bằng getToken()
 
@@ -250,87 +263,174 @@ export default function UserManagement() {
       {/* Modal hiển thị thông tin người dùng và nút cập nhật/xóa */}
       {showModal && selectedUser && (
         <div
-          className="modal"
+          className="modal-backdrop"
           style={{
             position: "fixed",
             inset: 0,
-            background: "rgba(0,0,0,0.3)",
+            background: "rgba(15, 23, 42, 0.55)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            padding: "32px",
             zIndex: 1000,
           }}
         >
           <div
-            className="modal-content"
+            className="modal-card"
             style={{
               background: "#fff",
-              padding: 24,
-              borderRadius: 12,
-              minWidth: 280,
-              maxWidth: "95vw",
-              width: "100%",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
-              margin: "0 auto",
-              overflowY: "auto",
+              borderRadius: 16,
+              padding: "28px 32px",
+              width: "min(520px, 100%)",
+              boxShadow: "0 20px 60px rgba(15,23,42,0.35)",
               maxHeight: "90vh",
+              overflowY: "auto",
+              border: "1px solid rgba(16, 185, 129, 0.2)",
             }}
           >
-            <h2
+            <header
               style={{
-                textAlign: "center",
-                marginBottom: 18,
-                color: "#2d6cdf",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginBottom: 20,
               }}
             >
-              Thông tin người dùng
-            </h2>
-            <div style={{ marginBottom: 12, fontSize: 15 }}>
-              <b>ID:</b> {selectedUser.id}
-            </div>
-            <div style={{ marginBottom: 12, fontSize: 15 }}>
-              <b>Tên:</b> {selectedUser.username}
-            </div>
-            <div style={{ marginBottom: 12, fontSize: 15 }}>
-              <b>Email:</b> {selectedUser.email}
-            </div>
-            <div style={{ marginBottom: 12, fontSize: 15 }}>
-              <b>Trạng thái email:</b>{" "}
-              <span
+              <div>
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: 20,
+                    fontWeight: 600,
+                    color: "#0f172a",
+                  }}
+                >
+                  Thông tin người dùng
+                </p>
+                <p
+                  style={{
+                    margin: 4,
+                    fontSize: 14,
+                    color: "#475569",
+                  }}
+                >
+                  Chỉnh sửa quyền hoặc xóa tài khoản khi cần
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowModal(false)}
                 style={{
-                  color: selectedUser.emailVerified ? "#2ecc40" : "#f39c12",
+                  border: "none",
+                  background: "transparent",
+                  fontSize: 24,
+                  cursor: "pointer",
+                  color: "#94a3b8",
                 }}
+                aria-label="Đóng modal"
               >
-                {selectedUser.emailVerified ? "Đã xác thực" : "Chưa xác thực"}
-              </span>
+                &times;
+              </button>
+            </header>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+                gap: 12,
+                marginBottom: 24,
+              }}
+            >
+              {[
+                { label: "ID", value: selectedUser.id },
+                { label: "Tên", value: selectedUser.username },
+                { label: "Email", value: selectedUser.email },
+                {
+                  label: "Trạng thái email",
+                  value: selectedUser.emailVerified ? "Đã xác thực" : "Chưa xác thực",
+                  accent: selectedUser.emailVerified ? "#16a34a" : "#f97316",
+                },
+                { label: "Provider", value: selectedUser.authProvider },
+              ].map((info) => (
+                <div
+                  key={info.label}
+                  style={{
+                    padding: "10px 12px",
+                    borderRadius: 12,
+                    background: "#f8fafc",
+                    border: "1px solid #e2e8f0",
+                  }}
+                >
+                  <span
+                    style={{
+                      display: "block",
+                      fontSize: 12,
+                      fontWeight: 600,
+                      letterSpacing: 1,
+                      color: "#475569",
+                      textTransform: "uppercase",
+                      marginBottom: 4,
+                    }}
+                  >
+                    {info.label}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: 14,
+                      color: info.accent || "#0f172a",
+                      fontWeight: info.accent ? 600 : 500,
+                      wordBreak: "break-word",
+                    }}
+                  >
+                    {info.value}
+                  </span>
+                </div>
+              ))}
             </div>
-            <div style={{ marginBottom: 12, fontSize: 15 }}>
-              <b>Provider:</b> {selectedUser.authProvider}
-            </div>
-            <div style={{ marginBottom: 12, fontSize: 15 }}>
-              <b>Vai trò:</b>{" "}
+            <div
+              style={{
+                marginBottom: 18,
+                fontSize: 15,
+              }}
+            >
+              <span style={{ fontWeight: 600, color: "#475569" }}>Vai trò: </span>
               {selectedUser.roles && selectedUser.roles.length > 0 ? (
                 selectedUser.roles.map((role, idx) => (
                   <span
                     key={idx}
-                    className="badge badge-primary"
                     style={{
-                      marginRight: 4,
-                      background: "#2d6cdf",
-                      color: "#fff",
-                      padding: "2px 8px",
-                      borderRadius: 8,
-                      fontSize: 13,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      marginRight: 6,
+                      marginBottom: 4,
+                      padding: "4px 10px",
+                      borderRadius: 999,
+                      background:
+                        role.name === "TEACHER" ? "#e0f2fe" : "#ede9fe",
+                      color: role.name === "TEACHER" ? "#0284c7" : "#7c3aed",
+                      fontSize: 12,
+                      fontWeight: 600,
                     }}
                   >
                     {role.name}
                   </span>
                 ))
               ) : (
-                <span className="badge badge-info">User</span>
+                <span
+                  style={{
+                    padding: "4px 10px",
+                    borderRadius: 999,
+                    background: "#e0f2fe",
+                    color: "#0284c7",
+                    fontSize: 12,
+                    fontWeight: 600,
+                  }}
+                >
+                  USER
+                </span>
               )}
             </div>
-            {/* Form cập nhật đơn giản */}
+
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -346,114 +446,81 @@ export default function UserManagement() {
                 handleUpdate({ password, firstName, lastName, dob, roles });
               }}
               style={{
-                marginTop: 18,
-                display: "flex",
-                flexDirection: "column",
-                gap: 10,
+                display: "grid",
+                gap: 12,
               }}
             >
-              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                <label style={{ fontWeight: 500 }}>Mật khẩu mới</label>
-                <input
-                  name="password"
-                  type="password"
-                  className="form-control"
-                  style={{
-                    borderRadius: 8,
-                    border: "1px solid #e0e0e0",
-                    padding: "8px",
-                  }}
-                />
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                <label style={{ fontWeight: 500 }}>Họ</label>
-                <input
-                  name="firstName"
-                  type="text"
-                  className="form-control"
-                  style={{
-                    borderRadius: 8,
-                    border: "1px solid #e0e0e0",
-                    padding: "8px",
-                  }}
-                />
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                <label style={{ fontWeight: 500 }}>Tên</label>
-                <input
-                  name="lastName"
-                  type="text"
-                  className="form-control"
-                  style={{
-                    borderRadius: 8,
-                    border: "1px solid #e0e0e0",
-                    padding: "8px",
-                  }}
-                />
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                <label style={{ fontWeight: 500 }}>Ngày sinh</label>
-                <input
-                  name="dob"
-                  type="date"
-                  className="form-control"
-                  style={{
-                    borderRadius: 8,
-                    border: "1px solid #e0e0e0",
-                    padding: "8px",
-                  }}
-                />
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                <label style={{ fontWeight: 500 }}>
-                  Vai trò (phân cách dấu phẩy)
-                </label>
-                <input
-                  name="roles"
-                  type="text"
-                  className="form-control"
-                  placeholder="ADMIN,TEACHER,USER"
-                  style={{
-                    borderRadius: 8,
-                    border: "1px solid #e0e0e0",
-                    padding: "8px",
-                  }}
-                />
-              </div>
+              {[
+                { name: "password", label: "Mật khẩu mới", type: "password" },
+                { name: "firstName", label: "Họ", type: "text" },
+                { name: "lastName", label: "Tên", type: "text" },
+                { name: "dob", label: "Ngày sinh", type: "date" },
+                {
+                  name: "roles",
+                  label: "Vai trò (phân cách dấu phẩy)",
+                  type: "text",
+                  placeholder: "ADMIN,TEACHER,USER",
+                },
+              ].map((field) => (
+                <div
+                  key={field.name}
+                  style={{ display: "flex", flexDirection: "column", gap: 5 }}
+                >
+                  <label style={{ fontWeight: 600, color: "#475569" }}>
+                    {field.label}
+                  </label>
+                  <input
+                    name={field.name}
+                    type={field.type}
+                    placeholder={field.placeholder}
+                    className="form-control"
+                    style={{
+                      borderRadius: 10,
+                      border: "1px solid #d1d5db",
+                      padding: "10px 12px",
+                      fontSize: 14,
+                    }}
+                  />
+                </div>
+              ))}
               <div
                 style={{
                   display: "flex",
                   flexDirection: "row",
                   gap: 10,
-                  marginTop: 10,
-                  justifyContent: "center",
+                  flexWrap: "wrap",
+                  justifyContent: "space-between",
+                  marginTop: 4,
                 }}
               >
                 <button
                   type="submit"
                   className="btn btn-primary"
                   style={{
-                    background: "#2d6cdf",
+                    flex: "1 1 140px",
+                    background: "linear-gradient(135deg, #2563eb, #3b82f6)",
                     color: "#fff",
-                    borderRadius: 8,
-                    fontWeight: 600,
-                    padding: "8px 18px",
+                    borderRadius: 10,
                     border: "none",
+                    padding: "10px 16px",
+                    fontWeight: 600,
+                    boxShadow: "0 4px 10px rgba(37,99,235,0.35)",
                   }}
                 >
                   Cập nhật
                 </button>
                 <button
                   type="button"
-                  className="btn btn-danger"
                   onClick={handleDelete}
+                  className="btn btn-danger"
                   style={{
-                    background: "#e74c3c",
+                    flex: "1 1 110px",
+                    background: "#f43f5e",
                     color: "#fff",
-                    borderRadius: 8,
-                    fontWeight: 600,
-                    padding: "8px 18px",
+                    borderRadius: 10,
                     border: "none",
+                    padding: "10px 16px",
+                    fontWeight: 600,
                   }}
                 >
                   Xóa
@@ -463,12 +530,13 @@ export default function UserManagement() {
                   className="btn btn-secondary"
                   onClick={() => setShowModal(false)}
                   style={{
-                    background: "#888",
+                    flex: "1 1 110px",
+                    background: "#64748b",
                     color: "#fff",
-                    borderRadius: 8,
-                    fontWeight: 600,
-                    padding: "8px 18px",
+                    borderRadius: 10,
                     border: "none",
+                    padding: "10px 16px",
+                    fontWeight: 600,
                   }}
                 >
                   Đóng
