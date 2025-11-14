@@ -22,6 +22,79 @@ declare global {
   }
 }
 
+const FRIENDLY_STATUS_CODE_MESSAGES: Record<number, string> = {
+  400: "Du lieu gui len khong hop le, vui long kiem tra lai.",
+  401: "Ban chua dang nhap hoac phien da het han.",
+  403: "Email hoac mat khau khong dung.",
+  404: "Khong tim thay tai khoan.",
+  429: "Ban thao tac qua nhanh, vui long thu lai sau.",
+  500: "May chu dang co su co, vui long thu lai.",
+  503: "Dich vu dang tam thoi ngung, vui long thu lai sau.",
+};
+
+type WithStatusError = {
+  status?: number | string;
+  statusCode?: number | string;
+  response?: {
+    status?: number | string;
+  };
+  message?: string;
+};
+
+function extractStatusFromError(error: unknown): number | null {
+  if (typeof error === "object" && error !== null) {
+    const candidate = error as WithStatusError;
+    const statusValue =
+      candidate.status ?? candidate.statusCode ?? candidate.response?.status;
+    if (typeof statusValue === "number" && !Number.isNaN(statusValue)) {
+      return statusValue;
+    }
+    if (typeof statusValue === "string") {
+      const parsed = Number(statusValue);
+      if (!Number.isNaN(parsed)) {
+        return parsed;
+      }
+    }
+  }
+
+  const message =
+    typeof error === "string"
+      ? error
+      : (error as WithStatusError).message;
+  if (typeof message === "string") {
+    const match = message.match(/HTTP\s+(\d{3})/);
+    if (match) {
+      const parsed = Number(match[1]);
+      if (!Number.isNaN(parsed)) {
+        return parsed;
+      }
+    }
+  }
+
+  return null;
+}
+
+function getFriendlyErrorMessage(error: unknown, fallback: string): string {
+  if (error === undefined || error === null) {
+    return fallback;
+  }
+
+  const status = extractStatusFromError(error);
+  if (status !== null && FRIENDLY_STATUS_CODE_MESSAGES[status]) {
+    return FRIENDLY_STATUS_CODE_MESSAGES[status];
+  }
+
+  const message =
+    typeof error === "string"
+      ? error
+      : (error as WithStatusError).message;
+  if (typeof message === "string" && message.trim().length) {
+    return message;
+  }
+
+  return fallback;
+}
+
 export default function Login({ onLogin, onBack }: Props) {
   const { login } = useAuth();
   const [isRegisterMode, setIsRegisterMode] = useState(false);
@@ -68,10 +141,12 @@ export default function Login({ onLogin, onBack }: Props) {
       }
     } catch (err: any) {
       setError(
-        err?.message ||
-          (isRegisterMode
-            ? "Lỗi khi đăng ký với Google"
-            : "Lỗi khi đăng nhập với Google")
+        getFriendlyErrorMessage(
+          err,
+          isRegisterMode
+            ? "Loi khi dang ky voi Google"
+            : "Loi khi dang nhap voi Google"
+        )
       );
     } finally {
       setLoading(false);
@@ -138,7 +213,7 @@ export default function Login({ onLogin, onBack }: Props) {
           setError("Đăng ký thất bại");
         }
       } catch (err: any) {
-        setError(err?.message || "Lỗi khi đăng ký");
+        setError(getFriendlyErrorMessage(err, "Loi khi dang ky"));
       } finally {
         setLoading(false);
       }
@@ -158,7 +233,7 @@ export default function Login({ onLogin, onBack }: Props) {
           setError("Đăng nhập thất bại");
         }
       } catch (err: any) {
-        setError(err?.message || "Lỗi khi gọi API");
+        setError(getFriendlyErrorMessage(err, "Loi khi goi API"));
       } finally {
         setLoading(false);
       }
