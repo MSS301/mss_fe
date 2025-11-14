@@ -193,15 +193,6 @@ export default function Layout({
           <div className="sidebar-section">
             <div className="sidebar-section-title">Slide</div>
             <Link
-              to="/genai"
-              className={`sidebar-link ${
-                isActive("/genai") ? "active" : ""
-              }`}
-            >
-              <span className="sidebar-link-icon">➕</span>
-              <span>Tạo mới</span>
-            </Link>
-            <Link
               to="/slides"
               className={`sidebar-link ${isActive("/slides") ? "active" : ""}`}
             >
