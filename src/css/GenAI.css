@@ -20,6 +20,33 @@
   font-size: 1.1rem;
 }
 
+.genai-token-balance {
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border: 1px solid #bae6fd;
+  border-radius: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+}
+
+.genai-token-label {
+  color: #0369a1;
+  font-weight: 600;
+}
+
+.genai-token-value {
+  color: #0c4a6e;
+  font-weight: 700;
+  font-size: 1.1rem;
+  background: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.375rem;
+  border: 1px solid #7dd3fc;
+}
+
 .genai-error-banner {
   background-color: #fee2e2;
   border: 1px solid #fecaca;

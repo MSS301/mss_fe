@@ -193,3 +193,60 @@ export function getTransactionStatusColor(status: string): string {
   };
   return colors[status] || "secondary";
 }
+
+export interface DeductTokenRequest {
+  tokens: number;
+  description: string;
+  user_id: string;
+  reference_type: string;
+  reference_id: string;
+}
+
+export interface TokenResponse {
+  user_id: string;
+  token_before: number;
+  token_after: number;
+  tokens_deducted: number;
+  transaction_id: number;
+  status: string;
+  message: string;
+}
+
+export interface ApiResponse<T> {
+  code: number;
+  result: T;
+}
+
+/**
+ * Trừ token từ ví của user
+ */
+export async function deductToken(
+  token: string,
+  userId: string,
+  request: DeductTokenRequest
+): Promise<TokenResponse> {
+  const url = `${API_BASE}/wallet-service/internal/wallets/deduct-token`;
+
+  const resp = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "*/*",
+      Authorization: `Bearer ${token}`,
+      "X-User-Id": userId,
+    },
+    body: JSON.stringify(request),
+  });
+
+  if (!resp.ok) {
+    const text = await resp.text();
+    throw new Error(`HTTP ${resp.status}: ${text}`);
+  }
+
+  const data: ApiResponse<TokenResponse> = await resp.json();
+  if (data && data.code === 1000 && data.result) {
+    return data.result;
+  }
+
+  throw new Error(data?.result?.message || "Không thể trừ token");
+}

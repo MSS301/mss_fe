@@ -179,6 +179,30 @@ export default function Layout({
             )}
           </div>
 
+<<<<<<< HEAD
+=======
+          {/* Slides */}
+          <div className="sidebar-section">
+            <div className="sidebar-section-title">Slide</div>
+            <Link
+              to="/slides"
+              className={`sidebar-link ${isActive("/slides") ? "active" : ""}`}
+            >
+              <span className="sidebar-link-icon">📄</span>
+              <span>Slide của tôi</span>
+            </Link>
+            <Link
+              to="/slides/templates"
+              className={`sidebar-link ${
+                isActive("/slides/templates") ? "active" : ""
+              }`}
+            >
+              <span className="sidebar-link-icon">🎨</span>
+              <span>Templates</span>
+            </Link>
+          </div>
+
+>>>>>>> cd5f96eb6ab4fe687ff7099f28664549f1563875
           {/* Mindmaps */}
           <div className="sidebar-section">
             <div className="sidebar-section-title">Mindmap AI</div>
