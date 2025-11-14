@@ -120,27 +120,6 @@ export default function Layout({
           {/* Main */}
           <div className="sidebar-section">
             <div className="sidebar-section-title">Tổng quan</div>
-            {isTeacher ? (
-              <Link
-                to="/teacher/dashboard"
-                className={`sidebar-link ${
-                  isActive("/teacher/dashboard") ? "active" : ""
-                }`}
-              >
-                <span className="sidebar-link-icon">📊</span>
-                <span>Dashboard Giáo viên</span>
-              </Link>
-            ) : (
-              <Link
-                to="/dashboard"
-                className={`sidebar-link ${
-                  isActive("/dashboard") ? "active" : ""
-                }`}
-              >
-                <span className="sidebar-link-icon">📊</span>
-                <span>Dashboard</span>
-              </Link>
-            )}
             <Link
               to="/profile"
               className={`sidebar-link ${isActive("/profile") ? "active" : ""}`}
@@ -199,15 +178,6 @@ export default function Layout({
               <span className="sidebar-link-icon">📄</span>
               <span>Slide của tôi</span>
             </Link>
-            <Link
-              to="/slides/templates"
-              className={`sidebar-link ${
-                isActive("/slides/templates") ? "active" : ""
-              }`}
-            >
-              <span className="sidebar-link-icon">🎨</span>
-              <span>Templates</span>
-            </Link>
           </div>
 
           {/* Mindmaps */}
@@ -240,39 +210,6 @@ export default function Layout({
             >
               <span className="sidebar-link-icon">💳</span>
               <span>Nạp tiền</span>
-            </Link>
-          </div>
-
-          {/* System */}
-          <div className="sidebar-section">
-            <div className="sidebar-section-title">Hệ thống</div>
-            <Link
-              to="/notifications"
-              className={`sidebar-link ${
-                isActive("/notifications") ? "active" : ""
-              }`}
-            >
-              <span className="sidebar-link-icon">🔔</span>
-              <span>Thông báo</span>
-              <span className="sidebar-link-badge">3</span>
-            </Link>
-            <Link
-              to="/statistics"
-              className={`sidebar-link ${
-                isActive("/statistics") ? "active" : ""
-              }`}
-            >
-              <span className="sidebar-link-icon">📊</span>
-              <span>Thống kê</span>
-            </Link>
-            <Link
-              to="/settings"
-              className={`sidebar-link ${
-                isActive("/settings") ? "active" : ""
-              }`}
-            >
-              <span className="sidebar-link-icon">⚙️</span>
-              <span>Cài đặt</span>
             </Link>
           </div>
         </nav>
