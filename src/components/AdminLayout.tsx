@@ -213,22 +213,6 @@ export default function AdminLayout({
               <span className="admin-sidebar-link-icon">📚</span>
               <span>Quản lý bài học của chương trình</span>
             </Link>
-            <Link
-              to="/admin/curriculum"
-              className={`admin-sidebar-link ${isActive("/admin/curriculum") ? "active" : ""
-                }`}
-            >
-              <span className="admin-sidebar-link-icon">📚</span>
-              <span>Chương trình học</span>
-            </Link>
-            <Link
-              to="/admin/templates"
-              className={`admin-sidebar-link ${isActive("/admin/templates") ? "active" : ""
-                }`}
-            >
-              <span className="admin-sidebar-link-icon">🎨</span>
-              <span>Templates</span>
-            </Link>
           </div>
 
           {/* Financial */}
@@ -264,36 +248,12 @@ export default function AdminLayout({
           <div className="admin-sidebar-section">
             <div className="admin-sidebar-section-title">Hệ thống</div>
             <Link
-              to="/admin/notifications"
-              className={`admin-sidebar-link ${isActive("/admin/notifications") ? "active" : ""
-                }`}
-            >
-              <span className="admin-sidebar-link-icon">🔔</span>
-              <span>Thông báo</span>
-            </Link>
-            <Link
-              to="/admin/reports"
-              className={`admin-sidebar-link ${isActive("/admin/reports") ? "active" : ""
-                }`}
-            >
-              <span className="admin-sidebar-link-icon">📊</span>
-              <span>Báo cáo</span>
-            </Link>
-            <Link
               to="/admin/settings"
               className={`admin-sidebar-link ${isActive("/admin/settings") ? "active" : ""
                 }`}
             >
               <span className="admin-sidebar-link-icon">⚙️</span>
               <span>Cài đặt</span>
-            </Link>
-            <Link
-              to="/admin/logs"
-              className={`admin-sidebar-link ${isActive("/admin/logs") ? "active" : ""
-                }`}
-            >
-              <span className="admin-sidebar-link-icon">📋</span>
-              <span>System Logs</span>
             </Link>
           </div>
         </nav>
