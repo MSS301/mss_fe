@@ -158,6 +158,7 @@ export default function BookManagement() {
   const booksList = Object.entries(books).map(([name, info]) => ({
     name,
     ...info,
+    book_id: (info as any).id || info.book_id || "", // Use 'id' from API response, fallback to 'book_id'
   }));
 
   return (

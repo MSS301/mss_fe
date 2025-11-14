@@ -75,14 +75,30 @@ async function fetchWithAuth(
     : null;
 
   try {
+    // Don't override Content-Type if it's FormData (for file uploads)
+    const isFormData = options.body instanceof FormData;
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${token}`,
+    };
+
+    // Merge existing headers
+    if (options.headers) {
+      for (const [key, value] of Object.entries(options.headers)) {
+        if (typeof value === "string") {
+          headers[key] = value;
+        }
+      }
+    }
+
+    // Only set Content-Type if not FormData (browser will set it automatically for FormData)
+    if (!isFormData && !headers["Content-Type"]) {
+      headers["Content-Type"] = "application/json";
+    }
+
     const response = await fetch(url, {
       ...options,
       signal: controller?.signal,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-        ...options.headers,
-      },
+      headers,
     });
 
     if (timeoutId) {
@@ -545,7 +561,8 @@ export interface IngestBookResponse {
 }
 
 export interface BookInfo {
-  book_id: string;
+  id?: string; // API returns 'id' from getAllIngestedBooks
+  book_id?: string; // API returns 'book_id' from getIngestedBookById
   book_name: string;
   grade_id: string;
   structure?: any;
@@ -586,7 +603,7 @@ export async function ingestBook(
 export async function getAllIngestedBooks(
   token: string
 ): Promise<BooksListResponse> {
-  const response = await fetchWithAuth("/ai_service/ingestion", token);
+  const response = await fetchWithAuth("/ai_service/ingestion/", token);
   return response.json();
 }
 
