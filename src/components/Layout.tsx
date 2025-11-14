@@ -202,14 +202,16 @@ export default function Layout({
               className={`sidebar-link ${isActive("/wallet") ? "active" : ""}`}
             >
               <span className="sidebar-link-icon">💰</span>
-              <span>Ví của tôi</span>
+              <span>Ví token</span>
             </Link>
             <Link
-              to="/payment"
-              className={`sidebar-link ${isActive("/payment") ? "active" : ""}`}
+              to="/packages"
+              className={`sidebar-link ${
+                isActive("/packages") ? "active" : ""
+              }`}
             >
               <span className="sidebar-link-icon">💳</span>
-              <span>Nạp tiền</span>
+              <span>Nạp token</span>
             </Link>
           </div>
         </nav>
@@ -274,19 +276,7 @@ export default function Layout({
           </div>
 
           <div className="header-right">
-            <div className="header-search">
-              <span className="header-search-icon">🔍</span>
-              <input
-                type="text"
-                placeholder="Tìm kiếm..."
-                className="header-search-input"
-              />
-            </div>
-
             <div className="header-actions">
-              <NotificationBell variant="user" />
-              <button className="header-action-btn">💬</button>
-
               {/* User Menu Dropdown */}
               <div className="user-menu-container" ref={userMenuRef}>
                 <button
@@ -344,7 +334,7 @@ export default function Layout({
                       <span>Xem hồ sơ</span>
                     </a>
 
-                    <a href="/settings" className="user-menu-item">
+                    <a href="/profile" className="user-menu-item">
                       <span className="user-menu-item-icon">⚙️</span>
                       <span>Cài đặt</span>
                     </a>

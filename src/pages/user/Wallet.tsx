@@ -10,6 +10,7 @@ import {
   Transaction,
 } from "../../api/wallet";
 import "../../css/Wallet.css";
+import "boxicons/css/boxicons.min.css";
 
 type Props = {
   token: string;
@@ -160,22 +161,12 @@ export default function Wallet({ token, userId }: Props) {
       <div className="wallet-page-header">
         <div className="wallet-header-content">
           <h1 className="wallet-page-title">
-            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-              <path
-                d="M28 8H24V6C24 4.89543 23.1046 4 22 4H6C4.89543 4 4 4.89543 4 6V26C4 27.1046 4.89543 28 6 28H22C23.1046 28 24 27.1046 24 26V24H28C29.1046 24 30 23.1046 30 22V10C30 8.89543 29.1046 8 28 8Z"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M24 16H30"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            {/* boxicons wallet-alt icon */}
+            <i
+              className="bx bx-wallet-alt"
+              style={{ fontSize: 32 }}
+              aria-hidden="true"
+            />
             Ví của tôi
           </h1>
           <p className="wallet-page-subtitle">
@@ -185,7 +176,7 @@ export default function Wallet({ token, userId }: Props) {
       </div>
 
       {/* Balance Card */}
-      <div className="balance-card">
+      <div className="balance-card green">
         <div className="balance-header">
           {wallet?.status === "ACTIVE" && (
             <span className="status-badge">
@@ -204,32 +195,68 @@ export default function Wallet({ token, userId }: Props) {
         </div>
         <div className="token-display">
           <div className="token-icon-wrapper">
-            <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <svg
+              width="48"
+              height="48"
+              viewBox="0 0 48 48"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <defs>
+                <linearGradient id="goldGrad" x1="0" x2="1">
+                  <stop offset="0%" stopColor="#FFD66B" />
+                  <stop offset="60%" stopColor="#FFB84D" />
+                  <stop offset="100%" stopColor="#CE8A00" />
+                </linearGradient>
+                <radialGradient id="coinShine" cx="30%" cy="25%" r="60%">
+                  <stop offset="0%" stopColor="rgba(255,255,255,0.9)" />
+                  <stop offset="60%" stopColor="rgba(255,255,255,0.15)" />
+                  <stop offset="100%" stopColor="rgba(255,255,255,0)" />
+                </radialGradient>
+              </defs>
+              {/* coin base */}
               <circle
                 cx="24"
                 cy="24"
                 r="20"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+                fill="url(#goldGrad)"
+                stroke="#b07a00"
+                strokeWidth="1.5"
               />
-              <path
-                d="M24 8V16M24 32V40M40 24H32M16 24H8"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
+              {/* inner ring */}
               <circle
                 cx="24"
                 cy="24"
-                r="8"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+                r="14.5"
+                fill="none"
+                stroke="#e6b34a"
+                strokeWidth="1.8"
               />
+              {/* shine */}
+              <ellipse cx="18" cy="16" rx="8" ry="5" fill="url(#coinShine)" />
+              {/* symbol: token/coin mark */}
+              <g transform="translate(0,0)">
+                <path
+                  d="M24 16 C26.5 16 28 17.5 28 20 C28 22.5 26.5 24 24 24 C21.5 24 20 22.5 20 20 C20 17.5 21.5 16 24 16 Z"
+                  fill="#fff5d6"
+                  opacity="0.12"
+                />
+                <path
+                  d="M24 18 C25.1 18 26 18.9 26 20 C26 21.1 25.1 22 24 22 C22.9 22 22 21.1 22 20 C22 18.9 22.9 18 24 18 Z"
+                  fill="#ffffff"
+                  opacity="0.18"
+                />
+                <text
+                  x="24"
+                  y="29.5"
+                  textAnchor="middle"
+                  fontWeight="800"
+                  fontSize="9"
+                  fill="#6b3f00"
+                >
+                  ₫
+                </text>
+              </g>
             </svg>
           </div>
           <span className="token-count">{wallet?.token || 0}</span>

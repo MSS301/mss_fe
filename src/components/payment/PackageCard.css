@@ -1,13 +1,14 @@
 .package-card {
-  background: linear-gradient(145deg, #ffffff 0%, #f8f9ff 100%);
+  background: #ffffff;
   border-radius: 24px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 10px 30px rgba(16, 24, 40, 0.06),
+    0 0 0 1px rgba(16, 24, 40, 0.02);
   padding: 2.5rem;
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   display: flex;
   flex-direction: column;
   height: 100%;
-  border: 2px solid #e8eaf6;
+  border: 1px solid rgba(16, 24, 40, 0.06);
   position: relative;
   overflow: hidden;
   opacity: 0;
@@ -31,11 +32,11 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 5px;
-  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  height: 6px;
+  background: linear-gradient(90deg, #06b6d4 0%, #10b981 100%);
   transform: scaleX(0);
   transform-origin: left;
-  transition: transform 0.4s ease;
+  transition: transform 0.35s ease;
 }
 
 .package-card:hover::before {
@@ -43,9 +44,33 @@
 }
 
 .package-card:hover {
-  transform: translateY(-8px) scale(1.02);
-  box-shadow: 0 15px 45px rgba(102, 126, 234, 0.25);
-  border-color: #667eea;
+  transform: translateY(-8px) scale(1.01);
+  box-shadow: 0 18px 50px rgba(16, 24, 40, 0.08);
+  border-color: rgba(16, 24, 40, 0.08);
+}
+
+/* Popular / featured card styles (center highlighted card) */
+.package-card.popular {
+  border-color: transparent;
+  box-shadow: 0 40px 90px rgba(6, 182, 212, 0.12),
+    0 0 0 8px rgba(6, 182, 212, 0.04) inset;
+  transform: translateY(-6px) scale(1.02);
+}
+
+.package-badge {
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, #06b6d4 0%, #10b981 100%);
+  color: white;
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  box-shadow: 0 10px 30px rgba(6, 182, 212, 0.12);
+  z-index: 5;
+  text-transform: none;
 }
 
 .package-card.loading {
@@ -70,27 +95,24 @@
 .package-name {
   font-size: 1.875rem;
   font-weight: 900;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #0f172a;
   margin: 0;
   letter-spacing: -0.5px;
   flex: 1;
-  line-height: 1.2;
+  line-height: 1.15;
 }
 
 .package-code {
   display: inline-block;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(90deg, #06b6d4 0%, #10b981 100%);
   color: white;
-  padding: 0.4rem 1rem;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 700;
+  padding: 0.38rem 0.9rem;
+  border-radius: 18px;
+  font-size: 0.78rem;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  letter-spacing: 0.6px;
+  box-shadow: 0 6px 22px rgba(6, 182, 212, 0.12);
 }
 
 .package-body {
@@ -113,10 +135,10 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  background: #fbfdff;
   padding: 1.25rem;
   border-radius: 14px;
-  border: 2px solid #e2e8f0;
+  border: 1px solid rgba(16, 24, 40, 0.04);
 }
 
 .credits-item {
@@ -160,13 +182,13 @@
 }
 
 .credits-item.total {
-  border-top: 2px solid #667eea;
+  border-top: 2px solid rgba(16, 24, 40, 0.04);
   margin-top: 0.25rem;
   padding-top: 0.75rem;
   background: linear-gradient(
-    135deg,
-    rgba(102, 126, 234, 0.1) 0%,
-    rgba(118, 75, 162, 0.1) 100%
+    90deg,
+    rgba(6, 182, 212, 0.03),
+    rgba(16, 185, 129, 0.02)
   );
   margin-left: -1.25rem;
   margin-right: -1.25rem;
@@ -245,10 +267,7 @@
 .price-amount {
   font-size: 2.5rem;
   font-weight: 900;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #0f172a;
   letter-spacing: -1px;
   display: inline-block;
 }
@@ -261,24 +280,24 @@
 
 .btn-select-package {
   width: 100%;
-  padding: 1.25rem 2rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 1.15rem 1.75rem;
+  background: linear-gradient(90deg, #06b6d4 0%, #10b981 100%);
   color: white;
   border: none;
   border-radius: 16px;
-  font-size: 1.1rem;
-  font-weight: 700;
+  font-size: 1.05rem;
+  font-weight: 800;
   cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+  transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  text-transform: none;
+  letter-spacing: 0.6px;
+  box-shadow: 0 8px 24px rgba(6, 182, 212, 0.12);
   position: relative;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
+  gap: 0.6rem;
 }
 
 .btn-select-package .btn-spinner {
@@ -326,7 +345,18 @@
 .btn-select-package:hover:not(:disabled) {
   transform: translateY(-4px);
   box-shadow: 0 12px 40px rgba(102, 126, 234, 0.5);
-  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+  background: linear-gradient(135deg, #4ba265 0%, #66ea8e 100%);
+}
+
+/* CTA variant for popular card */
+.btn-select-package.popular {
+  background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+  box-shadow: 0 10px 35px rgba(59, 130, 246, 0.25);
+}
+
+.btn-select-package.popular:hover:not(:disabled) {
+  background: linear-gradient(135deg, #06b6d4 0%, #10b981 100%);
+  box-shadow: 0 18px 50px rgba(6, 182, 212, 0.25);
 }
 
 .btn-select-package:active:not(:disabled) {
